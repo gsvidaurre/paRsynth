@@ -16,9 +16,9 @@
 #' set.seed(3)  # For reproducibility
 #' example_calls <- gen_calls(n_groups = 2, n_individuals = 5, n_calls = 10, string_length = 16, gl_middle = 8, il_middle = 2)
 #' View(example_calls)
-#' @export
+#' @export generate_strings
 
-gen_calls <- function(n_groups = 2, n_individuals = 5, n_calls = 10, string_length = 16, gl_middle = 8, il_middle = 2) {
+generate_strings <- function(n_groups = 2, n_individuals = 5, n_calls = 10, string_length = 16, gl_middle = 8, il_middle = 2) {
 
   if (string_length < 6 || string_length > 200) {
     stop("string_length must be between 6 and 200")
@@ -90,4 +90,10 @@ gen_calls <- function(n_groups = 2, n_individuals = 5, n_calls = 10, string_leng
     Call = calls,
     stringsAsFactors = FALSE
   )
+}
+
+
+# Helper function to generate a random string
+generate_random_string <- function(length) {
+  paste(sample(c("A", "B", "C"), length, replace = TRUE), collapse = "")
 }
