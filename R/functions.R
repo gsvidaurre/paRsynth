@@ -114,10 +114,10 @@ generate_frequency <- function(df, parsons_col, group_id_col, individual_id_col,
   individual_id_col <- tolower(individual_id_col)
   call_id_col <- tolower(call_id_col)
   callNo_id_col <- tolower(callNo_id_col)
-  
+
   # Initialize an empty list to store the results
   results <- list()
-  
+
   # Iterate over each row in the data frame
   for (i in 1:nrow(df)) {
     parsons_code <- df[[parsons_col]][i]
@@ -125,21 +125,21 @@ generate_frequency <- function(df, parsons_col, group_id_col, individual_id_col,
     individual_id <- df[[individual_id_col]][i]
     call_id <- df[[call_id_col]][i]
     callNo_id <- df[[callNo_id_col]][i]  # Fix: Added [i] to access specific row
-    
+
     # Split the parsons_code string by dashes
     split_parsons_code <- strsplit(parsons_code, "-")[[1]]
-    
+
     # Calculate the length of the split vector
     call_length <- length(split_parsons_code)
-    
+
     # Initialize the frequencies vector with starting frequency 4000
     frequencies <- numeric(length(split_parsons_code) + 2)
     frequencies[1] <- 4000
     previous_value <- 4000
-    
+
     # Set the increment value based on call_length
     increment <- if (call_length > 60) 100 else 1000
-    
+
     # Iterate over the split parsons code to generate frequencies
     for (j in 1:call_length) {
       direction <- split_parsons_code[j]
@@ -155,10 +155,10 @@ generate_frequency <- function(df, parsons_col, group_id_col, individual_id_col,
       previous_value <- frequency
       frequencies[j + 1] <- frequency
     }
-    
+
     # Add the final frequency value
     frequencies[length(frequencies)] <- 4000
-    
+
     # Create a data frame with the metadata and frequency values for the current call
     freq_df <- data.frame(
       Group = group_id,
@@ -168,19 +168,19 @@ generate_frequency <- function(df, parsons_col, group_id_col, individual_id_col,
       Parsons_Code = parsons_code,
       stringsAsFactors = FALSE
     )
-    
+
     # Add frequency columns to the data frame
     for (k in 1:length(frequencies)) {  # Fix: Iterate over length of frequencies correctly
       freq_df[[paste0("Frequency", k)]] <- frequencies[k]
     }
-    
+
     # Append the data frame to the results list
     results[[i]] <- freq_df
   }
-  
+
   # Combine all results into a single data frame
   final_df <- do.call(rbind, results)
-  
+
   return(final_df)
 }
 
@@ -246,122 +246,25 @@ write_wave <- function(df, save_path, sampling_rate, sylLen, prefix = "call") {
 
     # Construct the audio filename with a unique identifier
     audio_filename <- paste0(prefix, "_Group", df$Group[i], "_Ind", df$Individual[i],"_Call", df$Call[i], ".wav")
-    
+
     audio_pathname <- file.path(save_path, audio_filename)
 
     # Generate and save the WAV file
     gen_synth_signal(frequencies, audio_pathname, sampling_rate = sampling_rate, sylLen = sylLen)
-    
+
     return(
-      df[i, ] %>% 
+      df[i, ] %>%
         dplyr::mutate(
           audio_file_name = audio_filename
         )
     )
-    
+
   }))
-  
+
   return(df2)
-  
+
 }
 
 
 
-#' Generate calls at both the individual and group level
-#'
-#' This function generates distinct calls at the group and individual level by pasting together random heads, middles, and tails for both groups and individuals.
-#'
-#' @param n_groups Integer. Number of groups.
-#' @param n_individuals Integer. Number of individuals per group.
-#' @param n_calls Integer. Number of calls per individual.
-#' @param string_length Integer. Number of characters present in the string that encodes individual-level and group-level information through frequency modulation. Minimum is 6, maximum is 20.
-#' @param gl_middle Integer. Number of characters that will vary in the middle of the string across groups. Default is 8.
-#' @param il_middle Integer. Number of characters that will vary in the middle of the string within groups. Default is 2.
-#' @return A data frame containing the group, individual, and call strings.
-#' @examples
-#' set.seed(3)  # For reproducibility
-#' example_calls <- gen_calls(n_groups = 2, n_individuals = 5, n_calls = 10, string_length = 16, gl_middle = 8, il_middle = 2)
-#' View(example_calls)
-#' @export
 
-gen_calls <- function(n_groups = 2, n_individuals = 5, n_calls = 10, string_length = 16, gl_middle = 8, il_middle = 2) {
-  
-  if (string_length < 6 || string_length > 200) {
-    stop("string_length must be between 6 and 200")
-  }
-  
-  if(missing(gl_middle)){
-    stop("gl_middle must be specified")
-  }
-  
-  if(missing(il_middle)){
-    stop("il_middle must be specified")
-  }
-
-  # Create global header and tail strings. The length of these strings will vary depending on the length of the group-specific information (gl_middle) and the individual-specific information (il_middle)
-  head_tail_length <- floor((string_length - gl_middle - il_middle) / 2)
-
-  # Helper function to generate a random string
-  generate_random_string <- function(length) {
-    paste(sample(c("A", "B", "C"), length, replace = TRUE), collapse = "")
-  }
-
-  # Generate a single head and tail for all groups
-  global_head <- generate_random_string(head_tail_length)
-  # print(paste("Global Head:", global_head))
-  global_tail <- generate_random_string(head_tail_length)
-  # print(paste("Global Tail:", global_tail))
-
-  if (gl_middle > 0) {
-    # Generate distinct group middle sections
-    group_middles <- character(n_groups)
-    for (g in 1:n_groups) {
-      group_middles[g] <- generate_random_string(gl_middle)
-    }
-    # print(paste("Group Middles:", group_middles))
-  }
-
-  calls <- character(n_groups * n_individuals * n_calls)
-  groups <- rep(1:n_groups, each = n_individuals * n_calls)
-  individuals <- numeric(n_groups * n_individuals * n_calls)
-  call_numbers <- numeric(n_groups * n_individuals * n_calls)
-
-  for (group in 1:n_groups) {
-    for (ind in 1:n_individuals) {
-      # Generate a unique middle part for each individual
-      individual_middle <- generate_random_string(il_middle)
-      # print(paste(individual_middle))
-      if (gl_middle > 0) {
-        group_middle_head_tail_length <- (gl_middle - il_middle) / 2
-        individual_call <- paste0(
-          global_head,
-          substr(group_middles[group], 1, group_middle_head_tail_length),
-          individual_middle,
-          substr(group_middles[group], group_middle_head_tail_length + il_middle + 1, gl_middle),
-          global_tail
-        )
-      } else {
-        individual_call <- paste0(
-          global_head,
-          individual_middle,
-          global_tail
-        )
-      }
-
-      for (call in 1:n_calls) {
-        idx <- ((group - 1) * n_individuals * n_calls) + ((ind - 1) * n_calls) + call
-        calls[idx] <- individual_call
-        individuals[idx] <- ind
-        call_numbers[idx] <- call
-      }
-    }
-  }
-
-  data.frame(
-    Group = groups,
-    Individual = individuals,
-    Call.No = call_numbers,
-    Call = calls,
-    stringsAsFactors = FALSE
-  )
-}
