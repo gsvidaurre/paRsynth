@@ -1,8 +1,8 @@
-#' Generate strings with varying amounts of group membership and individual identity information
+#' Generate strings with group membership and individual identity information
 #'
 #'@author Ari Cross, Grace Smith-Vidaurre
 #'
-#'@description `generate_strings` creates character strings that represent vocalizations with varying amounts of group membership and individual identity information. The function facilitates specifying the length of string components that should be allocated to encoding individual identity (characters that are selected to emphasize differentiation among individuals) versus group membership (characters shared among group members but not between groups). Currently, this function builds strings using 3 unique characters only ("A", "B", and "C").
+#'@description `generate_strings()` creates character strings that represent vocalizations with varying amounts of group membership and individual identity information. The function facilitates specifying the length of string components that should be allocated to encoding individual identity (characters that are selected to emphasize differentiation among individuals) versus group membership (characters shared among group members but not between groups). Currently, this function builds strings using 3 unique characters only ("A", "B", and "C").
 #'
 #' @param n_groups Integer. The number of groups.
 #' @param n_individuals Integer. The number of individuals per group.
