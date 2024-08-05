@@ -2,6 +2,7 @@
 #'
 #'@author Ari Cross, Grace Smith-Vidaurre
 #'
+#'@description
 #' This function takes a data frame and a column name containing Parsons code strings,
 #' and generates a data frame that includes social and call metadata, as well as frequency values
 #' based on the Parsons code conversion.
@@ -11,9 +12,13 @@
 #' @param group_id_col The name of the column in the data frame containing numeric group IDs.
 #' @param individual_id_col The name of the column in the data frame containing numeric individual IDs.
 #' @param call_id_col The name of the column in the data frame containing unique numeric identifiers for each call per individual.
-#' @param callNo_id_col The name of the column in the data frame specifying which number call an individual is on.
+#' @param callNo_id_col The name of the column in the data frame specifying which number call an individual is on
+#'
+#' @details
+#'
 #' @return A data frame containing the group ID, individual ID, call ID,
 #' the original Parsons code string, and one column per frequency value.
+#'
 #' @examples
 #' df <- data.frame(
 #'   Parsons = c("up-down-constant-up", "down-up-constant-down"),
@@ -23,6 +28,7 @@
 #'   stringsAsFactors = FALSE
 #' )
 #' generate_frequency(df, "Parsons", "GroupID", "IndividualID", "CallID")
+#'
 #' @export
 
 generate_frequency <- function(df, parsons_col, group_id_col, individual_id_col, call_id_col, callNo_id_col) {

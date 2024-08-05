@@ -2,6 +2,7 @@
 #'
 #'@author Ari Cross, Grace Smith-Vidaurre
 #'
+#'@description
 #' This function loops through each row in the data frame and uses the `gen_synth_signal` function
 #' to generate and save WAV files for each call.
 #'
@@ -10,11 +11,17 @@
 #' @param sampling_rate The sampling rate for the audio file.
 #' @param sylLen The length of the syllable in milliseconds.
 #' @param prefix A prefix to distinguish between individual-level and group-level audio files.
+#'
+#' @details
+#'
 #' @return The input data frame, updated to have an additional column with the audio file name
+#'
 #' @examples
 #' individual_freq_df <- generate_frequency(individual_df, "Parsons", "GroupID", "IndividualID", "CallID")
 #' generate_and_save_wav(individual_freq_df, "path/to/save/directory", 150000, 200, "individual")
+#'
 #' @export write_audio
+
 write_audio <- function(df, save_path, sampling_rate, sylLen, prefix = "call") {
   # Ensure the save path exists
   if (!dir.exists(save_path)) {
