@@ -18,7 +18,7 @@
 #' @return A data frame containing the string of the vocalization, the original Parsons code string, and one column per frequency anchor value. This data structure facilitates calculating the minimum and maximum frequency anchors across vocalizations, which can in turn facilitate writing synthetic audio files with `soundgen` and making spectrogram image files.
 #'
 #' @examples
-#' #' seed <- 8
+#' seed <- 8
 #' set.seed(seed) # For reproducibility
 #' library(tidyverse)
 #'
