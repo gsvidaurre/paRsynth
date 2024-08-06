@@ -25,8 +25,10 @@
 #' @export parsons_code
 
 parsons_code <- function(df, string_col, mapping = list("A" = "up", "B" = "down", "C" = "constant")) {
+
   df %>%
     dplyr::mutate(Parsons_Code = sapply(!!rlang::sym(string_col), function(string) paste(convert_to_parsons_code(string, mapping), collapse = "-")))
+
 }
 
 # Helper function to generate Parsons code for existing sequences
