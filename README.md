@@ -1,10 +1,12 @@
-This package uses Parsons code to convert character strings to frequency modulated vocalizations with different amounts of individual identity and group membership information. These functions in this package were developed for the sonification of character strings that represent vocal signals with varying amounts of social information in agent-based models. The resulting audio files (created using the soundgen package) can be used in bioacoustics analyses downstream of the agent-based models.
+`paRsynth` uses Parsons code to convert character strings to frequency modulated vocalizations with different amounts of individual identity and group membership information. The functions in this package were developed for the sonification of character strings that represent vocal signals with varying amounts of social information. The resulting audio files (created using the soundgen package) can be used in downstream bioacoustics analyses.
 
-The original code for these functions was developed by Ari Cross in collaboration with Dr. Vanessa Ferdinand and Dr. Grace Smith-Vidaurre. This package was primarily designed for in-house use by the Smith-Vidaurre and Ferdinand labs, but will be made publicly available for others to use and modify as they see fit.
+The original code for these functions was developed by Arlena (Ari) Cross and Dr. Grace Smith-Vidaurre in collaboration with Dr. Vanessa Ferdinand. This package was primarily designed for in-house use by the Smith-Vidaurre and Ferdinand labs, but will be made publicly available for others to use and modify as they see fit.
 
 **Code collaboration guidelines:**
 
-Each collaborator who helps out with code development and documentation for this package will need a local version of this repository on their computer and some way of interfacing with GitHub (e.g. Git on the command line, GitHub Desktop). We will each stick to the following guidelines for collaborative code development:
+Each collaborator who helps out with code development and documentation for this package will need a local version of this repository on their computer and some way of interfacing with GitHub (e.g. Git on the command line, GitHub Desktop). Currently, the only collaborators working on code development are Ari Cross, Grace Smith-Vidaurre and Vanessa Ferdinand. Others who are interested in contributing directly to the package should first contact Grace Smith-Vidaurre (smithvid[at]msu.edu).
+
+We will each stick to the following guidelines for collaborative code development:
 
 To communicate that we need to make updates to the package, you should use the following workflow:
 
@@ -37,3 +39,7 @@ To communicate that you've addressed an issue:
   3. The Pull Request notification will be sent to the code owner (Smith-Vidaurre), who will review whether the changes from your branch can be integrated into the main branch without conflicts. You may need to fix code or documentation if there are conflicts or problems at this Pull Request reviewing stage, and then you'll need to run Steps 1 and 2 in this section again before creating another Pull Request
 
   4. Once a Pull Request is accepted and merged, then you can mark the associated issue as "Closed". You do not need to delete the branch for the issue that was closed
+
+**Package usage and maintenance**
+
+This is a new package that is still under development for our own research purposes. As such, we are currently not working to make the functions generally applicable for many different purposes or users. Anyone interested in using these functions should be careful to implement their own tests and validation, and please cite the package as well.
