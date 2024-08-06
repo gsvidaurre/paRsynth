@@ -2,7 +2,7 @@ Package: paRsynth
 Title: Sonify character strings to create synthetic frequency modulated vocalizations
 Version: 0.0.0.9000
 Authors@R: c(
-    person("Arlena (Ari)", "Cross", , "across@smith.edu", role = c("cre", "aut")),
+    person("Arlena (Ari)", "Cross", , "across@smith.edu", role = c("aut")),
     person("Vanessa", "Ferdinand", , "vanessa.ferdinand@unimelb.edu.au", role = c("aut")),
     person("Grace", "Smith-Vidaurre", , "smithvid@msu.edu", role = c("cre", "aut"))
   )
