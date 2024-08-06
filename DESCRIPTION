@@ -1,12 +1,13 @@
 Package: paRsynth
-Title: What the Package Does (One Line, Title Case)
+Title: Sonify character strings to create synthetic frequency modulated vocalizations
 Version: 0.0.0.9000
-Authors@R: 
-    person("First", "Last", , "first.last@example.com", role = c("aut", "cre"),
-           comment = c(ORCID = "YOUR-ORCID-ID"))
-Description: What the package does (one paragraph).
-License: `use_mit_license()`, `use_gpl3_license()` or friends to pick a
-    license
+Authors@R: c(
+    person("Arlena (Ari)", "Cross", , "across@smith.edu", role = c("cre", "aut")),
+    person("Vanessa", "Ferdinand", , "vanessa.ferdinand@unimelb.edu.au", role = c("aut")),
+    person("Grace", "Smith-Vidaurre", , "smithvid@msu.edu", role = c("cre", "aut"))
+  )
+Description: This package uses Parsons code to convert character strings to frequency modulated vocalizations with different amounts of individual identity and group membership information. These functions in this package were developed for the sonification of character strings that represent vocal signals with varying amounts of social information in agent-based models. The resulting audio files (created using the soundgen package) can be used in downstream bioacoustics analyses.
+License: `use_gpl3_license()`
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.2.3
