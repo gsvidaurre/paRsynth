@@ -13,7 +13,7 @@
 #' @param starting_frequency Numeric value. A numeric value in Hz that specifies the frequency value that will be used as a baseline for creating frequency anchors with Parsons code. For instance, if this value is 4000 Hz and the first Parsons code value is "constant", then the first frequency anchor will be 4000 Hz. The default value is 4000 Hz.
 #' @param frequency_shift Numeric value. A numeric value in Hz that specifies the frequency value that will be used to shift direction (or not) from the previous frequency anchor based on the Parsons code. For instance, if `frequency_shift` is 1000 Hz and the first Parsons code value is "up", then the first frequency anchor will be 5000 Hz. The default value is 1000 Hz, but we have found that when the total string length is over 60 characters, it is better to use a smaller value (100 Hz), which avoids generating negative or zero values.
 #'
-#' @details `frequency_anchors()` returns the same data frame that was used as input, and with additional columns that hold frequency values in Hz. These columns will be used as anchors to guide frequency modulation patterns when creating syntheic audio files with the `soundgen` package. The starting frequency value is also used to end the frequency anchors. The number of frequency anchor columns in the data frame returned by the function will depend on the length of each string. Currently, this function does not internally correct frequency anchors that are negative or zero, and so the output of this function should be carefully checked prior to creating synthetic files in `soundgen`. While testing this function, we found that setting negative or zero values in the resulting data frame to 1000 Hz worked well, but this change has not been thoroughly tested.
+#' @details `frequency_anchors()` returns the same data frame that was used as input, and with additional columns that hold frequency values in Hz. These columns will be used as anchors to guide frequency modulation patterns when creating syntheic audio files with the `soundgen` package. The starting frequency value is also used to end the frequency anchors. The number of frequency anchor columns in the data frame returned by the function will depend on the length of each string. Currently, this function internally corrects frequency anchors that are negative or zero by setting those values to the same value as the frequency shift (default of 1 kHz). While testing this function, we found that setting negative or zero values in the resulting data frame to 1000 Hz worked well, but this change has not been thoroughly tested.
 #'
 #' @return A data frame containing the string of the vocalization, the original Parsons code string, and one column per frequency anchor value. This data structure facilitates calculating the minimum and maximum frequency anchors across vocalizations, which can in turn facilitate writing synthetic audio files with `soundgen` and making spectrogram image files.
 #'
@@ -83,6 +83,10 @@ frequency_anchors <- function(df, parsons_col, group_id_col, individual_id_col, 
 
     # Add the final frequency value
     frequencies[length(frequencies)] <- starting_frequency
+
+    # Internally correct any frequency values that are zero or negative
+    # Set these values to the frequency shift value
+    frequencies[frequencies <= 0] <- frequency_shift
 
     # Create a data frame with the metadata and frequency values for the current call
     freq_df <- data.frame(
