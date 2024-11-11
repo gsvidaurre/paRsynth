@@ -84,13 +84,12 @@ test_that("The function generates the number of groups and individuals", {
 
 
 })
-
 # library(testthat)
 # test_file("/Users/raneemsamman/Documents/GitHub/paRsynth/R/tests/testthat/test_generate_strings.R")
 
-# # Checking that the number of characters in each string devoted to group information, individual information, and global head and tail are correct
+# Checking that the number of characters in each string devoted to group information, individual information, and global head and tail are correct
 
-# test_that("The function generates character-based vocal strings per catergory"){
+test_that("The function generates character-based vocal strings per catergory", {
 
 #   # Create a temporary directory for testing. Files will be written and read here
 #   # Generate files of raw  data per unique date
@@ -100,4 +99,4 @@ test_that("The function generates the number of groups and individuals", {
 #   if(tmp_path == file.path(path, data_dir)){
 #     unlink(tmp_path, recursive = TRUE)
 #   }
-# }
+})
