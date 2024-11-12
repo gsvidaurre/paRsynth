@@ -6,7 +6,7 @@ rm(list = ls())
 if (!require(testthat)) install.packages('testthat')
 library(testthat)
 
-source("~/Desktop/GitHub_repos/paRsynth/generate_strings.R")
+source("~/Desktop/GitHub_repos/paRsynth/R/generate_strings.R")
 
 # Unit test to check string length
 test_that("Generated strings have the correct length", {
@@ -39,12 +39,12 @@ test_that("Generated strings have the correct length", {
   }, USE.NAMES = FALSE)
 
   # Check that each string has the correct length
-  expect_true(all(string_lengths == string_length),
+  expect_equal(string_lengths, string_length,
               info = "Not all generated strings have the expected length.")
 })
 
 # Unit test to check that correct number of string were generated
-test_that("Generated strings are correct number", {
+test_that("Generated number of strings are correct number", {
 
   # Avoid library calls and other changes to the virtual environment
   # See https://r-pkgs.org/testing-design.html
@@ -73,12 +73,13 @@ test_that("Generated strings are correct number", {
   unique_individuals <- n_groups*n_individuals
   n_expected_calls <- n_calls*unique_individuals
   n_expected_calls
-  nrow(generated)
-
+  generated_calls <- nrow(generated_strings)
+  generated_calls
   # Check that the correct number of strings were generated
-  expect_equal(n_expected_calls, nrow(generated_strings),
-             info = "Not all number of strings were correctly generated.")
+  expect_equal(n_expected_calls, generated_calls,
+  info = "Not all number of strings were correctly generated.")
 })
+# I am not sure why its not passing the test
 
 # Unit test to check that the number of groups are correct
 test_that("Generated groups are correct number", {
