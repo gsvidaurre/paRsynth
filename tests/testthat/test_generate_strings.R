@@ -6,7 +6,7 @@ rm(list = ls())
 if (!require(testthat)) install.packages('testthat')
 library(testthat)
 
-source("~/Desktop/GitHub_repos/paRsynth/R/generate_strings.R")
+source("~/Desktop/BIRDS/GitHub_repos/paRsynth/R/generate_strings.R")
 
 # Unit test to check string length
 test_that("Generated strings have the correct length", {
@@ -14,7 +14,6 @@ test_that("Generated strings have the correct length", {
   # Avoid library calls and other changes to the virtual environment
   # See https://r-pkgs.org/testing-design.html
   withr::local_package("tidyverse")
-  withr::local_package("plyr")
   withr::local_package("dplyr")
   withr::local_package("lubridate")
 
@@ -44,12 +43,11 @@ test_that("Generated strings have the correct length", {
 })
 
 # Unit test to check that correct number of string were generated
-test_that("Generated number of strings are correct number", {
+test_that("Generated calls have the correct number", {
 
   # Avoid library calls and other changes to the virtual environment
   # See https://r-pkgs.org/testing-design.html
   withr::local_package("tidyverse")
-  withr::local_package("plyr")
   withr::local_package("dplyr")
   withr::local_package("lubridate")
 
@@ -69,17 +67,19 @@ test_that("Generated number of strings are correct number", {
 
   # glimpse(generated_strings)
 
-  # Get the number of unique individuals
+  # Get the number of unique individuals and expected calls
   unique_individuals <- n_groups*n_individuals
   n_expected_calls <- n_calls*unique_individuals
   n_expected_calls
+
+  # Get the number of generated calls
   generated_calls <- nrow(generated_strings)
   generated_calls
-  # Check that the correct number of strings were generated
-  expect_equal(n_expected_calls, generated_calls,
-  info = "Not all number of strings were correctly generated.")
+
+  # Check that the correct number of calls were generated
+  expect_true(generated_calls == n_expected_calls,
+               info = "Not all generated calls have the expected number.")
 })
-# I am not sure why its not passing the test
 
 # Unit test to check that the number of groups are correct
 test_that("Generated groups are correct number", {

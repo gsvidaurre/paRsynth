@@ -105,3 +105,4 @@ generate_strings <- function(n_groups = 2, n_individuals = 5, n_calls = 10, stri
 generate_random_string <- function(length) {
   paste(sample(c("A", "B", "C"), length, replace = TRUE), collapse = "")
 }
+
