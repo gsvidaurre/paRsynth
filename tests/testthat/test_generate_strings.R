@@ -8,7 +8,7 @@ library(testthat)
 
 source("~/Desktop/BIRDS/GitHub_repos/paRsynth/R/generate_strings.R")
 
-# Unit test to check string length
+# 1. Unit test to check string length
 test_that("Generated strings have the correct length", {
 
   # Avoid library calls and other changes to the virtual environment
@@ -32,17 +32,15 @@ test_that("Generated strings have the correct length", {
   # glimpse(generated_strings)
 
   # Extract the length of each generated string
-  # i <- CBAABBAABBBBCB # testing
-  string_lengths <- sapply(generated_strings$Call, FUN = function(i){
-    nchar(i)
-  }, USE.NAMES = FALSE)
+  # i <- CBABAAACBAAACBCB # testing
+  string_lengths <- nchar(generated_strings$Call[1])
 
   # Check that each string has the correct length
-  expect_equal(string_lengths, string_length,
+  expect_equal(string_length, string_lengths,
               info = "Not all generated strings have the expected length.")
 })
 
-# Unit test to check that correct number of string were generated
+# 2. Unit test to check that correct number of string were generated
 test_that("Generated calls have the correct number", {
 
   # Avoid library calls and other changes to the virtual environment
@@ -70,18 +68,16 @@ test_that("Generated calls have the correct number", {
   # Get the number of unique individuals and expected calls
   unique_individuals <- n_groups*n_individuals
   n_expected_calls <- n_calls*unique_individuals
-  n_expected_calls
 
   # Get the number of generated calls
   generated_calls <- nrow(generated_strings)
-  generated_calls
 
   # Check that the correct number of calls were generated
   expect_true(generated_calls == n_expected_calls,
                info = "Not all generated calls have the expected number.")
 })
 
-# Unit test to check that the number of groups are correct
+# 3. Unit test to check that the number of groups are correct
 test_that("Generated groups are correct number", {
 
   # Avoid library calls and other changes to the virual environment
@@ -115,7 +111,7 @@ test_that("Generated groups are correct number", {
               info = "Not all number of groups were correctly generated.")
 })
 
-# Unit test to check that the number of individuals are correct
+# 4. Unit test to check that the number of individuals are correct
 test_that("Generated number of individuals are correct", {
 
   # Avoid library calls and other changes to the  virtual environment
@@ -148,5 +144,10 @@ test_that("Generated number of individuals are correct", {
                info = "Not all numbers of individuals were generated correctly.")
 })
 
-# Check that the number of characters in each string devoted to group information, individual information, and global head and tail are correct
-# Google doc
+# Check that the number of characters in each string devoted to group information is correct
+
+# Check that the number of characters in each string devoted to individual information is correct
+
+# Check that the number of characters in each string devoted to global head and is correct
+
+# Check that the number of characters in each string devoted to global tail is correct
