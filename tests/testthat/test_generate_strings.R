@@ -66,11 +66,15 @@ test_that("Generated strings are correct number", {
   
   # Call the function with the test parameters
   generated_strings <- generate_strings(n_groups = n_groups, n_individuals = n_individuals, n_calls = n_calls, string_length = string_length, group_information = 8, individual_information = 2) 
+  
+  # glimpse(generated_strings)
+  
   # Get the number of unique individuals
   unique_individuals <- n_groups*n_individuals
   n_expected_calls <- n_calls*unique_individuals
-# Check that the correct number of strings were generated
+  n_expected_calls
+  
+  # Check that the correct number of strings were generated
 expect_equal(n_expected_calls, nrow(generated_strings),
              info = "Not all number of strings were correctly generated.")
-})
 })
