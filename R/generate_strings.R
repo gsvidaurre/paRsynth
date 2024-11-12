@@ -40,41 +40,6 @@ generate_strings <- function(n_groups = 2, n_individuals = 5, n_calls = 10, stri
     stop("individual_information must be specified")
   }
 
-## Pseudocode Alexandra Juarez
-# Create a unit test to check that the character strings produced are the expected length
-
-  # Load testthat package
-  # library(testthat)
-  # rm(list = ls())
-
-  # if (!require(testthat)) install.packages('testthat')
-  # library(testthat)
-
-  # source("~/Desktop/BIRDS/GitHub_repos/paRsynth/R/generate_strings.R")
-
-  # Mock generation of strings (each of specified length)
-  # replicate(n_calls, paste(sample(LETTERS, string_length, replace = TRUE), collapse = ""))
-# }
-  # Unit test to check string length
-  # test_that("Generated strings have the correct length", {
-    # Define parameters
-    # string_length <- 16
-    # n_calls <- 10
-
-  # Call the function with the test parameters
-  # generated_strings <- generate_strings(n_groups = 2, n_individuals = 5, n_calls = n_calls, string_length = string_length, group_information = 8, individual_information = 2)
-
-  # Check that each string has the correct length
-  # expect_true(all(nchar(generated_strings) == string_length),
-            # info = "Not all generated strings have the expected length.")
-  # Check that the correct number of strings were generated
-  # expect_equal(length(generated_strings), n_calls)
-# })
-
-# testthat::test_file("generate_strings.R")
-
-##
-
   # Create global header and tail strings. The length of these strings will vary depending on the length of the group-specific information (group_information) and the individual-specific information (individual_information)
   head_tail_length <- floor((string_length - group_information - individual_information) / 2)
 
