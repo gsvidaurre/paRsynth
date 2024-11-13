@@ -219,6 +219,83 @@ test_that("Generated number of characters in each string devoted to group inform
 })
 
 # 6. Unit test to check that the number of characters in each string devoted to individual information is correct
+test_that("Generated number of characters in each string devoted to individual information have the correct length", {
+
+  # Avoid library calls and other changes to the virtual environment
+  # See https://r-pkgs.org/testing-design.html
+  withr::local_package("tidyverse")
+  withr::local_package("dplyr")
+  withr::local_package("lubridate")
+
+  # Just for code development
+  # library(tidyverse)
+  # library(lubridate)
+  # library(testthat)
+
+  # Define parameters
+  string_length <- 16
+  n_calls <- 10
+  n_groups <- 2
+  n_individuals <- 5
+  group_information <- 8
+  individual_information <- 2
+
+  # Call the function with the test parameters
+  generated_strings <- generate_strings(n_groups = n_groups, n_individuals = n_individuals, n_calls = n_calls, string_length = string_length, group_information = group_information, individual_information = individual_information)
+
+  # glimpse(generated_strings)
+
+  # List of all generated_calls
+  generated_calls <- generated_strings$Call
+  generated_calls
+
+  # Expected number of unique individual information
+  unique_individuals_information <- n_individuals*n_groups
+  unique_individuals_information
+
+  # Total calls with the unique individual information
+
+
+  # Extract the two characters that pertain to individual information
+  individuals_information <- substr(generated_calls, 8, 9)
+  individuals_information
+
+  # Distinguish individual information from individual 1-5 in group 1 and 2
+  individuals_information_1 <- sapply(individuals_information[1:10], function(x){
+    print(char(x))
+  }, USE.NAMES = FALSE)
+  individuals_information_1
+  # AC
+
+  individuals_information_2 <- sapply(individuals_information[11:20], function(x){
+    print(char(x))
+  }, USE.NAMES = FALSE)
+  individuals_information_2
+  # CC
+
+  individuals_information_3 <- sapply(individuals_information[21:30], function(x){
+    print(char(x))
+  }, USE.NAMES = FALSE)
+  individuals_information_3
+  # CA
+
+  individuals_information_4 <- sapply(individuals_information[31:40], function(x){
+    print(char(x))
+  }, USE.NAMES = FALSE)
+  individuals_information_4
+  # CB
+
+  individuals_information_5 <- sapply(individuals_information[41:50], function(x){
+    print(char(x))
+  }, USE.NAMES = FALSE)
+  individuals_information_5
+  # AB
+
+
+  # Check that the number of characters in each string devoted to individual information is correct
+  expect_equal(total_group_information_1, group_information,
+               info = "Not all generated strings devoted to group information have the expected length for group 1.")
+})
 
 # 7. Unit test to check that the number of characters in each string devoted to global head and is correct
 
