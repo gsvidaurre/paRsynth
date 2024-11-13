@@ -32,6 +32,12 @@
 #'
 #' @export
 
+## added by Alexandra Juarez
+# Just for code development
+# library(dplyr)
+# library(tidyverse)
+##
+
 frequency_anchors <- function(df, parsons_col, group_id_col, individual_id_col, call_id_col, call_string_col, starting_frequency = 4000, frequency_shift = 1000) {
 
   # Ensure column names are case-insensitive
