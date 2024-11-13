@@ -65,13 +65,19 @@ generate_strings <- function(n_groups = 2, n_individuals = 5, n_calls = 10, stri
       # Generate a unique middle part for each individual
       individual_middle <- generate_random_string(individual_information)
       if (group_information > 0) {
-        group_middle_head_tail_length <- (group_information - individual_information) / 2
+        # group_middle_head_tail_length <- (group_information - individual_information) / 2
+        group_info <- group_middles[group]
+        group_head <- substr(group_info, 1, group_information / 2)
+        group_tail <- substr(group_info, group_information / 2 + 1, group_information)
+
         # Combine all components to create a string that represents a vocalization
         individual_call <- paste0(
           global_head,
-          substr(group_middles[group], 1, group_middle_head_tail_length),
+          # substr(group_middles[group], 1, group_middle_head_tail_length),
+          group_head,
           individual_middle,
-          substr(group_middles[group], group_middle_head_tail_length + individual_information + 1, group_information),
+          # substr(group_middles[group], group_middle_head_tail_length + individual_information + 1, group_information),
+          group_tail,
           global_tail
         )
       } else {
