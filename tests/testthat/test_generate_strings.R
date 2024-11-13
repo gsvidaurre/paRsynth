@@ -32,7 +32,6 @@ test_that("Generated strings have the correct length", {
   # glimpse(generated_strings)
 
   # Extract the length of each generated string
-  # i <- CBABAAACBAAACBCB # testing
   string_lengths <- nchar(generated_strings$Call[1])
 
   # Check that each string has the correct length
@@ -103,7 +102,6 @@ test_that("Generated groups are correct number", {
   # glimpse(generated_strings)
 
   # Extract the number of unique groups
-  # t <- 1 # testing
   unique_groups <- length(unique(generated_strings$Group))
 
   # Check that the number of groups are correct
@@ -166,40 +164,58 @@ test_that("Generated number of characters in each string devoted to group inform
   group_information <- 8
 
   # Call the function with the test parameters
-  # Call the function with the test parameters
   generated_strings <- generate_strings(n_groups = n_groups, n_individuals = n_individuals, n_calls = n_calls, string_length = string_length, group_information = group_information, individual_information = 2)
 
   # glimpse(generated_strings)
 
-  # Extract the length of each generated string devoted to group information
+  # List of all generated_calls
   generated_calls <- generated_strings$Call
   generated_calls
 
+  # Extract the first four characters that pertain to group information
   group_information_1 <- substr(generated_calls, 4, 7)
   group_information_1
 
+  # Distinguish first four characters of group 1
   group_information_1_1 <- sapply(group_information_1[1:50], function(x){
     print(char(x))
     }, USE.NAMES = FALSE)
 
+  # Distinguish first four characters of group 2
   group_information_1_2 <- sapply(group_information_1[51:100], function(x){
     print(char(x))
   }, USE.NAMES = FALSE)
 
+  # Extract the last four characters that pertain to group information
   group_information_2 <- substr(generated_calls, 10, 13)
   group_information_2
 
+  # Distinguish last four characters of group 1
   group_information_2_1 <- sapply(group_information_2[1:50], function(x){
     print(char(x))
   }, USE.NAMES = FALSE)
 
+  # Distinguish last four characters of group 2
   group_information_2_2 <- sapply(group_information_2[51:100], function(x){
     print(char(x))
   }, USE.NAMES = FALSE)
 
-  # Compare group information for
-  expect_equal(string_length, string_lengths,
-               info = "Not all generated strings have the expected length.")
+  # Total number of characters in each string devoted to group information for group 1
+  total_group_information_1 <- unique(nchar(group_information_1_1) + nchar(group_information_2_1))
+  total_group_information_1
+
+  # Total number of characters in each string devoted to group information for group 2
+  total_group_information_2 <- unique(nchar(group_information_1_2) + nchar(group_information_2_2))
+  total_group_information_2
+
+  # Check that the number of characters in each string devoted to group information is correct
+  # Group 1
+  expect_equal(total_group_information_1, group_information,
+               info = "Not all generated strings devoted to group information have the expected length for group 1.")
+
+  # Group 2
+  expect_equal(total_group_information_2, group_information,
+               info = "Not all generated strings devoted to group information have the expected length for group 2.")
 })
 
 # 6. Unit test to check that the number of characters in each string devoted to individual information is correct
