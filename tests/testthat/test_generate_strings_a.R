@@ -40,7 +40,7 @@ test_that("Generated strings have the correct length", {
 })
 
 # 2. Unit test to check that correct number of string were generated
-test_that("Generated calls have the correct number", {
+test_that("Generated correct number of strings", {
 
   # Avoid library calls and other changes to the virtual environment
   # See https://r-pkgs.org/testing-design.html
@@ -64,12 +64,11 @@ test_that("Generated calls have the correct number", {
 
   # glimpse(generated_strings)
 
-  # Get the number of unique individuals and expected calls
-  unique_individuals <- n_groups*n_individuals
-  n_expected_calls <- n_calls*unique_individuals
-
   # Get the number of generated calls
   generated_calls <- nrow(generated_strings)
+
+  # Get the number of expected calls
+  n_expected_calls <- n_calls*n_groups*n_individuals
 
   # Check that the correct number of calls were generated
   expect_true(generated_calls == n_expected_calls,
