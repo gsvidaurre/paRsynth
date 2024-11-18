@@ -84,7 +84,7 @@ library(testthat)
 library(data.table)
 library(stringer)
 
-test_that("The function generates character-based vocal strings per catergory",{
+test_that("The function generates character-based vocal strings per catergory", {
 
   # 1. set a hypothetical set of parameters
   n_groups <- 3
@@ -97,7 +97,7 @@ test_that("The function generates character-based vocal strings per catergory",{
   test_result2 <- generate_strings(n_groups = n_groups, n_individuals = n_individuals, n_calls = n_calls, string_length = string_length, group_information = group_information, individual_information = individual_information)
 
   # Get all the calls generated
-  for (call in 1:nrow(test_result2)) {
+for (call in 1:nrow(test_result2)) {
     current_call <- test_result2$Call[call]
     cat("-------- Testing current call: --------", current_call, "\n")
 
@@ -140,10 +140,8 @@ test_that("The function generates character-based vocal strings per catergory",{
     individual_middle <- stringr::str_sub(current_call, # nolint
                                           expected_head_tail_length + half_group_length + 1, # nolint
                                           expected_head_tail_length + half_group_length + individual_information) # nolint
-                                           expected_head_tail_length + half_group_length + individual_information) # nolint
     cat("Individual middle string is:", individual_middle, "\n")
     cat("Expected individual middle length is", individual_information, "\n")
     expect_equal(nchar(individual_middle), individual_information)
-
   }
 })
