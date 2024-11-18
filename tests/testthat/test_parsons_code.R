@@ -1,12 +1,6 @@
 # G.A. Juarez
 # 15 Nov 2024
 
-# parsons_code():
-#   1 Test for the generation of correct parsons code length
-#   2 Test for the generation of correct parsons code amount
-#   3 Test for the generation of correct parsons code
-#   4	Test the function performance for multiple row entry
-
 rm(list = ls())
 
 if (!require(testthat)) install.packages('testthat')
@@ -83,32 +77,28 @@ test_that("Generated correct number of parson code strings", {
   # library(lubridate)
   # library(testthat)
 
-  #Define parameters
+  # Generate strings
+  n_calls <- 10
   n_groups <- 2
   n_individuals <- 5
-  n_calls <- 10
-  string_length <- 16
 
-  # Generate strings
-  generated_strings <- generate_strings(n_groups = n_groups, n_individuals = n_individuals, n_calls = n_calls, string_length = string_length, group_information = 8, individual_information = 2)
+  generated_strings <- generate_strings(n_groups = n_groups, n_individuals = n_individuals, n_calls = n_calls, string_length = 16, group_information = 8, individual_information = 2)
+
+  # glimpse(generated_strings)
 
   # Convert generated strings to parsons code
   Conversion <- parsons_code(generated_strings, "Call", list("A" = "up", "B" = "down", "C" = "constant"))
 
   # glimpse(Conversion)
 
-  generated_parsons_code <- sapply(Conversion$Parsons_Code, function(x){
-    print(x)
-  }, USE.NAMES = FALSE)
-
   # Calculate how many parsons codes that were generated
-  n_generated_parsons_codes <- nrow(generated_parsons_code)
+  n_generated_parsons_codes <- nrow(Conversion)
 
   # Get the number of expected parson codes
-  n_generated_parsons_codes <- n_calls*n_groups*n_individuals
+  n_expected_parsons_codes <- n_calls*n_groups*n_individuals
 
   # Check that the generated parsons code is the correct length
-  expect_true(n_generated_parsons_codes == n_generated_parsons_codes,
+  expect_equal(n_generated_parsons_codes, n_expected_parsons_codes,
               info = "Not all parson codes were generated.")
 })
 
@@ -118,45 +108,6 @@ test_that("Generated parsons code are correct",{
   # Avoid library calls and other changes to the virtual environment
   # See https://r-pkgs.org/testing-design.html
   withr::local_package("tidyverse")
-  withr::local_package("plyr")
-  withr::local_package("dplyr")
-  withr::local_package("lubridate")
-  withr::local_package("data.table")
-
-  # Just for code development
-  # library(tidyverse)
-  # library(lubridate)
-  # library(testthat)
-  # library(data.table)
-  # library(stringr)
-
-  # Define parameter
-  n_groups <- 3
-  n_individuals <- 4
-  n_calls <- 5
-  string_length <- 16
-  group_information <- 8
-  individual_information <- 2
-
-  # Generate_strings
-  generated_strings <- generate_strings(n_groups = n_groups, n_individuals = n_individuals, n_calls = n_calls, string_length = string_length, group_information = group_information, individual_information = individual_information)
-
-  # Generate parsons code from generated strings
-  Conversion <- parsons_code(generated_strings, "Call", list("A" = "up", "B" = "down", "C" = "constant"))
-
-  # glimpse(Conversion)
-
-  generated_parsons_code <- sapply(Conversion$Parsons_Code, function(x){
-    print(x)
-  }, USE.NAMES = FALSE)
-})
-
-# 4. Unit test to check performance for multiple row entry
-test_that("Generated parsons code for multiple row entry are correct", {
-
-  # Avoid library calls and other changes to the virtual environment
-  # See https://r-pkgs.org/testing-design.html
-  withr::local_package("tidyverse")
   withr::local_package("dplyr")
   withr::local_package("lubridate")
 
@@ -165,15 +116,18 @@ test_that("Generated parsons code for multiple row entry are correct", {
   # library(lubridate)
   # library(testthat)
 
-  # Generate strings
-  generated_strings <- generate_strings(n_groups = 2, n_individuals = 5, n_calls = 10, string_length = 16, group_information = 8, individual_information = 2)
+  # Make up generated strings
+  generated_strings <- data.frame(
+    Call = c("AAA", "BBB", "CCC")
+  )
 
-  # Generate parsons code from generated strings
+ # Use parsons_code to convert it
   Conversion <- parsons_code(generated_strings, "Call", list("A" = "up", "B" = "down", "C" = "constant"))
 
-  # glimpse(Conversion)
+  generated_parsons_code <- unname(Conversion$Parsons_Code)
 
-  generated_parsons_code <- sapply(Conversion$Parsons_Code, function(x){
-    print(x)
-  }, USE.NAMES = FALSE)
+  # Check that the generated parsons code is the same as the expected parsons code ("A" = "up", "B" = "down", "C" = "constant")
+  expect_equal(generated_parsons_code[1], "up-up-up")
+  expect_equal(generated_parsons_code[2], "down-down-down")
+  expect_equal(generated_parsons_code[3], "constant-constant-constant")
 })
