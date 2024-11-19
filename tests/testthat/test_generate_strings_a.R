@@ -8,6 +8,9 @@ library(testthat)
 
 source("~/Desktop/BIRDS/GitHub_repos/paRsynth/R/generate_strings.R")
 
+# 1. Test that string length is correct
+# 2. Test that correct number of string were generated
+
 # 1. Unit test to check string length
 test_that("Generated strings have the correct length", {
 
