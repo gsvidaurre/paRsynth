@@ -58,7 +58,7 @@ write_audio <- function(df, save_path, sampling_rate = 150000, sylLen = 200, pre
     frequencies <- as.numeric(df[i, grep("^Frequency", colnames(df))])
 
     # Construct the audio filename with a unique identifier
-    audio_filename <- paste0(prefix, "_Group", df$Group[i], "_Ind", df$Individual[i],"_Call", df$Call[i], ".wav")
+    audio_filename <- paste0(prefix, "_Group", df$Group[i], "_Ind", df$Individual[i],"_Call", df$Call_ID[i], ".wav")
 
     audio_pathname <- file.path(save_path, audio_filename)
 
