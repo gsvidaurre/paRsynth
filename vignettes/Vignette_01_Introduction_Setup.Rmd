@@ -1,0 +1,56 @@
+---
+title: "Vignette_01_Introduction_Setup"
+author: "GAJ"
+date: "2024-11-25"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+summary(cars)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+Vignette 1: Setting up your workspace in R
+Before you start using the paRsynth package, we need to setup and install R and R studio on your computer.
+Install R and RStudio
+To install R on your computer, go to the R project website and download the latest version of R for your operating system (Windows, macOS, or Linux). Follow the installation instructions provided on the site.
+To install RStudio on your computer, go to the RStudio website. RStudio is an integrated development environment (IDE) that makes working with R a better and more user-friendly experience.
+GitHub Setup
+In addition to installing R and R Studio, you will need to install GitHub Desktop to have the paRsynth GitHub repository on your local machine
+Open the paRsynth GitHub repository on your internet browser, you can use this link 
+Click on the arrow of the green "Code" button
+Click on the copy link icon
+Install GitHub Desktop by going to this website and clicking "Download Now"
+In the top left toolbar, click on File > Clone Repository
+Paste the URL 
+Make sure the "Local Path" is where you want the paRsynth repository to be located on your local machine
+Click on the blue "Clone" button 
+You should be able to see it the local path of your machine that you assigned it
+Purpose of the package
+paRsynth provides four functions for the simulation of vocalisations with representation of both individual identity and group membership informations. These vocalizations are encoded as strings that can be used for generating synthetic audio signals for bioacoustic analysis. This vignette will demonstrate how to use the package's functions to generate vocalisation strings, convert them into Parsons code, calculate frequency anchors, and generate synthetic audio files.
+Introduce the 4 functions with descriptions of what they do
+Give an overview of the package (like a simple one sentence intro):
+generate_strings(): generates strings that encode group membership information and individual identity information.
+parsons_code(): converts the generated strings (characters) into Parsons code (musical up-down-constant connotation) for frequency modulation.
+frequency_anchors(): calculates frequency anchors (numeric values that correspond to each segment of the Parsons code string) from Parsons code to guide the creation of synthetic audio.
+write_audio(): uses frequency anchors and the 'soundgen' package to generate and save synthetic audio files.
+Add the graphic workflow that illustrates how the functions work together with descriptive caption
