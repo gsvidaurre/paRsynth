@@ -24,7 +24,7 @@ test_that("testing with multiple rows data frame", {
   # testing that the returned df (result) has the expected columns
   expect_true("Group" %in% colnames(result))
   expect_true("Individual" %in% colnames(result))
-  expect_true("Call.No" %in% colnames(result))
+  expect_true("Call_ID" %in% colnames(result))
   expect_true("Call" %in% colnames(result))
   expect_true("Parsons_Code" %in% colnames(result))
   expect_true(any(grepl("Frequency", colnames(result))))
@@ -83,7 +83,7 @@ test_that("testing up, constant, and down directions shift frequency correctly",
 
 })
 
-# Unit Test 3: testing with negative or zero frequencies (did not pass)
+# Unit Test 3: testing with negative or zero frequencies (passed)
 test_that("testing negative or zero frequencies corrections", {
 df <- data.frame(
     Group = c(1),
