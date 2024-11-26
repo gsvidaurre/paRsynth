@@ -9,11 +9,6 @@ library(testthat)
 source("~/Desktop/BIRDS/GitHub_repos/paRsynth/R/generate_strings.R")
 source("~/Desktop/BIRDS/GitHub_repos/paRsynth/R/parsons_code.R")
 
-# 1. Test that the parsons code is the correct length
-# 2. Test that correct number of parson code strings were generated
-# 3. Test that the correct parsons code were generated
-# 4. Test that the df has the right number of dimensions (right number of rows and columns)
-
 # 1. Unit test to check that the parsons code is the correct length
 test_that("Generated parsons code is the correct length", {
 
@@ -59,7 +54,7 @@ test_that("Generated parsons code is the correct length", {
   # Calculate how length of parsons code
   generated_parsons_code <- (sapply(count_words(generated_parsons_code), function(y){
     print(y)
-    }, USE.NAMES = FALSE))
+  }, USE.NAMES = FALSE))
 
   generated_parsons_code_length <- generated_parsons_code / (n_groups*n_individuals*n_calls)
 
@@ -104,7 +99,7 @@ test_that("Generated correct number of parson code strings", {
 
   # Check that the generated parsons code is the correct length
   expect_equal(n_generated_parsons_codes, n_expected_parsons_codes,
-              info = "Not all parson codes were generated.")
+               info = "Not all parson codes were generated.")
 })
 
 # 3. Unit test to check that the correct parsons code were generated
@@ -126,7 +121,7 @@ test_that("Generated parsons code are correct",{
     Call = c("AAA", "BBB", "CCC")
   )
 
- # Use parsons_code to convert it
+  # Use parsons_code to convert it
   Conversion <- parsons_code(generated_strings, "Call", list("A" = "up", "B" = "down", "C" = "constant"))
 
   generated_parsons_code <- unname(Conversion$Parsons_Code)
