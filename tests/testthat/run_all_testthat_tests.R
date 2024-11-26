@@ -8,6 +8,8 @@ library(testthat)
 
 testing_path <- "~/Desktop/GitHub_repos/paRsynth/tests/testthat/"
 
+# change Desktop/GitHub_repos  based on where you stored paRsynth
+
 # Run the testthat tests for each function
 
 test_file(file.path(testing_path, "test_generate_strings_new.R"))
