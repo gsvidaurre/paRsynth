@@ -76,18 +76,22 @@ frequency_anchors <- function(df, parsons_col, group_id_col, individual_id_col, 
       } else {
         stop("Invalid direction: ", direction)
       }
+      # Correct for negative or zero frequencies immediately --- this is what i fixed to ensure the function runs correctly updates values if they get to negative or zero
+      if (frequency <= 0) {
+        frequency <- frequency_shift
+      }
+
       # Update the previous frequency value to have accurate frequency value assignment when the directionality is "constant" (in which the current frequency value should be the same as the previous value, but not the starting value)
       previous_value <- frequency
       frequencies[j + 1] <- frequency
     }
+    # Internally correct any frequency values that are zero or negative
+    # Set these values to the frequency shift value
+    # frequencies[frequencies <= 0] <- frequency_shift
 
     # Add the final frequency value
     frequencies[length(frequencies)] <- starting_frequency
-
-    # Internally correct any frequency values that are zero or negative
-    # Set these values to the frequency shift value
-    frequencies[frequencies <= 0] <- frequency_shift
-
+    
     # Create a data frame with the metadata and frequency values for the current call
     freq_df <- data.frame(
       Group = group_id,
