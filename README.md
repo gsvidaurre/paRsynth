@@ -1,10 +1,10 @@
 `paRsynth` uses Parsons code to convert character strings to frequency modulated vocalizations with different amounts of individual identity and group membership information. The functions in this package were developed for the sonification of character strings that represent vocal signals with varying amounts of social information. The resulting audio files (created using the soundgen package) can be used in downstream bioacoustics analyses.
 
-The original code for these functions was developed by Arlena (Ari) Cross and Dr. Grace Smith-Vidaurre in collaboration with Dr. Vanessa Ferdinand. This package was primarily designed for in-house use by the Smith-Vidaurre and Ferdinand labs, but will be made publicly available for others to use and modify as they see fit. Current code colaborators in the Smith-Vidaurre lab include Raneem Samman and Alexandra Juárez. Grace Smith-Vidaurre is the code owner.
+The original code for these functions was first developed by Arlena (Ari) Cross and Dr. Grace Smith-Vidaurre in collaboration with Dr. Vanessa Ferdinand. This package was primarily designed for in-house use by the Smith-Vidaurre and Ferdinand labs, but will be made publicly available for others to use and modify as they see fit. Current code colaborators in the Smith-Vidaurre lab include Raneem Samman and Alexandra Juárez. Grace Smith-Vidaurre is the code owner.
 
 **Code collaboration guidelines:**
 
-Each collaborator who helps out with code development and documentation for this package will need a local version of this repository on their computer and some way of interfacing with GitHub (e.g. Git on the command line, GitHub Desktop). Currently, the only collaborators working on code development are Ari Cross, Grace Smith-Vidaurre and Vanessa Ferdinand. Others who are interested in contributing directly to the package should first contact Grace Smith-Vidaurre (smithvid[at]msu.edu).
+Each collaborator who helps out with code development and documentation for this package will need a local version of this repository on their computer and some way of interfacing with GitHub (e.g. Git on the command line, GitHub Desktop). Currently, the collaborators working on code development are Raneem Samman, Alexandra Juárez, and Grace Smith-Vidaurre. Others who are interested in contributing directly to the package should first contact Grace Smith-Vidaurre (smithvid[at]msu.edu).
 
 We will each stick to the following guidelines for collaborative code development:
 
