@@ -7,15 +7,12 @@
 #' @param n_groups Integer. The number of groups.
 #' @param n_individuals Integer. The number of individuals per group.
 #' @param n_calls Integer. The number of calls per individual.
-<<<<<<< Updated upstream
 #' @param string_length Integer. The number of characters present in the string that encodes individual-level and group-level information through frequency modulation patterns. The current minimum is 6 characters and the current maximum is 200 characters.
 #' @param group_information Integer. The number of characters that will vary in the middle of the string across groups. The default is 8 characters.
 #' @param individual_information Integer. The number of characters that will vary in the middle of the string within groups. The default is 2 characters.
-=======
 #' @param string_length Integer. The number of characters in the string that encodes individual- and group-level information through frequency modulation patterns. The current minimum is 6 characters and the maximum is 200 characters.
 #' @param group_information Integer. The number of characters that vary in the middle of the string across groups. The default is 8 characters. The user must provide an even value, negative values will produce unexpected behavior.
 #' @param individual_information Integer. The number of characters that will vary in the middle of the string within groups. The default is 2 characters. The user must provide an even value, negative values will produce unexpected behavior.
->>>>>>> Stashed changes
 #'
 #' @details The individual-specific and group-specific string components are combined to form the middle section of a longer string. The individual-specific component may not be unique to a single individual within a group, as individual distinctiveness depends on the total number of individuals in the group, the length of the individual-specific string component, and depending on how the functions is modified, the number of unique characters or symbols available for creating strings. For example, if the length of the individual-specific string component is 2 characters and 3 unique characters are used, there will be 3^2 (or 9) possible unique individual signatures.
 #'
