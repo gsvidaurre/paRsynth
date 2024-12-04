@@ -1,16 +1,17 @@
 # G.A. Juarez
-# 15 Nov 2024
+# 4 Dec 2024
 
 rm(list = ls())
 
 if (!require(testthat)) install.packages('testthat')
 library(testthat)
 
+# Change "Desktop/.../GitHub_repos" based on where you stored paRsynth
 source("~/Desktop/BIRDS/GitHub_repos/paRsynth/R/generate_strings.R")
 source("~/Desktop/BIRDS/GitHub_repos/paRsynth/R/parsons_code.R")
 
 # 1. Unit test to check that the parsons code is the correct length
-test_that("Generated parsons code is the correct length", {
+test_that("This functions generates the correct length of parsons code", {
 
   # Avoid library calls and other changes to the virtual environment
   # See https://r-pkgs.org/testing-design.html
@@ -22,26 +23,23 @@ test_that("Generated parsons code is the correct length", {
   # library(tidyverse)
   # library(lubridate)
   # library(testthat)
+  # library(dplyr)
 
-  #Define parameters
+  # Define parameters
   n_groups <- 2
   n_individuals <- 5
   n_calls <- 10
   string_length <- 16
 
-  # Generate strings
+  # Generate strings using the parameters
   generated_strings <- generate_strings(n_groups = n_groups, n_individuals = n_individuals, n_calls = n_calls, string_length = string_length, group_information = 8, individual_information = 2)
 
-  # Convert generated strings to parsons code
+  # Convert the previously generated strings to parsons code
   Conversion <- parsons_code(generated_strings, "Call", list("A" = "up", "B" = "down", "C" = "constant"))
-
   # glimpse(Conversion)
+  # View(Conversion)
 
-  generated_parsons_code <- sapply(Conversion$Parsons_Code, function(x){
-    print(x)
-  }, USE.NAMES = FALSE)
-
-  # Calculate parsons code directions generated
+  # Calculate the generated parsons code directions
   count_words <- function(string) {
 
     # Split the string by hyphen
@@ -51,20 +49,16 @@ test_that("Generated parsons code is the correct length", {
     length(words)
   }
 
-  # Calculate how length of parsons code
-  generated_parsons_code <- (sapply(count_words(generated_parsons_code), function(y){
-    print(y)
-  }, USE.NAMES = FALSE))
-
-  generated_parsons_code_length <- generated_parsons_code / (n_groups*n_individuals*n_calls)
+  # Calculate the length of the parsons code for each generated string
+  generated_parsons_code <- count_words(Conversion$Parsons_Code) / (n_groups*n_individuals*n_calls)
 
   # Check that the generated parsons code is the correct length
-  expect_true(string_length == generated_parsons_code_length,
+  expect_true(string_length == generated_parsons_code,
               info = "Not all generated calls have the expected number.")
 })
 
-# 2. Unit test to check that correct number of parson code strings were generated
-test_that("Generated correct number of parson code strings", {
+# 2. Unit test to check that correct number of parson codes were generated
+test_that("The functions generates the correct number of parson codes", {
 
   # Avoid library calls and other changes to the virtual environment
   # See https://r-pkgs.org/testing-design.html
@@ -77,33 +71,32 @@ test_that("Generated correct number of parson code strings", {
   # library(lubridate)
   # library(testthat)
 
-  # Generate strings
+  # Define parameters
   n_calls <- 10
   n_groups <- 2
   n_individuals <- 5
 
+  # Generate strings using the parameters
   generated_strings <- generate_strings(n_groups = n_groups, n_individuals = n_individuals, n_calls = n_calls, string_length = 16, group_information = 8, individual_information = 2)
 
-  # glimpse(generated_strings)
-
-  # Convert generated strings to parsons code
+  # Convert the previously generated strings to parsons code
   Conversion <- parsons_code(generated_strings, "Call", list("A" = "up", "B" = "down", "C" = "constant"))
-
   # glimpse(Conversion)
+  # View(Conversion)
 
-  # Calculate how many parsons codes that were generated
+  # Calculate how many parsons codes were generated
   n_generated_parsons_codes <- nrow(Conversion)
 
-  # Get the number of expected parson codes
+  # Find the number of expected parson codes
   n_expected_parsons_codes <- n_calls*n_groups*n_individuals
 
-  # Check that the generated parsons code is the correct length
+  # Check that the number of parsons codes were generated as expected
   expect_equal(n_generated_parsons_codes, n_expected_parsons_codes,
                info = "Not all parson codes were generated.")
 })
 
 # 3. Unit test to check that the correct parsons code were generated
-test_that("Generated parsons code are correct",{
+test_that("The function generates correct parsons code",{
 
   # Avoid library calls and other changes to the virtual environment
   # See https://r-pkgs.org/testing-design.html
@@ -116,14 +109,13 @@ test_that("Generated parsons code are correct",{
   # library(lubridate)
   # library(testthat)
 
-  # Make up generated strings
+  # Generate generic strings (easy to track conversion)
   generated_strings <- data.frame(
     Call = c("AAA", "BBB", "CCC")
   )
 
   # Use parsons_code to convert it
   Conversion <- parsons_code(generated_strings, "Call", list("A" = "up", "B" = "down", "C" = "constant"))
-
   generated_parsons_code <- unname(Conversion$Parsons_Code)
 
   # Check that the generated parsons code is the same as the expected parsons code ("A" = "up", "B" = "down", "C" = "constant")
@@ -133,7 +125,7 @@ test_that("Generated parsons code are correct",{
 })
 
 # 4. Unit test to check that the df has the right number of dimensions (right number of rows and columns)
-test_that("The data frame has the right number of rows and columns",{
+test_that("The function generates a data frame that has the right number of rows and columns",{
 
   # Avoid library calls and other changes to the virtual environment
   # See https://r-pkgs.org/testing-design.html
@@ -149,12 +141,11 @@ test_that("The data frame has the right number of rows and columns",{
   # Generate strings
   generated_strings <- generate_strings(n_groups = 2, n_individuals = 5, n_calls = 10, string_length = 16, group_information = 8, individual_information = 2)
 
-  # glimpse(generated_strings)
 
   # Use parsons_code to convert the generated strings
   generated_parsons <- parsons_code(generated_strings, "Call", list("A" = "up", "B" = "down", "C" = "constant"))
-
   # glimpse(generated_parsons)
+  # View(generated_parsons)
 
   # Check that the data frame has the right number of rows
   expect_equal(nrow(generated_strings),nrow(generated_parsons))
