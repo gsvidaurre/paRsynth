@@ -90,11 +90,11 @@ test_that("The function generates the number of groups and individuals", {
   withr::local_package("stringr")
 
   # Just for code development
-    # library(tidyverse)
-    # library(lubridate)
-    # library(testthat)
-    # library(data.table)
-    # library(stringr)
+  # library(tidyverse)
+  # library(lubridate)
+  # library(testthat)
+  # library(data.table)
+  # library(stringr)
 
   # Define parameters
   string_length <- 16
@@ -137,11 +137,11 @@ test_that("The function generates character-based vocal strings per catergory", 
 
   # Avoid library calls and other changes to the virtual environment
   # See https://r-pkgs.org/testing-design.html
-  # withr::local_package("tidyverse")
-  # withr::local_package("dplyr")
-  # withr::local_package("lubridate")
-  # withr::local_package("data.table")
-  # withr::local_package("stringr")
+  withr::local_package("tidyverse")
+  withr::local_package("dplyr")
+  withr::local_package("lubridate")
+  withr::local_package("data.table")
+  withr::local_package("stringr")
 
   # Just for code development
   # library(tidyverse)
@@ -217,11 +217,11 @@ test_that("The function generates strings of individuals assigned to one social 
 
   # Avoid library calls and other changes to the virtual environment
   # See https://r-pkgs.org/testing-design.html
-  # withr::local_package("tidyverse")
-  # withr::local_package("dplyr")
-  # withr::local_package("lubridate")
-  # withr::local_package("data.table")
-  # withr::local_package("stringr")
+  withr::local_package("tidyverse")
+  withr::local_package("dplyr")
+  withr::local_package("lubridate")
+  withr::local_package("data.table")
+  withr::local_package("stringr")
 
   # Just for code development
   # library(tidyverse)
