@@ -24,11 +24,17 @@
 #'
 #' @export parsons_code
 
-parsons_code <- function(df, string_col, mapping = list("A" = "up", "B" = "down", "C" = "constant")) {
+library(dplyr)
 
+parsons_code <- function(df, string_col, global_head_col, group_head_col, individual_middle_col, group_tail_col, global_tail_col, mapping = list("A" = "up", "B" = "down", "C" = "constant")) {
   df %>%
-    dplyr::mutate(Parsons_Code = sapply(!!rlang::sym(string_col), function(string) paste(convert_to_parsons_code(string, mapping), collapse = "-")))
-
+    dplyr::mutate(Call_Parsons_Code = sapply(!!rlang::sym(string_col), function(string) paste(convert_to_parsons_code(string, mapping), collapse = "-"))) %>%
+    # Raneem's additions
+    dplyr::mutate(Global_Head_Parsons_Code = sapply(!!rlang::sym(global_head_col), function(string) paste(convert_to_parsons_code(string, mapping), collapse = "-"))) %>%
+    dplyr::mutate(Group_Head_Parsons_Code = sapply(!!rlang::sym(group_head_col), function(string) paste(convert_to_parsons_code(string, mapping), collapse = "-"))) %>%
+    dplyr::mutate(Individual_Middle_Parsons_Code = sapply(!!rlang::sym(individual_middle_col), function(string) paste(convert_to_parsons_code(string, mapping), collapse = "-"))) %>%
+    dplyr::mutate(Group_Tail_Parsons_Code = sapply(!!rlang::sym(group_tail_col), function(string) paste(convert_to_parsons_code(string, mapping), collapse = "-"))) %>%
+    dplyr::mutate(Global_Tail_Parsons_Code = sapply(!!rlang::sym(global_tail_col), function(string) paste(convert_to_parsons_code(string, mapping), collapse = "-")))
 }
 
 # Helper function to generate Parsons code for existing sequences

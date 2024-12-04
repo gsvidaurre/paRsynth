@@ -40,75 +40,84 @@ frequency_anchors <- function(df, parsons_col, group_id_col, individual_id_col, 
   group_id_col <- tolower(group_id_col)
   individual_id_col <- tolower(individual_id_col)
   call_id_col <- tolower(call_id_col)
-  call_string_col <- tolower(call_string_col)
+  call_string_col <- tolower(call_string_col) # Fix: Added [i] to access specific row
 
   # Initialize an empty list to store the results
   results <- list()
 
   # Iterate over each row in the data frame
-  for (i in 1:nrow(df)) {
-    parsons_code <- df[[parsons_col]][i]
+  for (i in 1:nrow(df)) { # Raneem: we could use for (i in seq_len(nrow(df))) { to avoid any issues in an empty vector case
+    # parsons_code <- df[[parsons_col]][i]
     group_id <- df[[group_id_col]][i]
     individual_id <- df[[individual_id_col]][i]
     call_id <- df[[call_id_col]][i]
-    call_string <- df[[call_string_col]][i]  # Fix: Added [i] to access specific row
+    call_string <- df[[call_string_col]][i] # Fix: Added [i] to access specific row
 
-    # Split the parsons_code string by dashes
-    split_parsons_code <- strsplit(parsons_code, "-")[[1]]
+    # Split the parsons_code string by dashes -- Raneem commented it out ; no need for this step anymore
+    # split_parsons_code <- strsplit(parsons_code, "-")[[1]]
 
-    # Calculate the length of the split vector
-    call_length <- length(split_parsons_code)
+    # Raneem's additions - separate out the different sections of the string based on known column names
+    global_head <- df$Global_head[i]
+    group_head <- df$Group_head[i]
+    individual_middle <- df$Individual_middle[i]
+    group_tail <- df$Group_tail[i]
+    global_tail <- df$Global_tail[i]
 
-    # Initialize the frequencies vector with the starting frequency
-    frequencies <- numeric(length(split_parsons_code) + 2)
-    frequencies[1] <- starting_frequency
-    previous_value <- starting_frequency
+    # Raneem's additions - initialize an empty vector for frequency anchors
+    frequencies <- c()
 
-    # Iterate over the split parsons code to generate frequencies
-    for (j in 1:call_length) {
-      direction <- split_parsons_code[j]
-      if (direction == "up") {
-        frequency <- previous_value + frequency_shift
-      } else if (direction == "down") {
-        frequency <- previous_value - frequency_shift
-      } else if (direction == "constant") {
-        frequency <- previous_value
-      } else {
-        stop("Invalid direction: ", direction)
+    # Raneem's additions - helper function to generate frequencies from a section of Parsons code
+    generate_frequencies_from_section <- function(section_code, previous_value) {
+      section_frequencies <- numeric(length(section_code))
+      for (j in 1:length(section_code)) { # we could use for (i in seq_along(section_code)) { to avoid any issues in an empty vector case
+        direction <- section_code[j]
+        if (direction == "up") {
+          frequency <- previous_value + frequency_shift
+        } else if (direction == "down") {
+          frequency <- previous_value - frequency_shift
+        } else if (direction == "constant") {
+          frequency <- previous_value
+        } else {
+          stop("Invalid direction: ", direction)
+        }
+
+        # Internally correct any frequency values that are zero or negative
+        # Set these values to the frequency shift v
+        if (frequency <= 0) {
+          frequency <- frequency_shift
+        }
+        # Update the previous frequency value to have accurate frequency value assignment when the directionality is "constant" (in which the current frequency value should be the same as the previous value, but not the starting value)
+        previous_value <- frequency
+        section_frequencies[j] <- frequency
       }
-      # Update the previous frequency value to have accurate frequency value assignment when the directionality is "constant" (in which the current frequency value should be the same as the previous value, but not the starting value)
-      previous_value <- frequency
-      frequencies[j + 1] <- frequency
+      return(section_frequencies)
     }
 
-    # Add the final frequency value
-    frequencies[length(frequencies)] <- starting_frequency
+    # Initialize the frequencies vector with the starting frequency for each section
+    previous_frequency <- starting_frequency
 
-    # Internally correct any frequency values that are zero or negative
-    # Set these values to the frequency shift value
-    frequencies[frequencies <= 0] <- frequency_shift
+    # Raneem's additions - Process each section separately
+    global_head_frequencies <- generate_frequencies_from_section(strsplit(global_head, "")[[1]], previous_frequency)
+    group_head_frequencies <- generate_frequencies_from_section(strsplit(group_head, "")[[1]], previous_frequency)
+    individual_middle_frequencies <- generate_frequencies_from_section(strsplit(individual_middle, "")[[1]], previous_frequency)
+    group_tail_frequencies <- generate_frequencies_from_section(strsplit(group_tail, "")[[1]], previous_frequency)
+    global_tail_frequencies <- generate_frequencies_from_section(strsplit(global_tail, "")[[1]], previous_frequency)
 
-    # Create a data frame with the metadata and frequency values for the current call
-    freq_df <- data.frame(
-      Group = group_id,
-      Individual = individual_id,
-      Call_ID = call_id,
-      Call = call_string,
-      Parsons_Code = parsons_code,
-      stringsAsFactors = FALSE
+    # Raneem's additions - concatenate all frequencies into one final vector
+    frequencies <- c(global_head_frequencies, group_head_frequencies, individual_middle_frequencies, group_tail_frequencies, global_tail_frequencies)
+
+    # Raneem's changes just a step thing -- store the results in a list then data frame for output
+    results[[i]] <- c(
+      group_id = group_id,
+      individual_id = individual_id,
+      call_id = call_id,
+      call_string = call_string,
+      frequencies = list(frequencies)
     )
-
-    # Add frequency columns to the data frame
-    for (k in 1:length(frequencies)) {  # Fix: Iterate over length of frequencies correctly
-      freq_df[[paste0("Frequency", k)]] <- frequencies[k]
-    }
-
-    # Append the data frame to the results list
-    results[[i]] <- freq_df
   }
 
-  # Combine all results into a single data frame
-  final_df <- do.call(rbind, results)
-
+  # convert the list of results into a data frame with metadata and frequency values for the calls
+  final_df <- do.call(rbind, lapply(results, as.data.frame))
+  
   return(final_df)
 }
