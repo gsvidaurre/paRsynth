@@ -92,6 +92,9 @@ frequency_anchors <- function(df, parsons_col, group_id_col, individual_id_col, 
       }
       return(section_frequencies)
     }
+    # Internally correct any frequency values that are zero or negative
+    # Set these values to the frequency shift value
+    # frequencies[frequencies <= 0] <- frequency_shift
 
     # Initialize the frequencies vector with the starting frequency for each section
     previous_frequency <- starting_frequency

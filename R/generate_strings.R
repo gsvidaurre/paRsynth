@@ -8,8 +8,8 @@
 #' @param n_individuals Integer. The number of individuals per group.
 #' @param n_calls Integer. The number of calls per individual.
 #' @param string_length Integer. The number of characters present in the string that encodes individual-level and group-level information through frequency modulation patterns. The current minimum is 6 characters and the current maximum is 200 characters.
-#' @param group_information Integer. The number of characters that will vary in the middle of the string across groups. The default is 8 characters.
-#' @param individual_information Integer. The number of characters that will vary in the middle of the string within groups. The default is 2 characters.
+#' @param group_information Integer. The number of characters that will vary in the middle of the string across groups. The default is 8 characters. User must put in an even argument. Failure of this runs a high risk of the function not working properly and creating incorrect data.
+#' @param individual_information Integer. The number of characters that will vary in the middle of the string within groups. The default is 2 characters. User must put in an even argument. Failure of this runs a high risk of the function not working properly and creating incorrect data.
 #'
 #' @details The individual-specific and group-specific string components are combined to form the middle of a longer string. The individually-specific component of the string may not be unique to any one individual in a group, as individual distinctiveness will depend on the total number of individuals in a group, the length of the individually-specific string component, and depending on how users modify this function, the number of unique characters or symbols that can be used to create strings. For instance, when the length of the individually distinctive string component is 2 characters long, and you're using 3 unique characters to create strings, there will be 3^2 or 9 possible unique individual signatures.
 #'
