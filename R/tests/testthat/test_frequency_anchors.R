@@ -11,8 +11,8 @@ library(testthat)
 # Change "~Desktop/.../GitHub_repos" based on where paRsynth is stored
 source("~/Desktop/BIRDS/GitHub_repos/paRsynth/R/frequency_anchors.R")
 
-# Unit test 1: Testing the generation of df with multiple rows input (Passed)
-test_that("testing with multiple rows data frame", {
+# 1. Unit test to check that the generation of df with multiple rows input
+test_that("The function generates df with multiple rows data frame", {
 
   # Avoid library calls and other changes to the virtual environment
   # See https://r-pkgs.org/testing-design.html
@@ -26,6 +26,7 @@ test_that("testing with multiple rows data frame", {
   # library(testthat)
   # library(dplyr)
 
+  # Example data frame for testing
   test_df <- data.frame(
     Group = c(1, 2),
     Individual = c(1, 2),
@@ -35,9 +36,10 @@ test_that("testing with multiple rows data frame", {
     stringsAsFactors = FALSE
   )
 
+  # Call the function with test df
   result <- frequency_anchors(df = test_df, parsons_col = "Parsons_Code", group_id_col = "Group", individual_id_col = "Individual", call_id_col = "Call_ID", call_string_col = "Call", starting_frequency = 4000, frequency_shift = 1000)
 
-  # testing that the returned df (result) has the expected columns
+  # Test that the returned df (result) has the expected columns
   expect_true("Group" %in% colnames(result))
   expect_true("Individual" %in% colnames(result))
   expect_true("Call_ID" %in% colnames(result))
@@ -45,17 +47,17 @@ test_that("testing with multiple rows data frame", {
   expect_true("Parsons_Code" %in% colnames(result))
   expect_true(any(grepl("Frequency", colnames(result))))
 
-  # testing the number of frequency columns (should be one per "up", "down", or "constant" in the Parsons code, plus two for the starting and ending frequencies)
+  # Test the number of frequency columns (should be one per "up", "down", or "constant" in the Parsons code, plus two for the starting and ending frequencies)
   expect_equal(ncol(result), 10)  # 5 metadata columns + 5 frequency columns
 
-  # checking the first row's frequencies
+  # Check the first row's frequencies
   expect_equal(result$Frequency1[1], 4000) # starting frequency
   expect_equal(result$Frequency2[1], 5000) # "up" shifts by 1000 Hz
   expect_equal(result$Frequency3[1], 4000) # "down" shifts back by 1000 Hz
   expect_equal(result$Frequency4[1], 4000) # "constant"
   expect_equal(result$Frequency5[1], 4000) # back to starting frequency
 
-  # checking the second row's frequencies
+  # Check the second row's frequencies
   expect_equal(result$Frequency1[2], 4000) # starting frequency
   expect_equal(result$Frequency2[2], 4000) # "constant"
   expect_equal(result$Frequency3[2], 5000) # "up" shifts by 1000 Hz
@@ -67,8 +69,8 @@ test_that("testing with multiple rows data frame", {
   print(colnames(result)) # checking the column names of the result df
 })
 
-#Unit test 2: Testing frequency directions shift (passed)
-test_that("testing up, constant, and down directions shift frequency correctly", {
+# 2. Unit test to check that frequency directions shift
+test_that("This function shifts up, constant, and down directions frequency correctly", {
 
   # Avoid library calls and other changes to the virtual environment
   # See https://r-pkgs.org/testing-design.html
@@ -82,6 +84,7 @@ test_that("testing up, constant, and down directions shift frequency correctly",
   # library(testthat)
   # library(dplyr)
 
+  # Example data frame for testing
   df <- data.frame(
     Group = c(1),
     Individual = c(2, 1),
@@ -93,6 +96,7 @@ test_that("testing up, constant, and down directions shift frequency correctly",
   starting_frequency <- 4000
   frequency_shift <- 1000
 
+  # Call the function with test df
   result <- frequency_anchors(df = df, parsons_col = "Parsons_Code", group_id_col = "Group", individual_id_col = "Individual", call_id_col = "Call_ID", call_string_col = "Call", starting_frequency, frequency_shift)
 
   # Check frequencies for each step
@@ -112,8 +116,8 @@ test_that("testing up, constant, and down directions shift frequency correctly",
 
 })
 
-# Unit Test 3: testing with negative or zero frequencies (passed)
-test_that("testing negative or zero frequencies corrections", {
+# 3. Unit test to check that it corrects negative or zero frequencies
+test_that("The function corrects negative or zero frequencies", {
 
   # Avoid library calls and other changes to the virtual environment
   # See https://r-pkgs.org/testing-design.html
@@ -127,7 +131,8 @@ test_that("testing negative or zero frequencies corrections", {
   # library(testthat)
   # library(dplyr)
 
-df <- data.frame(
+  # Example data frame for testing
+  df <- data.frame(
     Group = c(1),
     Individual = c(2, 1),
     Call_ID = c(1, 2),
@@ -138,9 +143,10 @@ df <- data.frame(
   starting_frequency <- 3000
   frequency_shift <- 1000
 
+  # Call the function with test df
   result <- frequency_anchors(df = df, parsons_col = "Parsons_Code", group_id_col = "Group", individual_id_col = "Individual", call_id_col = "Call_ID", call_string_col = "Call", starting_frequency, frequency_shift)
 
-  # checking frequencies for each step
+  # Check frequencies for each step
   expect_equal(result$Frequency1[1], 3000) # starting frequency
   expect_equal(result$Frequency2[1], 2000) # down: 3000 - 1000
   expect_equal(result$Frequency3[1], 1000) # down: 2000 - 1000
