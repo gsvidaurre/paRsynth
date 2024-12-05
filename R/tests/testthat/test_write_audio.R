@@ -43,7 +43,7 @@ test_that("Audio files are correctly created and removed", {
   df_test <- data.frame(
     Group = c(1, 2),
     Individual = c(1, 2),
-    Call = c(1, 2),
+    Call_ID = c(1, 2),
     Frequency_1 = c(4000, 4500),
     Frequency_2 = c(5000, 5500)
   )
@@ -91,17 +91,22 @@ test_that("Data frame contains correct audio file name format", {
   df_test <- data.frame(
     Group = c(1, 2),
     Individual = c(1, 2),
-    Call = c(1, 2),
+    Call_ID = c(1, 2),
     Frequency_1 = c(4000, 4500),
     Frequency_2 = c(5000, 5500)
   )
+  # View(df_test)
+  # glimpse(df_test)
+
   result_df <- write_audio(df_test, save_path = tmp_dir, sampling_rate = 150000, sylLen = 200, prefix = "TestPrefix")
+  # View(result_df)
+  # glimpse(result_df)
 
   # testing if the audio_file_name column exists and filenames are correctly formatted
   expect_true("audio_file_name" %in% colnames(result_df))
 
   # Check the naming format for the first row
-  expected_filename <- paste0("TestPrefix_Group", df_test$Group[1], "_Ind", df_test$Individual[1], "_Call", df_test$Call[1], ".wav")
+  expected_filename <- paste0("TestPrefix", "_Group", df_test$Group[1], "_Ind", df_test$Individual[1],"_Call", df_test$Call_ID[1], ".wav")
   expect_equal(result_df$audio_file_name[1], expected_filename)
 
   # Remove the created files
@@ -137,7 +142,7 @@ test_that("Generated files have the correct .wav extension", {
   df_test <- data.frame(
     Group = c(1, 2),
     Individual = c(1, 2),
-    Call = c(1, 2),
+    Call_ID = c(1, 2),
     Frequency_1 = c(4000, 4500),
     Frequency_2 = c(5000, 5500)
   )
