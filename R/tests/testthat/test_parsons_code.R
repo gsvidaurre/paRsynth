@@ -6,7 +6,7 @@ rm(list = ls())
 if (!require(testthat)) install.packages('testthat')
 library(testthat)
 
-# Change "Desktop/.../GitHub_repos" based on where paRsynth is stored
+# Change "~Desktop/.../GitHub_repos" based on where paRsynth is stored
 source("~/Desktop/BIRDS/GitHub_repos/paRsynth/R/generate_strings.R")
 source("~/Desktop/BIRDS/GitHub_repos/paRsynth/R/parsons_code.R")
 

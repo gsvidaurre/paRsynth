@@ -6,7 +6,7 @@ rm(list = ls())
 if (!require(testthat)) install.packages('testthat')
 library(testthat)
 
-# Change "Desktop/.../GitHub_repos" based on where paRsynth is stored
+# Change "~Desktop/.../GitHub_repos" based on where paRsynth is stored
 source("~/Desktop/BIRDS/GitHub_repos/paRsynth/R/generate_strings.R")
 
 # 1. Unit test to check string length
