@@ -13,8 +13,8 @@ source("~/Desktop/BIRDS/GitHub_repos/paRsynth/R/write_audio.R")
 
 desktop_path <- "~/Desktop"
 
-# Unit Test 1: Test for correct audio file creation
-test_that("Audio files are correctly created and removed", {
+# 1. Unit test to check for correct audio file creation
+test_that("The function creates and removes audio files correctly", {
 
   # Avoid library calls and other changes to the virtual environment
   # See https://r-pkgs.org/testing-design.html
@@ -48,9 +48,10 @@ test_that("Audio files are correctly created and removed", {
     Frequency_2 = c(5000, 5500)
   )
 
+  # Call the function with test df
   result_df <- write_audio(df_test, save_path = tmp_dir, sampling_rate = 150000, sylLen = 200, prefix = "TestPrefix")
 
-  # ensure files are created
+  # Ensure files are created
   audio_files <- result_df$audio_file_name
   expect_true(all(file.exists(file.path(tmp_dir, audio_files))))
 
@@ -62,8 +63,8 @@ test_that("Audio files are correctly created and removed", {
 })
 
 
-# Unit Test 2: Test for correct df creation (must add an additional column -audio_file_name- for file names with a correct naming format)
-test_that("Data frame contains correct audio file name format", {
+# 2. Unit test to check for correct df creation (must add an additional column -audio_file_name- for file names with a correct naming format)
+test_that("The function creates data frame with correct audio file name format", {
 
   # Avoid library calls and other changes to the virtual environment
   # See https://r-pkgs.org/testing-design.html
@@ -88,6 +89,7 @@ test_that("Data frame contains correct audio file name format", {
   }
   print(tmp_dir)
 
+  # Example data frame for testing
   df_test <- data.frame(
     Group = c(1, 2),
     Individual = c(1, 2),
@@ -95,14 +97,11 @@ test_that("Data frame contains correct audio file name format", {
     Frequency_1 = c(4000, 4500),
     Frequency_2 = c(5000, 5500)
   )
-  # View(df_test)
-  # glimpse(df_test)
 
+  # Call the function with test df
   result_df <- write_audio(df_test, save_path = tmp_dir, sampling_rate = 150000, sylLen = 200, prefix = "TestPrefix")
-  # View(result_df)
-  # glimpse(result_df)
 
-  # testing if the audio_file_name column exists and filenames are correctly formatted
+  # Test if the audio_file_name column exists and file names are correctly formatted
   expect_true("audio_file_name" %in% colnames(result_df))
 
   # Check the naming format for the first row
@@ -113,8 +112,8 @@ test_that("Data frame contains correct audio file name format", {
   unlink(tmp_dir, recursive = TRUE)
 })
 
-# Unit Test 3: Test whether the resulting files contain the correct file extentsion
-test_that("Generated files have the correct .wav extension", {
+# 3. Unit test to check whether the resulting files contain the correct file extension
+test_that("The function creates files that have the correct .wav extension", {
 
   # Avoid library calls and other changes to the virtual environment
   # See https://r-pkgs.org/testing-design.html
@@ -139,6 +138,7 @@ test_that("Generated files have the correct .wav extension", {
   }
   print(tmp_dir)
 
+  # Example data frame for testing
   df_test <- data.frame(
     Group = c(1, 2),
     Individual = c(1, 2),
@@ -147,9 +147,10 @@ test_that("Generated files have the correct .wav extension", {
     Frequency_2 = c(5000, 5500)
   )
 
+  # Call the function with test df
   result_df <- write_audio(df_test, save_path = tmp_dir, sampling_rate = 150000, sylLen = 200, prefix = "TestPrefix")
 
-  # check that all generated files have a .wav extension
+  # Check that all generated files have a .wav extension
   audio_files <- result_df$audio_file_name
   expect_true(all(grepl("\\.wav$", audio_files)))
 
