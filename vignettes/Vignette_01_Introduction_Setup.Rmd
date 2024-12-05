@@ -8,8 +8,21 @@ output: html_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
+<h2>Purpose of the package</h2>
 
-<h2>Setting up your work space in R</h2>
+paRsynth provides four functions for the simulation of vocalizations with representation of both individual identity and group membership information. These vocalizations are encoded as strings that can be used for generating synthetic audio signals for bioacoustic analysis. This vignette will demonstrate how to use the package's functions to generate vocalizations strings, convert them into Parsons code, calculate frequency anchors, and generate synthetic audio files.
+
+1. generate_strings(): generates strings that encode group membership information and individual identity information.
+2. parsons_code(): converts the generated strings (characters) into Parsons code (musical up-down-constant connotation) for frequency modulation.
+3. frequency_anchors(): calculates frequency anchors (numeric values that correspond to each segment of the Parsons code string) from Parsons code to guide the creation of synthetic audio.
+4. write_audio(): uses frequency anchors and the 'soundgen' package to generate and save synthetic audio files.
+
+<br>
+![paRsynth graphic workflow](~/Desktop/BIRDS/WorkflowGraphics/paRsynthMethods/paRsynth_methods_workflow.svg)
+<br>
+![paRsynth graphic workflow](~/Desktop/BIRDS/WorkflowGraphics/paRsynthMethods/paRsynth_methods_workflow_horizontal.svg)
+
+<h2>Installing Necessary Code Development Software</h2>
 
 Before you start using the paRsynth package, you need to setup and install R, R studio, and GitHub Desktop on your computer.
 
@@ -32,16 +45,97 @@ You will need to install GitHub Desktop to have the paRsynth GitHub repository o
 * Click on the blue "Clone" button 
 * Check to see that the paRsynth package is located in the appropriate local path of your machine that you assigned it
 
-<h2>Purpose of the package</h2>
+<h2>Setting up your work space in RStudio</h2>
 
-paRsynth provides four functions for the simulation of vocalizations with representation of both individual identity and group membership information. These vocalizations are encoded as strings that can be used for generating synthetic audio signals for bioacoustic analysis. This vignette will demonstrate how to use the package's functions to generate vocalizations strings, convert them into Parsons code, calculate frequency anchors, and generate synthetic audio files.
+Before the functions in the paRsynth package, there are some preliminary steps we must go through to ensure it will work appropriately and organized neatly.
 
-1. generate_strings(): generates strings that encode group membership information and individual identity information.
-2. parsons_code(): converts the generated strings (characters) into Parsons code (musical up-down-constant connotation) for frequency modulation.
-3. frequency_anchors(): calculates frequency anchors (numeric values that correspond to each segment of the Parsons code string) from Parsons code to guide the creation of synthetic audio.
-4. write_audio(): uses frequency anchors and the 'soundgen' package to generate and save synthetic audio files.
+<u> Step i. Load packages and set paths </u>
 
-<br>
-![paRsynth graphic workflow](~/Desktop/BIRDS/WorkflowGraphics/paRsynthMethods/paRsynth_methods_workflow.svg)
-<br>
-![paRsynth graphic workflow](~/Desktop/BIRDS/WorkflowGraphics/paRsynthMethods/paRsynth_methods_workflow_horizontal.svg)
+It is good practice to clean your global environment before using functions from open-sourced packages. In order for paRsynth functions to run they need specific external R packages as well. For example, 'write_audio' generates and saves audio files in .WAV format which requires `soundgen::soundgen()` to be installed and loaded. 
+
+```{r}
+
+# Clean the global environment
+rm(list = ls())
+
+# Specify the required packages
+X <- c("devtools", "dplyr", "stringdist", "tidyverse", "ggplot2", "apcluster", "soundgen", "parallel", "stringr", "data.table", "tuneR", "pbapply", "aricode", "Rmisc", "warbleR")
+
+# Install the packages in X if not already installed
+# Type "Yes" in the console
+for (pkg in X) {
+  if (!require(pkg, character.only = TRUE)) {
+    install.packages(pkg)
+  }
+}
+
+# Install the paRsynth package from GitHub if you haven't installed it already
+devtools::install_github("gsvidaurre/paRsynth")
+
+# Add paRsynth to the list of packages to load
+X <- c(X, "paRsynth")
+
+# Load all of the packages specified above
+invisible(lapply(X, library, character.only = TRUE))
+
+```
+
+<u> Step ii. Initialize working directories for data on your local machine </u>
+
+```{r}
+
+# Initialize a base path (this will need to be different per user)
+# path <- "/Users/raneemsamman/Desktop" # Raneem's path
+# path <- "/Users/gracesmith-vidaurre/Desktop" # Grace's path
+path <- "/Users/gretheljuarez/Desktop" # Alexandra's path
+
+# Initialize the directory for analysis on your local computer
+analysis_dir <- "tda_synthetic_dataset"
+
+# Combine the base path and the data directory into a single path
+analysis_path <- file.path(path, analysis_dir)
+
+# Create the data directory if it doesn't already exist on your computer
+if(!dir.exists(analysis_path)){ 
+  dir.create(analysis_path)
+}
+
+# If the analysis directory doesn't exist, then create it
+if(!dir.exists(analysis_path)){ 
+  dir.create(analysis_path)
+}
+
+# Specify a folder inside the analysis directory where audio will be written out/read in
+audio_dir <- "audio"
+
+# Combine the base path, the analysis directory, and the audio directory into a single path
+audio_path <- file.path(path, analysis_dir, audio_dir)
+
+# Create the audio directory if it doesn't already exist on your computer
+if(!dir.exists(audio_path)){ 
+  dir.create(audio_path)
+}
+
+# Specify a folder inside the analysis directory where images will be written out/read in
+images_dir <- "images"
+
+# Combine the base path, the analysis directory, and the data directory into a single path
+images_path <- file.path(path, analysis_dir, images_dir)
+
+# Create the data directory if it doesn't already exist on your computer
+if(!dir.exists(images_path)){ 
+  dir.create(images_path)
+}
+
+```
+
+<u> Step iii. Check out documentation for the paRsynth functions. These functions are written below in the order in which they should be used </u>
+
+```{r eval = FALSE}
+
+?paRsynth::generate_strings
+?paRsynth::parsons_code
+?paRsynth::frequency_anchors
+?paRsynth::write_audio
+
+```

@@ -8,98 +8,9 @@ output: html_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
-<h2>Setup Before using paRsynth Functions</h2>
-
-# Step i. Load packages and set paths
-
-```{r}
-
-# Clean the global environment
-rm(list = ls())
-
-# Specify the required packages
-X <- c("devtools", "dplyr", "stringdist", "tidyverse", "ggplot2", "apcluster", "soundgen", "parallel", "stringr", "data.table", "tuneR", "pbapply", "aricode", "Rmisc", "warbleR")
-
-# Install the packages in X if not already installed
-for (pkg in X) {
-  if (!require(pkg, character.only = TRUE)) {
-    install.packages(pkg)
-  }
-}
-
-# Install the paRsynth package from GitHub if you haven't installed it already
-devtools::install_github("gsvidaurre/paRsynth")
-
-# Add paRsynth to the list of packages to load
-X <- c(X, "paRsynth")
-
-# Load all of the packages specified above
-invisible(lapply(X, library, character.only = TRUE))
-
-```
-
-# Step ii. Initialize working directories for data on your local machine
-
-```{r}
-
-# Initialize a base path (this will need to be different per user)
-# path <- "/Users/raneemsamman/Desktop" # Raneem's path
-path <- "/Users/gracesmith-vidaurre/Desktop" # Grace's path
-
-# Initialize the directory for analysis on your local computer
-analysis_dir <- "tda_synthetic_dataset"
-
-# Combine the base path and the data directory into a single path
-analysis_path <- file.path(path, analysis_dir)
-
-# Create the data directory if it doesn't already exist on your computer
-if(!dir.exists(analysis_path)){ 
-  dir.create(analysis_path)
-}
-
-# If the analysis directory doesn't exist, then create it
-if(!dir.exists(analysis_path)){ 
-  dir.create(analysis_path)
-}
-
-# Specify a folder inside the analysis directory where audio will be written out/read in
-audio_dir <- "audio"
-
-# Combine the base path, the analysis directory, and the audio directory into a single path
-audio_path <- file.path(path, analysis_dir, audio_dir)
-
-# Create the audio directory if it doesn't already exist on your computer
-if(!dir.exists(audio_path)){ 
-  dir.create(audio_path)
-}
-
-# Specify a folder inside the analysis directory where images will be written out/read in
-images_dir <- "images"
-
-# Combine the base path, the analysis directory, and the data directory into a single path
-images_path <- file.path(path, analysis_dir, images_dir)
-
-# Create the data directory if it doesn't already exist on your computer
-if(!dir.exists(images_path)){ 
-  dir.create(images_path)
-}
-
-```
-
-# Step iii. Check out documentation for the paRsynth functions. These functions are written below in the order in which they should be used
-
-```{r eval = FALSE}
-
-?paRsynth::generate_strings
-?paRsynth::parsons_code
-?paRsynth::frequency_anchors
-?paRsynth::write_audio
-
-```
-
 <h2>How to Use paRsynth Functions</h2>
 
-# STEP 1: Create character strings representing vocal signals with more group membership information than individual information
+<u> STEP 1: Create character strings representing vocal signals with more group membership information than individual information </u>
 
 After installing paRsynth and loading the relevant libraries, you will be able to take the first step into creating synthetic bird calls. The first step is generating the character strings that represent vocalizations using the function generate_strings(). These strings encode both group membership (characters that are shared across individuals within a group) and individual identity (characters that are unique to each individual in a group). The function allows you to specify the length of the string as well as how much of the string encodes group versus individual identity information. It also allows you to control the number of groups, individuals in each group and calls per individual. These variables that you can control are known as the parameters of the function. 
 
@@ -128,7 +39,7 @@ glimpse(calls)
 
 The above chunk of code will generate a data frame called example_calls. Each row of the data frame represents a call, including the group, individual, and call identifiers, along with the vocalization string itself. 
 
-# STEP 2: Convert strings to Parsons code
+<u> STEP 2: Convert strings to Parsons code </u>
 
 Now that you have a data frame of generated calls, you can use the parsons_code() function to convert the vocalisations strings in the data frame example_calls into Parsons code. The goal of this step is to create a representation of the direction of frequency shifts ("up", "down", "constant") that will be used to modulate the sound's pitch when generating synthetic audio later on. This function has 3 parameters: the data frame (df), the name of the column containing the character strings (string_col), and the list that maps each character ("A", "B", "C") to a direction in Parsons code ("up", "down", "constant") (mapping).
 
@@ -142,7 +53,7 @@ glimpse(calls_parsons)
 
 This will return a data frame with all the previous columns in example_calls in addition to one extra column called "Parsons_code", which contains the Parsons code representation of each segment of the vocalisation string.
 
-# STEP 3: Convert the Parsons code to frequency values
+<u> STEP 3: Convert the Parsons code to frequency values </u>
 
 With the Parsons code in your data frame, you are now able to create the frequency anchors that will guide the changes in pitch when creating synthetic audio files using the frequency_anchors() function. It does so by calculating the frequency values for each vocalisation based on the Parsons code from the previous step, a starting frequency value, and a frequency shift value you provide. Therefore, the parameters of this function are the data frame with the parsons code, the names of the columns containing the parsons code (parsons_col), the numeric group identifiers (group_id_col), the numeric individual identifiers (individual_id_col), unique numeric identifiers for each vocalization per individual (call_id_col),  the character string per vocalisation (call_string_col), the baseline frequency value (starting_frequency) which has a default of 4000 Hz, and a value of frequency shift (frequency_shift) which has a default value of 1000. 
 
@@ -156,7 +67,7 @@ glimpse(calls_parsons_frequencies)
 
 This will return an updated data frame that includes all the previous columns in addition to additional columns that represent the frequency anchors for each vocalisation. 
 
-# STEP 4: For each call or string, use these frequency vectors to generate synthetic audio files with the soundgen package
+<u> STEP 4: For each call or string, use these frequency vectors to generate synthetic audio files with the soundgen package </u>
 
 Now, finally, you are equipped with all the necessary data to generate the audio files that will allow you to hear the synthetic bird calls we generated! To do that, we will use the function write_audio(). This function creates a sound file (in .wav format) for each vocalisation and saves it to your desired directory. Each file will represent one vocalisation with its own unique frequency modulation pattern that was developed in step 3. This function has five parameters: the data frame with frequency anchors and string metadata (df), the directory where the audio files will be saved (save_path), the sampling rate for the audio files with a default of 150000 Hz (sampling_rate), the length of the syllable in milliseconds with a default of 200 ms (sylLen), and the prefix for the audio file names (prefix). Note that the prefix you use for the synthetic audio files should match the social level that should contain the most information (here it is the group level because the group information string is longer).
 
@@ -170,7 +81,7 @@ glimpse(synthetic_call_metadata)
 
 This will create files with the extension .wav for each vocalizations and will save them in your desired and specified directory with a prefix of your preference.
 
-# Step 5: Save the metadata for the synthetic audio files to a CSV file
+<u> Step 5: Save the metadata for the synthetic audio files to a CSV file </u>
 
 Run the same steps above, but instead create a data set of synthetic vocalizations with more individual information than group information (This will require changes to the arguments in generate_strings(), as well as the prefix used in write_audio().)
 
@@ -186,7 +97,7 @@ synthetic_call_metadata %>%
 
 ```
 
-# Step 6: Create a warbleR selection table
+<u> Step 6: Create a warbleR selection table </u>
 
 ```{r}
 
@@ -240,7 +151,7 @@ glimpse(sel_tbl)
 
 ```
 
-# Step 7: Create spectrogram image files of each audio file
+<u> Step 7: Create spectrogram image files of each audio file </u>
 
 ```{r}
 
