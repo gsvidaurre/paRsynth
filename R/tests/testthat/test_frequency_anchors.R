@@ -1,14 +1,30 @@
 # R. Samman
 # November 15 2024
+# G.A. Juarez
+# 5Dec24 - Grammar check
 
 rm(list = ls())
+
 if (!require(testthat)) install.packages('testthat')
 library(testthat)
-library(dplyr)
-source("/Users/raneemsamman/Documents/GitHub/paRsynth/R/frequency_anchors.R")
+
+# Change "~Desktop/.../GitHub_repos" based on where paRsynth is stored
+source("~/Desktop/BIRDS/GitHub_repos/paRsynth/R/frequency_anchors.R")
 
 # Unit test 1: Testing the generation of df with multiple rows input (Passed)
 test_that("testing with multiple rows data frame", {
+
+  # Avoid library calls and other changes to the virtual environment
+  # See https://r-pkgs.org/testing-design.html
+  withr::local_package("tidyverse")
+  withr::local_package("dplyr")
+  withr::local_package("lubridate")
+
+  # Just for code development
+  # library(tidyverse)
+  # library(lubridate)
+  # library(testthat)
+  # library(dplyr)
 
   test_df <- data.frame(
     Group = c(1, 2),
@@ -53,6 +69,19 @@ test_that("testing with multiple rows data frame", {
 
 #Unit test 2: Testing frequency directions shift (passed)
 test_that("testing up, constant, and down directions shift frequency correctly", {
+
+  # Avoid library calls and other changes to the virtual environment
+  # See https://r-pkgs.org/testing-design.html
+  withr::local_package("tidyverse")
+  withr::local_package("dplyr")
+  withr::local_package("lubridate")
+
+  # Just for code development
+  # library(tidyverse)
+  # library(lubridate)
+  # library(testthat)
+  # library(dplyr)
+
   df <- data.frame(
     Group = c(1),
     Individual = c(2, 1),
@@ -85,6 +114,19 @@ test_that("testing up, constant, and down directions shift frequency correctly",
 
 # Unit Test 3: testing with negative or zero frequencies (passed)
 test_that("testing negative or zero frequencies corrections", {
+
+  # Avoid library calls and other changes to the virtual environment
+  # See https://r-pkgs.org/testing-design.html
+  withr::local_package("tidyverse")
+  withr::local_package("dplyr")
+  withr::local_package("lubridate")
+
+  # Just for code development
+  # library(tidyverse)
+  # library(lubridate)
+  # library(testthat)
+  # library(dplyr)
+
 df <- data.frame(
     Group = c(1),
     Individual = c(2, 1),
@@ -97,7 +139,7 @@ df <- data.frame(
   frequency_shift <- 1000
 
   result <- frequency_anchors(df = df, parsons_col = "Parsons_Code", group_id_col = "Group", individual_id_col = "Individual", call_id_col = "Call_ID", call_string_col = "Call", starting_frequency, frequency_shift)
-  
+
   # checking frequencies for each step
   expect_equal(result$Frequency1[1], 3000) # starting frequency
   expect_equal(result$Frequency2[1], 2000) # down: 3000 - 1000
