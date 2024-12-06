@@ -32,7 +32,7 @@
 #'
 #' @export
 
-frequency_anchors <- function(df, parsons_col, group_id_col, individual_id_col, call_id_col, call_string_col, starting_frequency = 4000, frequency_shift = 1000) {
+frequency_anchors <- function(df, parsons_col, group_id_col, individual_id_col, call_id_col, call_string_col, starting_frequency = 4000, frequency_shift = 1000, section_transition = "starting_frequency") {
 
   # Ensure column names are case-insensitive
   colnames(df) <- tolower(colnames(df))
@@ -46,15 +46,11 @@ frequency_anchors <- function(df, parsons_col, group_id_col, individual_id_col, 
   results <- list()
 
   # Iterate over each row in the data frame
-  for (i in 1:nrow(df)) { # Raneem: we could use for (i in seq_len(nrow(df))) { to avoid any issues in an empty vector case
-    # parsons_code <- df[[parsons_col]][i]
+  for (i in 1:nrow(df)) {
     group_id <- df[[group_id_col]][i]
     individual_id <- df[[individual_id_col]][i]
     call_id <- df[[call_id_col]][i]
     call_string <- df[[call_string_col]][i] # Fix: Added [i] to access specific row
-
-    # Split the parsons_code string by dashes -- Raneem commented it out ; no need for this step anymore
-    # split_parsons_code <- strsplit(parsons_code, "-")[[1]]
 
     # Raneem's additions - separate out the different sections of the string based on known column names
     global_head <- df$Global_head[i]
@@ -63,64 +59,72 @@ frequency_anchors <- function(df, parsons_col, group_id_col, individual_id_col, 
     group_tail <- df$Group_tail[i]
     global_tail <- df$Global_tail[i]
 
-    # Raneem's additions - initialize an empty vector for frequency anchors
+    # Initialize an empty vector for frequency anchors
     frequencies <- c()
-
-    # Raneem's additions - helper function to generate frequencies from a section of Parsons code
-    generate_frequencies_from_section <- function(section_code, previous_value) {
-      section_frequencies <- numeric(length(section_code))
-      for (j in 1:length(section_code)) { # we could use for (i in seq_along(section_code)) { to avoid any issues in an empty vector case
-        direction <- section_code[j]
-        if (direction == "up") {
-          frequency <- previous_value + frequency_shift
-        } else if (direction == "down") {
-          frequency <- previous_value - frequency_shift
-        } else if (direction == "constant") {
-          frequency <- previous_value
-        } else {
-          stop("Invalid direction: ", direction)
-        }
-
-        # Internally correct any frequency values that are zero or negative
-        # Set these values to the frequency shift v
-        if (frequency <= 0) {
-          frequency <- frequency_shift
-        }
-        # Update the previous frequency value to have accurate frequency value assignment when the directionality is "constant" (in which the current frequency value should be the same as the previous value, but not the starting value)
-        previous_value <- frequency
-        section_frequencies[j] <- frequency
-      }
-      return(section_frequencies)
-    }
-    # Internally correct any frequency values that are zero or negative
-    # Set these values to the frequency shift value
-    # frequencies[frequencies <= 0] <- frequency_shift
 
     # Initialize the frequencies vector with the starting frequency for each section
     previous_frequency <- starting_frequency
 
-    # Raneem's additions - Process each section separately
-    global_head_frequencies <- generate_frequencies_from_section(strsplit(global_head, "")[[1]], previous_frequency)
-    group_head_frequencies <- generate_frequencies_from_section(strsplit(group_head, "")[[1]], previous_frequency)
-    individual_middle_frequencies <- generate_frequencies_from_section(strsplit(individual_middle, "")[[1]], previous_frequency)
-    group_tail_frequencies <- generate_frequencies_from_section(strsplit(group_tail, "")[[1]], previous_frequency)
-    global_tail_frequencies <- generate_frequencies_from_section(strsplit(global_tail, "")[[1]], previous_frequency)
+    if (section_transition == "starting_frequency") {
+        # Raneem's additions - Process each section separately
+        global_head_frequencies <- generate_frequencies_from_section(strsplit(global_head, "")[[1]], previous_frequency)
+        group_head_frequencies <- generate_frequencies_from_section(strsplit(group_head, "")[[1]], previous_frequency)
+        individual_middle_frequencies <- generate_frequencies_from_section(strsplit(individual_middle, "")[[1]], previous_frequency)
+        group_tail_frequencies <- generate_frequencies_from_section(strsplit(group_tail, "")[[1]], previous_frequency)
+        global_tail_frequencies <- generate_frequencies_from_section(strsplit(global_tail, "")[[1]], previous_frequency)
+    } else if (section_transition == "continuous_trajectory") {
+        global_head_frequencies <- generate_frequencies_from_section(strsplit(global_head, "")[[1]], previous_frequency)
+          previous_frequency <- tail(global_head_frequencies, 1)
+        group_head_frequencies <- generate_frequencies_from_section(strsplit(group_head, "")[[1]], previous_frequency)
+          previous_frequency <- tail(group_head_frequencies, 1)
+        individual_middle_frequencies <- generate_frequencies_from_section(strsplit(individual_middle, "")[[1]], previous_frequency)
+          previous_frequency <- tail(individual_middle_frequencies, 1)
+        group_tail_frequencies <- generate_frequencies_from_section(strsplit(group_tail, "")[[1]], previous_frequency)
+          previous_frequency <- tail(group_tail_frequencies, 1)
+        global_tail_frequencies <- generate_frequencies_from_section(strsplit(global_tail, "")[[1]], previous_frequency)
+    }
 
-    # Raneem's additions - concatenate all frequencies into one final vector
-    frequencies <- c(global_head_frequencies, group_head_frequencies, individual_middle_frequencies, group_tail_frequencies, global_tail_frequencies)
+  # Concatenate all frequencies into one final vector
+  frequencies <- c(global_head_frequencies, group_head_frequencies, individual_middle_frequencies, group_tail_frequencies, global_tail_frequencies)
 
-    # Raneem's changes just a step thing -- store the results in a list then data frame for output
-    results[[i]] <- c(
-      group_id = group_id,
-      individual_id = individual_id,
-      call_id = call_id,
-      call_string = call_string,
-      frequencies = list(frequencies)
-    )
-  }
+  # Store the results in a list then data frame for output
+  results[[i]] <- c(
+    group_id = group_id,
+    individual_id = individual_id,
+    call_id = call_id,
+    call_string = call_string,
+    frequencies = list(frequencies)
+  )
+}
 
-  # convert the list of results into a data frame with metadata and frequency values for the calls
+  # Convert the list of results into a data frame with metadata and frequency values for the calls
   final_df <- do.call(rbind, lapply(results, as.data.frame))
-  
+
   return(final_df)
 }
+
+# Helper function to generate frequencies from a section of Parsons code
+generate_frequencies_from_section <- function(section_code, previous_value, frequency_shift=frequency_shift) {
+  section_frequencies <- numeric(length(section_code))
+  for (j in 1:length(section_code)) {
+    direction <- section_code[j]
+    if (direction == "up") {
+      frequency <- previous_value + frequency_shift
+    } else if (direction == "down") {
+      frequency <- previous_value - frequency_shift
+    } else if (direction == "constant") {
+      frequency <- previous_value
+    } else {
+      stop("Invalid direction: ", direction)
+    
+    # Internally correct any frequency values that are zero or negative
+    # Set these values to the frequency shift v
+    if (frequency <= 0) {
+      frequency <- frequency_shift
+    }
+    # Update the previous frequency value to have accurate frequency value assignment when the directionality is "constant" (in which the current frequency value should be the same as the previous value, but not the starting value)
+    previous_value <- frequency
+    section_frequencies[j] <- frequency
+  }
+  return(section_frequencies)
+}}
