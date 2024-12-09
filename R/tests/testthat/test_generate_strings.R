@@ -8,12 +8,6 @@ library(testthat)
 
 source("~/Desktop/BIRDS/GitHub_repos/paRsynth/R/generate_strings.R")
 
-# 1. Test that string length is correct
-# 2. Test that correct number of string were generated
-# 3. Unit test to check that the number of groups and individuals is correct
-# 4. Unit test to check that the number of characters in each string devoted to group information, individual information, and global head and tail are correct
-# 5. Unit test to check that each individual is assigned to only one social group
-
 # 1. Unit test to check string length
 test_that("Generated strings have the correct length", {
 
