@@ -23,12 +23,31 @@
 #' glimpse(example_calls_parsons)
 #'
 #' @export parsons_code
-
+ library(dplyr)
 parsons_code <- function(df, string_col, mapping = list("A" = "up", "B" = "down", "C" = "constant")) {
-
+  
+  if (!is.data.frame(df)) {
+    stop("The 'df' argument must be a data frame.")
+  }
+  if (!is.list(mapping)) {
+    stop("The 'mapping' argument must be a list.")
+  }
+  if (!string_col %in% colnames(df)) {
+    stop(paste("Column", string_col, "does not exist in the data frame."))
+  }
+  if (!is.character(string_col)) {
+    stop("The 'string_col' argument must be a character string.")
+  }
+  if (nrow(df) == 0) {
+    stop("Input data frame is empty")
+  }
+  if (length(mapping) == 0) {
+    stop("The 'mapping' list must contain at least one element.")
+  }
+  
   df %>%
     dplyr::mutate(Parsons_Code = sapply(!!rlang::sym(string_col), function(string) paste(convert_to_parsons_code(string, mapping), collapse = "-")))
-
+  
 }
 
 # Helper function to generate Parsons code for existing sequences
