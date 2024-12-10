@@ -31,13 +31,20 @@ generate_strings <- function(n_groups = 2, n_individuals = 5, n_calls = 10, stri
   if (string_length < 6 || string_length > 200) {
     stop("string_length must be between 6 and 200")
   }
-
   if(missing(group_information)){
     stop("group_information must be specified")
   }
-
   if(missing(individual_information)){
     stop("individual_information must be specified")
+  }
+  if (group_information || individual_information %% 2 != 0) {
+    stop("group_information and individual_information must be even numbers")
+  }
+  if (!is.integer(n_groups) || !is.integer(n_individuals) || !is.integer(n_calls) || !is.integer(string_length) || !is.integer(group_information) || !is.integer(individual_information)) {
+    stop("All arguments must be integers")
+  }
+  if (n_calls < 1 || n_groups < 1 || n_individuals < 1) {
+    stop("All arguments must be greater than 0")
   }
 
   # Create global header and tail strings. The length of these strings will vary depending on the length of the group-specific information (group_information) and the individual-specific information (individual_information)

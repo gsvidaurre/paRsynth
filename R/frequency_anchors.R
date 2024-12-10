@@ -34,6 +34,23 @@
 
 frequency_anchors <- function(df, parsons_col, group_id_col, individual_id_col, call_id_col, call_string_col, starting_frequency = 4000, frequency_shift = 1000) {
 
+  if (starting_frequency <= 0) {
+    stop("starting_frequency must be a positive value")
+  }
+  if (frequency_shift <= 0) {
+    stop("frequency_shift must be a positive value")
+  }
+  if (nrow(df) == 0) {
+    stop("Input data frame is empty")
+  }
+  if (!all(c(parsons_col, group_id_col, individual_id_col, call_id_col, call_string_col) %in% colnames(df))) {
+    stop("One or more columns were not found in the data frame")
+  }
+  if (section_transition != "starting_frequency" && section_transition != "continuous_trajectory") {
+    stop("section_transition must be 'starting_frequency' or 'continuous_trajectory'")
+  }
+
+
   # Ensure column names are case-insensitive
   colnames(df) <- tolower(colnames(df))
   parsons_col <- tolower(parsons_col)
@@ -46,7 +63,7 @@ frequency_anchors <- function(df, parsons_col, group_id_col, individual_id_col, 
   results <- list()
 
   # Iterate over each row in the data frame
-  for (i in 1:nrow(df)) {
+  for (i in seq_len(nrow(df))) {
     parsons_code <- df[[parsons_col]][i]
     group_id <- df[[group_id_col]][i]
     individual_id <- df[[individual_id_col]][i]
@@ -103,7 +120,7 @@ frequency_anchors <- function(df, parsons_col, group_id_col, individual_id_col, 
     )
 
     # Add frequency columns to the data frame
-    for (k in 1:length(frequencies)) {  # Fix: Iterate over length of frequencies correctly
+    for (k in seq_len((frequencies))) {  # Fix: Iterate over length of frequencies correctly
       freq_df[[paste0("Frequency", k)]] <- frequencies[k]
     }
 

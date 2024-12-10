@@ -45,15 +45,44 @@
 #' }
 #'
 #' @export write_audio
+library(magrittr)
 
 write_audio <- function(df, save_path, sampling_rate = 150000, sylLen = 200, prefix = "IndividualSignatures") {
 
-  # Ensure the save path exists
+  if (!is.data.frame(df)) {
+    stop("The 'df' argument must be a data frame.")
+  }
+  if (nrow(df) == 0) {
+    stop("Input data frame is empty")
+  }
+  if (!all(c("Group", "Individual", "Call_ID") %in% colnames(df))) {
+    stop("One or more columns were not found in the data frame")
+  }
+  if (!is.character(save_path)) {
+    stop("The 'save_path' argument must be a character string.")
+  }
+  if (sampling_rate <= 0) {
+    stop("sampling_rate must be a positive value")
+  }
+  if (sylLen <= 0) {
+    stop("sylLen must be a positive value")
+  }
+  if (!is.numeric(sampling_rate)) {
+    stop("The 'sampling_rate' argument must be a numeric value.")
+  }
+  if (!is.numeric(sylLen)) {
+    stop("The 'sylLen' argument must be a numeric value.")
+  }
+  if (!is.character(prefix)) {
+    stop("The 'prefix' argument must be a character string.")
+  }
+
+    # Ensure the save path exists
   if (!dir.exists(save_path)) {
     dir.create(save_path, recursive = TRUE)
   }
 
-  df2 <- data.table::rbindlist(lapply(1:nrow(df), function(i){
+  df2 <- data.table::rbindlist(lapply(seq_len(nrow(df)), function(i) {
     # Extract frequencies from the data frame
     frequencies <- as.numeric(df[i, grep("^Frequency", colnames(df))])
 
@@ -78,7 +107,6 @@ write_audio <- function(df, save_path, sampling_rate = 150000, sylLen = 200, pre
 
 }
 
-
 # A helper function to generate a synthetic audio signal in .wav format from a vector of frequencies using the `soundgen` package
 
 # Aurguments
@@ -93,6 +121,8 @@ write_audio <- function(df, save_path, sampling_rate = 150000, sylLen = 200, pre
 # sampling_rate <- 150000
 # sylLen <- 200
 # gen_synth_signal(frequencies, audio_filename, sampling_rate, sylLen)
+
+library(soundgen)
 
 gen_synth_signal <- function(frequencies, audio_filename, sampling_rate, sylLen) {
 
