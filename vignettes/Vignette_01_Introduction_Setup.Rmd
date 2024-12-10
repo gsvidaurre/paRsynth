@@ -11,6 +11,7 @@ knitr::opts_chunk$set(echo = TRUE)
 <h2>paRsynth Introduction</h2>
 
 paRsynth uses Parsons code to convert character strings to frequency modulated vocalizations with different amounts of individual identity and group membership information. The functions in this package were developed for the sonification of character strings that represent vocal signals with varying amounts of social information. The resulting audio files (created using the soundgen package) can be used in downstream bioacoustics analyses.
+
 This vignette will go through the purpose of the paRsynth package and how to set it up appropriately before utilizing it for your research purposes.
 
 Please read the README.rmd file for more information on the package, the code collaborators, code collaboration guidelines and package usage/maintenance. Refer to this file if you have trouble-shooting errors or would like to know how to report a bug on GitHub.
