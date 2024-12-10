@@ -10,6 +10,8 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 <h2>How to Use paRsynth Functions</h2>
 
+In this vignette, we will go through how to create vocalizations strings, convert them into Parsons code, calculate frequency anchors, and generate synthetic audio files using the paRsynth package for downstream bioacoustics analyses. 
+
 <u> STEP 1: Create character strings representing vocal signals with more group membership information than individual information </u>
 
 After installing paRsynth and loading the relevant libraries, you will be able to take the first step into creating synthetic bird calls. The first step is generating the character strings that represent vocalizations using the function generate_strings(). These strings encode both group membership (characters that are shared across individuals within a group) and individual identity (characters that are unique to each individual in a group). The function allows you to specify the length of the string as well as how much of the string encodes group versus individual identity information. It also allows you to control the number of groups, individuals in each group and calls per individual. These variables that you can control are known as the parameters of the function. 
@@ -28,10 +30,17 @@ group_information <- individual_information * factor_ratio
 n_groups <- 2
 n_individuals <- 4
 n_calls <- 3
-string_length <- 28
+string_length <- (group_information + individual_information) + 10
 
 ### Generate the string for each call
-calls <- paRsynth::generate_strings(n_groups = n_groups, n_individuals = n_individuals, n_calls = n_calls, string_length = string_length, group_information = group_information, individual_information = individual_information)
+calls <- paRsynth::generate_strings(
+  n_groups = n_groups, 
+  n_individuals = n_individuals, 
+  n_calls = n_calls, 
+  string_length = string_length, 
+  group_information = group_information, 
+  individual_information = individual_information
+  )
 
 glimpse(calls)
 
@@ -41,17 +50,21 @@ The above chunk of code will generate a data frame called example_calls. Each ro
 
 <u> STEP 2: Convert strings to Parsons code </u>
 
-Now that you have a data frame of generated calls, you can use the parsons_code() function to convert the vocalisations strings in the data frame example_calls into Parsons code. The goal of this step is to create a representation of the direction of frequency shifts ("up", "down", "constant") that will be used to modulate the sound's pitch when generating synthetic audio later on. This function has 3 parameters: the data frame (df), the name of the column containing the character strings (string_col), and the list that maps each character ("A", "B", "C") to a direction in Parsons code ("up", "down", "constant") (mapping).
+Now that you have a data frame of generated calls, you can use the parsons_code() function to convert the vocalization strings in the data frame example_calls into Parsons code. The goal of this step is to create a representation of the direction of frequency shifts ("up", "down", "constant") that will be used to modulate the sound's pitch when generating synthetic audio later on. This function has 3 parameters: the data frame (df), the name of the column containing the character strings (string_col), and the list that maps each character ("A", "B", "C") to a direction in Parsons code ("up", "down", "constant") (mapping).
 
 ```{r}
 
-calls_parsons <- paRsynth::parsons_code(calls, "Call", list("A" = "up", "B" = "down", "C" = "constant"))
+calls_parsons <- paRsynth::parsons_code(
+  df = calls, 
+  string_col = "Call", 
+  mapping = list("A" = "up", "B" = "down", "C" = "constant")
+  )
 
 glimpse(calls_parsons)
 
 ```
 
-This will return a data frame with all the previous columns in example_calls in addition to one extra column called "Parsons_code", which contains the Parsons code representation of each segment of the vocalisation string.
+This will return a data frame with all the previous columns in example_calls in addition to one extra column called "Parsons_code", which contains the Parsons code representation of each segment of the vocalization string.
 
 <u> STEP 3: Convert the Parsons code to frequency values </u>
 
@@ -59,13 +72,22 @@ With the Parsons code in your data frame, you are now able to create the frequen
 
 ```{r}
 
-calls_parsons_frequencies <- frequency_anchors(calls_parsons, parsons_col = "Parsons_Code", group_id_col = "Group", individual_id_col = "Individual", call_id_col = "Call_ID", call_string_col = "Call", starting_frequency = 4000, frequency_shift = 1000)
+calls_parsons_frequencies <- frequency_anchors(
+  df = calls_parsons, 
+  parsons_col = "Parsons_Code", 
+  group_id_col = "Group", 
+  individual_id_col = "Individual", 
+  call_id_col = "Call_ID", 
+  call_string_col = "Call", 
+  starting_frequency = 4000, 
+  frequency_shift = 1000
+  )
 
 glimpse(calls_parsons_frequencies)
 
 ```
 
-This will return an updated data frame that includes all the previous columns in addition to additional columns that represent the frequency anchors for each vocalisation. 
+This will return an updated data frame that includes all the previous columns in addition to additional columns that represent the frequency anchors for each vocalization. 
 
 <u> STEP 4: For each call or string, use these frequency vectors to generate synthetic audio files with the soundgen package </u>
 
@@ -73,26 +95,26 @@ Now, finally, you are equipped with all the necessary data to generate the audio
 
 ```{r}
 
-synthetic_call_metadata <- write_audio(calls_parsons_frequencies, save_path = audio_path, sampling_rate = 150000, sylLen = 400, prefix = "GroupMembership_TDA")
+synthetic_call_metadata <- write_audio(
+  df = calls_parsons_frequencies, 
+  save_path = audio_path, 
+  sampling_rate = 150000, 
+  sylLen = 400, 
+  prefix = "GroupMembership"
+  )
 
 glimpse(synthetic_call_metadata)
 
 ```
 
-This will create files with the extension .wav for each vocalizations and will save them in your desired and specified directory with a prefix of your preference.
+This will create files with the extension .wav for each vocalization and will save them in your desired and specified directory with a prefix of your preference.
 
 <u> Step 5: Save the metadata for the synthetic audio files to a CSV file </u>
-
-Run the same steps above, but instead create a data set of synthetic vocalizations with more individual information than group information (This will require changes to the arguments in generate_strings(), as well as the prefix used in write_audio().)
 
 ```{r}
 
 # Add extra metadata for upcoming image files names and rearrange columns
 synthetic_call_metadata %>%
-  dplyr::mutate(
-    image_file_name = gsub(".wav", ".jpeg", audio_file_name)
-  ) %>% 
-  dplyr::select(audio_file_name, image_file_name, Group, Individual, Call_ID, Call, Parsons_Code, names(.)[grepl("Frequency", names(.))]) %>% 
   write.csv(., file = file.path(analysis_path, "synthetic_call_metadata.csv"), row.names = FALSE) 
 
 ```
@@ -100,8 +122,12 @@ synthetic_call_metadata %>%
 <u> Step 6: Create a warbleR selection table </u>
 
 ```{r}
+# Create a vector of all the audio files in the analysis path
+wavs <- list.files(path = audio_path, pattern = ".wav$", full.names = FALSE)
+length(wavs)
+head(wavs)
 
-wavs <- list.files(path = audio_path)
+# w <- 1 # testing
 
 sel_tbl <- data.table::rbindlist(lapply(1:length(wavs), function(w){
   
@@ -122,7 +148,8 @@ sel_tbl <- data.table::rbindlist(lapply(1:length(wavs), function(w){
       sound.files = wavs[w], 
       selec = 1,
       start = 0.1, 
-      end = seewave::duration(tmp) + 0.1,
+      end = seewave::duration(tmp) - 0.1,
+      sampling_rate = tmp@samp.rate,
       group_ID = metadats_tmp[["Group"]],
       individual_ID = metadats_tmp[["Individual"]],
       call_ID = metadats_tmp[["Call"]]
@@ -135,6 +162,7 @@ sel_tbl <- data.table::rbindlist(lapply(1:length(wavs), function(w){
       selec = 1, 
       start = 0.1, 
       end = seewave::duration(tmp) + 0.1,
+      sampling_rate = NA,
       group_ID = NA,
       individual_ID = NA,
       call_ID = NA
@@ -149,18 +177,15 @@ sel_tbl <- data.table::rbindlist(lapply(1:length(wavs), function(w){
 # See the selection table in warbleR format with all useful metadata for the synthetic experiment
 glimpse(sel_tbl)
 
+unique(sel_tbl$sampling_rate)
+
 ```
 
 <u> Step 7: Create spectrogram image files of each audio file </u>
 
 ```{r}
 
-spectrograms(sel_tbl, wl = 512, flim = c(0, 12), wn = "hanning", pal = reverse.gray.colors.2,
-             ovlp = 90, inner.mar = c(5, 4, 4, 2), outer.mar = c(0, 0, 0, 0), picsize = 1, res = 100,
-             cexlab = 1, propwidth = FALSE, xl = 1, osci = FALSE, gr = FALSE,  sc = FALSE, line = FALSE,
-             mar = 0.05, it = "jpeg", parallel = 1, path = audio_path, pb = TRUE, fast.spec = FALSE,
-             by.song = NULL, sel.labels = NULL, title.labels = NULL, dest.path = images_path,
-             box = TRUE, axis = TRUE)
+warbleR::spectrograms(sel_tbl, wl = 512, flim = c(0, 12), wn = "hanning", pal = reverse.gray.colors.2,ovlp = 90, inner.mar = c(5, 4, 4, 2), outer.mar = c(0, 0, 0, 0), picsize = 1, res = 100, cexlab = 1, propwidth = FALSE, xl = 1, osci = FALSE, gr = FALSE, sc = FALSE, line = FALSE, mar = 0.05, it = "jpeg", parallel = 1, path = audio_path, pb = TRUE, fast.spec = FALSE, by.song = NULL, sel.labels = NULL, title.labels = NULL, dest.path = images_path, box = TRUE, axis = TRUE)
 
 # Rename the image files
 imgs <- list.files(images_path)
@@ -169,6 +194,123 @@ imgs
 new_nms <- gsub(".wav-1", "", imgs)
 new_nms
 
-file.rename(file.path(images_path, imgs), file.path(images_path, new_nms))
+invisible(file.rename(file.path(images_path, imgs), file.path(images_path, new_nms)))
 
 ```
+
+<u> Step 8. Perform spectrogrphic cross-correlation (SPCC) to measure acoustic similarity of all calls in dataset (pairwise similarity matrix) </u>
+
+```{r}
+
+glimpse(sel_tbl)
+
+xc_mat <- warbleR::cross_correlation(sel_tbl, wl = 512, ovlp = 90, bp = c(0, 20), wn = "hanning", cor.method = "pearson", parallel = 1, na.rm = FALSE, type = "spectrogram", path = audio_path)
+
+str(xc_mat)
+dim(xc_mat)
+
+# xc_mat[1:5, 16:24]
+
+xc_mat[xc_mat < 0]
+
+# Get the percentage of values that are negative
+neg_values <- length(xc_mat[xc_mat<0])/(dim(xc_mat)[1]*dim(xc_mat)[2])
+
+# Stop the function if the percentage of negative values is > 0%
+if(neg_values > 0){
+  stop("Negative values are present in the spectrographic cross-correlation matrix")
+}
+
+xc_mat[xc_mat < 0]
+
+# Update the dimension names of the matrix
+dimnames(xc_mat) <- list(sel_tbl$sound.files, sel_tbl$sound.files)
+
+```
+
+<u> Step 9. Create acoustic space plots for the vocalizations </u>
+
+```{r}
+
+# View(xc_mat)
+
+# Convert to a distance matrix and dist object for isoMDS
+dist_mat <- stats::as.dist(1 - xc_mat, diag = TRUE, upper = TRUE)
+# str(dist_mat)
+
+iso <- invisible(MASS::isoMDS(dist_mat, k = 2, maxit = 1000, trace = FALSE))
+str(iso)
+
+mds_df <- data.frame(
+  sound.files = dimnames(xc_mat)[[1]],
+  X = as.vector(iso$points[, 1]), 
+  Y = as.vector(iso$points[, 2])
+) %>% 
+  inner_join(
+    sel_tbl %>% 
+      dplyr::select(sound.files, group_ID, individual_ID),
+    by = c("sound.files")
+  ) %>% 
+  dplyr::mutate(
+    group_ID = paste("group", group_ID, sep = "_"),
+    individual_ID = paste("individual", individual_ID, sep = "_"),
+    unique_individuals = paste(group_ID, individual_ID, sep = " - "),
+    group_ID = factor(group_ID),
+    individual_ID = factor(individual_ID),
+    unique_individuals = factor(unique_individuals)
+  )
+
+glimpse(mds_df)
+# View(mds_df)
+
+levels(mds_df$group_ID)
+levels(mds_df$individual_ID)
+levels(mds_df$unique_individuals)
+
+# Colors by group
+cols <- scales::alpha(c("navy", "orange", "forestgreen", "firebrick", "grey"), 0.65)
+
+# Shapes by individual within groups
+shps <- rep(c(21, 23, 24, 6), length(levels(mds_df$group_ID)))
+
+# Convex hull polygons per group or unique individual
+# hulls <- plyr::ddply(mds_df, "unique_individuals", function(x){
+#   x[chull(x$X, x$Y), ]
+# })
+
+hulls <- plyr::ddply(mds_df, "group_ID", function(x){
+  x[chull(x$X, x$Y), ]
+})
+
+glimpse(hulls)
+
+mds_df %>%
+  ggplot(aes(x = X, y = Y, color = group_ID)) + 
+  geom_polygon(data = hulls, aes(x = X, y = Y, fill = group_ID, color = group_ID), alpha = 0.2, size = 0.2, show.legend = FALSE) +
+  geom_point(aes(fill = group_ID, color = group_ID, shape = individual_ID), size = 2, stroke = 0.5) +
+  scale_shape_manual(values = shps) +
+  scale_color_manual(values = cols) +
+  scale_fill_manual(values = cols) +
+  xlab("") + ylab("") + 
+  guides(color = "none", shape = "none", fill = "none") +
+  theme_bw() +
+  theme(
+    axis.title = element_text(size = 14),
+    axis.text = element_text(size = 9),
+    strip.text.x = element_text(size = 12),
+    strip.text.y = element_text(size = 10),
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    axis.ticks = element_line(size = 0.25),
+    plot.margin = margin(0, 3, -3, -3)
+  )
+
+```
+
+Run the same steps above, but instead create a data set of synthetic vocalizations with more individual information than group information (This will require changes to the arguments in generate_strings(), as well as the prefix used in write_audio().)
+
+Compare what your did with our results with individual information = TKTK and group information = TKTK. 
+
+TKTK Placeholder TKTK
+<br>
+![paRsynth graphic workflow](~/Desktop/BIRDS/WorkflowGraphics/paRsynthMethods/paRsynth_methods_workflow.svg)
