@@ -1,6 +1,6 @@
 ---
 title: "Vignette 01 Introduction/Setup"
-author: "GAJ"
+author: "Grethel Alexandra Juarez"
 date: "2024-11-25"
 output: html_document
 ---
@@ -8,13 +8,23 @@ output: html_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
-<h2>Purpose of the package</h2>
+<h2>paRsynth Introduction</h2>
+
+paRsynth uses Parsons code to convert character strings to frequency modulated vocalizations with different amounts of individual identity and group membership information. The functions in this package were developed for the sonification of character strings that represent vocal signals with varying amounts of social information. The resulting audio files (created using the soundgen package) can be used in downstream bioacoustics analyses.
+This vignette will go through the purpose of the paRsynth package and how to set it up appropriately before utilizing it for your research purposes.
+
+Please read the README.rmd file for more information on the package, the code collaborators, code collaboration guidelines and package usage/maintenance. 
+
+<u>Purpose</u>
 
 paRsynth provides four functions for the simulation of vocalizations with representation of both individual identity and group membership information. These vocalizations are encoded as strings that can be used for generating synthetic audio signals for bioacoustic analysis. This vignette will demonstrate how to use the package's functions to generate vocalizations strings, convert them into Parsons code, calculate frequency anchors, and generate synthetic audio files.
 
 1. generate_strings(): generates strings that encode group membership information and individual identity information.
+
 2. parsons_code(): converts the generated strings (characters) into Parsons code (musical up-down-constant connotation) for frequency modulation.
+
 3. frequency_anchors(): calculates frequency anchors (numeric values that correspond to each segment of the Parsons code string) from Parsons code to guide the creation of synthetic audio.
+
 4. write_audio(): uses frequency anchors and the 'soundgen' package to generate and save synthetic audio files.
 
 <br>
@@ -22,36 +32,85 @@ paRsynth provides four functions for the simulation of vocalizations with repres
 <br>
 ![paRsynth graphic workflow](~/Desktop/BIRDS/WorkflowGraphics/paRsynthMethods/paRsynth_methods_workflow_horizontal.svg)
 
-<h2>Installing Necessary Code Development Software</h2>
+<h2>Setup</h2>
 
-Before you start using the paRsynth package, you need to setup and install R, R studio, and GitHub Desktop on your computer.
+<u>Install R and RStudio</u>
 
-<u>Install R and RStudio:</u>
+If you are new to using R (a programming language for statistical analysis) and RStudio (a graphical user interface for R), then I recommend checking out the introductory lesson [R for Reproducible Scientific Analysis](https://swcarpentry.github.io/r-novice-gapminder/) provided by the [Software Carpentry](https://software-carpentry.org/).
 
 * To install R on your computer, go to the [R project website](https://www.r-project.org/) and download the latest version of R for your operating system (Windows, macOS, or Linux). Follow the installation instructions provided on the site.
-* To install RStudio on your computer, go to the [RStudio website](https://posit.co/download/rstudio-desktop/). RStudio is an integrated development environment (IDE) that makes working with R a better and more user-friendly experience.
 
-You will need to install GitHub Desktop to have the paRsynth GitHub repository on your local machine.
+* To install RStudio on your computer, go to the [RStudio website](https://posit.co/download/rstudio-desktop/). RStudio is an integrated development environment (IDE) that makes working with R a better and more user-friendly experience. Follow the installation instructions provided on the site.
 
-<u>GitHub Setup:</u>
+Once you have R and RStudio installed on your computer, you can open RStudio by clicking on the software icon.
 
-* To install GitHub Desktop on your computer, go to the [GitHub Desktop website](https://github.com/apps/desktop) and click "Download now"
-* After downloaded, open GitHub Destop and navigate to the top left toolbar, click on File > Clone Repository
+<u>Configure your RStudio session</u>
+
+You can reconfigure the panes so that the source and console panes are horizontally adjacent to one another. This makes it easier to immediately check the output of any code that you run.
+
+* Go to the menu along the top bar of the RStudio window and select the option "Tools"
+
+* Select "Global Options" in the  pop-up menu
+
+* Select the option "Pane Layout" along the left hand side
+
+* Use the dropdown menus to select "Source" as the top right pane and "Console" as the top left pane
+
+* Select "Apply" to apply those changes, then "Ok" to exit this window 
+
+You can also reconfigure the soft-wrapping lines of text and code. You don't have to scroll horizontally to see long lines of text in your Source pane.
+
+* Go to the menu along the top bar of the RStudio window and select the option "Tools"
+
+* Select "Global Options" in the  pop-up menu
+
+* Select the option "Code" along the left hand side
+
+* Check the box next to the option "Soft-wrap R source files"
+
+* Select "Apply" to apply those changes, then "Ok" to exit this window 
+
+You can also change the font size, font color, and background color of your RStudio workspace. 
+
+* Go to the menu along the top bar of the RStudio window and select the option "Tools"
+
+* Select "Global Options" in the  pop-up menu
+
+* Select the option "Appearance" along the left hand side to see some different options
+
+<u>Install GitHub</u>
+
+You will need to install GitHub Desktop to later clone the paRsynth package on your local machine.
+
+* Go to the [GitHub Desktop website](https://github.com/apps/desktop) and click "Download now" to install GitHub Desktop on your computer
+
+* Open GitHub Desktop by clicking on the software icon after downloaded 
+
+<u>Clone paRsynth</u>
+
 * Open the [paRsynth GitHub repository](https://github.com/gsvidaurre/paRsynth) on your internet browser
+
 * Click on the arrow of the green "Code" button
+
 * Click on the copy link icon
+
+* Navigate to the top left toolbar of GitHub Desktop, click on File > Clone Repository
+
 * Paste the URL from the paRsynth GitHub repository
-* Make sure the "Local Path" is where you want the paRsynth repository to be located on your local machine
+
+* Ensure the "Local Path" is where you want the paRsynth repository to be located on your local machine
+
 * Click on the blue "Clone" button 
+
 * Check to see that the paRsynth package is located in the appropriate local path of your machine that you assigned it
 
-<h2>Setting up your work space in RStudio</h2>
+<h2>paRsynth Setup</h2>
 
-Before the functions in the paRsynth package, there are some preliminary steps we must go through to ensure it will work appropriately and organized neatly.
+Before using the functions in the paRsynth package, there are some preliminary steps we must go through to ensure it will work appropriately and organized neatly.
 
-<u> Step i. Load packages and set paths </u>
+<u>Step i. Load packages and set paths</u>
 
-It is good practice to clean your global environment before using functions from open-sourced packages. In order for paRsynth functions to run they need specific external R packages as well. For example, 'write_audio' generates and saves audio files in .WAV format which requires `soundgen::soundgen()` to be installed and loaded. 
+It is good practice to clean your global environment before using functions from open-sourced packages. In order for paRsynth functions to run, they need specific external R packages as well. For example, 'write_audio' generates and saves audio files in .WAV format which requires `soundgen::soundgen()` to be installed and loaded. 
 
 ```{r}
 
@@ -59,15 +118,16 @@ It is good practice to clean your global environment before using functions from
 rm(list = ls())
 
 # Specify the required packages
-X <- c("devtools", "dplyr", "stringdist", "tidyverse", "ggplot2", "apcluster", "soundgen", "parallel", "stringr", "data.table", "tuneR", "pbapply", "aricode", "Rmisc", "warbleR")
+X <- c("devtools", "dplyr", "stringdist", "tidyverse", "ggplot2", "apcluster", "soundgen", "parallel", "stringr", "data.table", "tuneR", "pbapply", "warbleR")
 
 # Install the packages in X if not already installed
-# Type "Yes" in the console
-for (pkg in X) {
-  if (!require(pkg, character.only = TRUE)) {
-    install.packages(pkg)
+is_installed <- function(p) is.element(p, installed.packages()[,1])
+
+invisible(lapply(1:length(X), function(x){
+  if(!is_installed(X[x])){
+    install.packages(X[x], repos = "http://lib.stat.cmu.edu/R/CRAN")
   }
-}
+}))
 
 # Install the paRsynth package from GitHub if you haven't installed it already
 devtools::install_github("gsvidaurre/paRsynth")
@@ -82,6 +142,8 @@ invisible(lapply(X, library, character.only = TRUE))
 
 <u> Step ii. Initialize working directories for data on your local machine </u>
 
+It is important to have your files organized especially when creating many different types of output data. Therefore, initializing working directories in the beginning will be helpful knowing and understanding the data you create with paRsynth.
+
 ```{r}
 
 # Initialize a base path (this will need to be different per user)
@@ -90,17 +152,12 @@ invisible(lapply(X, library, character.only = TRUE))
 path <- "/Users/gretheljuarez/Desktop" # Alexandra's path
 
 # Initialize the directory for analysis on your local computer
-analysis_dir <- "tda_synthetic_dataset"
+analysis_dir <- "paRsynth_methods_synthetic_dataset"
 
 # Combine the base path and the data directory into a single path
 analysis_path <- file.path(path, analysis_dir)
 
 # Create the data directory if it doesn't already exist on your computer
-if(!dir.exists(analysis_path)){ 
-  dir.create(analysis_path)
-}
-
-# If the analysis directory doesn't exist, then create it
 if(!dir.exists(analysis_path)){ 
   dir.create(analysis_path)
 }
@@ -131,6 +188,8 @@ if(!dir.exists(images_path)){
 
 <u> Step iii. Check out documentation for the paRsynth functions. These functions are written below in the order in which they should be used </u>
 
+Before using the paRsynth package, it would be beneficial for you to go over the description, usage, arguments, extra details, and examples of each function. 
+
 ```{r eval = FALSE}
 
 ?paRsynth::generate_strings
@@ -139,3 +198,5 @@ if(!dir.exists(images_path)){
 ?paRsynth::write_audio
 
 ```
+
+
