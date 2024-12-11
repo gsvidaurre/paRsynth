@@ -109,7 +109,7 @@ You will need to install GitHub Desktop to later clone the paRsynth package on y
 
 Before using the functions in the paRsynth package, there are some preliminary steps we must go through to ensure it will work appropriately and organized neatly.
 
-<u>Step i. Load packages and set paths</u>
+<u>Step 1. Load packages and set paths</u>
 
 It is good practice to clean your global environment before using functions from open-sourced packages. In order for paRsynth functions to run, they need specific external R packages as well. For example, 'write_audio' generates and saves audio files in .WAV format which requires `soundgen::soundgen()` to be installed and loaded. 
 
@@ -141,7 +141,7 @@ invisible(lapply(X, library, character.only = TRUE))
 
 ```
 
-<u> Step ii. Initialize working directories for data on your local machine </u>
+<u> Step 2. Initialize working directories for data on your local machine </u>
 
 It is important to have your files organized especially when creating many different types of output data. Therefore, initializing working directories in the beginning will be helpful knowing and understanding the data you create with paRsynth.
 
@@ -187,7 +187,7 @@ if(!dir.exists(images_path)){
 
 ```
 
-<u> Step iii. Check out documentation for the paRsynth functions. These functions are written below in the order in which they should be used </u>
+<u> Step 3. Check out documentation for the paRsynth functions. These functions are written below in the order in which they should be used </u>
 
 Before using the paRsynth package, it would be beneficial for you to go over the description, usage, arguments, extra details, and examples of each function. 
 
