@@ -34,10 +34,6 @@ sel_tbl <- data.table::rbindlist(lapply(1:length(wavs), function(w){
   metadats_tmp <- synthetic_call_metadata %>%
     dplyr::filter(grepl(wavs[w], audio_file_name))
   
-  nrow(metadats_tmp)
-  
-  metadats_tmp <- as.data.frame(metadats_tmp)
-  
   # glimpse(metadats_tmp)
   
   # Create a row for the selection table in warbleR format if the audio file exists and metadata for that file also exists
@@ -105,7 +101,7 @@ invisible(file.rename(file.path(images_path, imgs), file.path(images_path, new_n
 
 This will output appropriately named spectrograms for the generated vocalizations in the selection table created previously. 
 
-<u> Step 3. Perform spectrogrphic cross-correlation (SPCC) to measure acoustic similarity of all calls in dataset (pairwise similarity matrix) </u>
+<u> Step 3: Perform spectrogrphic cross-correlation (SPCC) to measure acoustic similarity of all calls in dataset (pairwise similarity matrix) </u>
 
 Now, we are getting the key analysis step. Using warbleR, an spectrographic cross-correlation (SPCC) can be performed to find acoustic similarities in the spectrograms created. 
 
@@ -139,7 +135,7 @@ dimnames(xc_mat) <- list(sel_tbl$sound.files, sel_tbl$sound.files)
 
 This will output data about the measured acoustic similarities of all the vocalizations in the dataset using the previously created spectrograms using warbleR.
 
-<u> Step 4. Create acoustic space plots for the vocalizations </u>
+<u> Step 4: Create acoustic space plots for the vocalizations </u>
 
 Using the results from the SPCC, acoustic space plots can be used as a figure to represent the acoustic similarity of all the calls in the dataset. 
 
