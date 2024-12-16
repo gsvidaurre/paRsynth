@@ -1,15 +1,16 @@
 # G.A. Juarez
-# 19 Nov 2024
+# 4 Dec 2024
 
 rm(list = ls())
 
 if (!require(testthat)) install.packages('testthat')
 library(testthat)
 
+# Change "~Desktop/.../GitHub_repos" based on where paRsynth is stored
 source("~/Desktop/BIRDS/GitHub_repos/paRsynth/R/generate_strings.R")
 
 # 1. Unit test to check string length
-test_that("Generated strings have the correct length", {
+test_that("The function generates strings that have the correct length", {
 
   # Avoid library calls and other changes to the virtual environment
   # See https://r-pkgs.org/testing-design.html
@@ -26,21 +27,24 @@ test_that("Generated strings have the correct length", {
   string_length <- 16
   n_calls <- 10
 
-  # Call the function with the test parameters
+  # Call the function using parameters
   generated_strings <- generate_strings(n_groups = 2, n_individuals = 5, n_calls = n_calls, string_length = string_length, group_information = 8, individual_information = 2)
-
   # glimpse(generated_strings)
+  # View(generated_strings)
+
 
   # Extract the length of each generated string
-  string_lengths <- nchar(generated_strings$Call[1])
+  string_lengths <- unique(nchar(generated_strings$Call))
+  # glimpse(string_lengths)
+  # View(string_lengths)
 
-  # Check that each string has the correct length
+  # Check that each string has the correct length by comparing previously defined parameter
   expect_equal(string_length, string_lengths,
                info = "Not all generated strings have the expected length.")
 })
 
 # 2. Unit test to check that correct number of string were generated
-test_that("Generated correct number of strings", {
+test_that("The function generates the correct number of strings", {
 
   # Avoid library calls and other changes to the virtual environment
   # See https://r-pkgs.org/testing-design.html
@@ -59,9 +63,8 @@ test_that("Generated correct number of strings", {
   n_groups <- 2
   n_individuals <- 5
 
-  # Call the function with the test parameters
+  # Call the function using parameters
   generated_strings <- generate_strings(n_groups = n_groups, n_individuals = n_individuals, n_calls = n_calls, string_length = string_length, group_information = 8, individual_information = 2)
-
   # glimpse(generated_strings)
 
   # Get the number of generated calls
@@ -70,7 +73,7 @@ test_that("Generated correct number of strings", {
   # Get the number of expected calls
   n_expected_calls <- n_calls*n_groups*n_individuals
 
-  # Check that the correct number of calls were generated
+  # Check that the number of generated calls equal the number of expected calls
   expect_true(generated_calls == n_expected_calls,
               info = "Not all generated calls have the expected number.")
 })
@@ -87,11 +90,11 @@ test_that("The function generates the number of groups and individuals", {
   withr::local_package("stringr")
 
   # Just for code development
-    # library(tidyverse)
-    # library(lubridate)
-    # library(testthat)
-    # library(data.table)
-    # library(stringr)
+  # library(tidyverse)
+  # library(lubridate)
+  # library(testthat)
+  # library(data.table)
+  # library(stringr)
 
   # Define parameters
   string_length <- 16
@@ -101,11 +104,11 @@ test_that("The function generates the number of groups and individuals", {
   group_information <- 8
   individual_information <- 2
 
-  # Call the function with the test parameters
+  # Call the function using parameters
   generated_strings <- generate_strings(n_groups = n_groups, n_individuals = n_individuals, n_calls = n_calls, string_length = string_length, group_information = group_information, individual_information = individual_information)
 
   # Find the expected number of rows
-  expected_rows <- n_groups * n_individuals * n_calls
+  expected_rows <- n_groups*n_individuals*n_calls
 
   # Check if the number of rows created is correct
   expect_equal(nrow(generated_strings), expected_rows)
@@ -119,7 +122,7 @@ test_that("The function generates the number of groups and individuals", {
   cat("number of n_groups in test", length(unique(generated_strings$Group)), "\n")
 
   # Check if number of individuals created is correct
-  # use equal for the number of individuals (unique ones) in the individuals column
+  # Use equal for the number of individuals (unique ones) in the individuals column
   cat("expected n_individuals:", n_individuals, "\n")
   for (group in 1:n_groups) {
     test_group_individuals <- unique(generated_strings[generated_strings$Group == group, "Individual"])
@@ -129,16 +132,16 @@ test_that("The function generates the number of groups and individuals", {
   cat("number of n_individuals in test", length(test_group_individuals), "\n")
 })
 
-# 4. Unit test to check that the number of characters in each string devoted to group information, individual information, and global head and tail are correct
+# 4. Unit test to check that the number of characters in each string devoted to group information, individual information, global head and global tail are correct
 test_that("The function generates character-based vocal strings per catergory", {
 
   # Avoid library calls and other changes to the virtual environment
   # See https://r-pkgs.org/testing-design.html
-  # withr::local_package("tidyverse")
-  # withr::local_package("dplyr")
-  # withr::local_package("lubridate")
-  # withr::local_package("data.table")
-  # withr::local_package("stringr")
+  withr::local_package("tidyverse")
+  withr::local_package("dplyr")
+  withr::local_package("lubridate")
+  withr::local_package("data.table")
+  withr::local_package("stringr")
 
   # Just for code development
   # library(tidyverse)
@@ -214,11 +217,11 @@ test_that("The function generates strings of individuals assigned to one social 
 
   # Avoid library calls and other changes to the virtual environment
   # See https://r-pkgs.org/testing-design.html
-  # withr::local_package("tidyverse")
-  # withr::local_package("dplyr")
-  # withr::local_package("lubridate")
-  # withr::local_package("data.table")
-  # withr::local_package("stringr")
+  withr::local_package("tidyverse")
+  withr::local_package("dplyr")
+  withr::local_package("lubridate")
+  withr::local_package("data.table")
+  withr::local_package("stringr")
 
   # Just for code development
   # library(tidyverse)
@@ -263,5 +266,6 @@ test_that("The function generates strings of individuals assigned to one social 
 
   }, simplify = FALSE))
 
+  # Check that each individual is assigned to only one social group
   expect_true(all(group_assign == 1))
 })
