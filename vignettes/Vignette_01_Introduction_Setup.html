@@ -358,8 +358,15 @@ display: none;
 
 
 <h2>
-paRsynth Introduction
+Introduction
 </h2>
+<p>This vignette will go through the paRsynth package, its purpose, and
+how to set it up appropriately before utilizing it for your research
+purposes.</p>
+<p>Please read the README.rmd file for more information on the package,
+code collaborators, code collaboration guidelines and package
+usage/maintenance. Refer to that file if you have trouble-shooting
+errors or would like to know how to report a bug on GitHub.</p>
 <p>paRsynth uses Parsons code to convert character strings to frequency
 modulated vocalizations with different amounts of individual identity
 and group membership information. The functions in this package were
@@ -367,13 +374,6 @@ developed for the sonification of character strings that represent vocal
 signals with varying amounts of social information. The resulting audio
 files (created using the soundgen package) can be used in downstream
 bioacoustics analyses.</p>
-<p>This vignette will go through the purpose of the paRsynth package and
-how to set it up appropriately before utilizing it for your research
-purposes.</p>
-<p>Please read the README.rmd file for more information on the package,
-the code collaborators, code collaboration guidelines and package
-usage/maintenance. Refer to this file if you have trouble-shooting
-errors or would like to know how to report a bug on GitHub.</p>
 <p><u>Purpose</u></p>
 <p>paRsynth provides four functions for the simulation of vocalizations
 with representation of both individual identity and group membership
@@ -396,7 +396,7 @@ to generate and save synthetic audio files.</p></li>
 </ol>
 <p><br> <img src="~/Desktop/BIRDS/WorkflowGraphics/paRsynthMethods/paRsynth_methods_workflow.svg" alt="paRsynth graphic workflow" /> <br> <img src="~/Desktop/BIRDS/WorkflowGraphics/paRsynthMethods/paRsynth_methods_workflow_horizontal.svg" alt="paRsynth graphic workflow" /></p>
 <h2>
-Setup
+Software Setup
 </h2>
 <p><u>Install R and RStudio</u></p>
 <p>If you are new to using R (a programming language for statistical
@@ -477,7 +477,7 @@ to be located on your local machine</p></li>
 appropriate local path of your machine that you assigned it</p></li>
 </ul>
 <h2>
-paRsynth Setup
+Package Setup
 </h2>
 <p>Before using the functions in the paRsynth package, there are some
 preliminary steps we must go through to ensure it will work
@@ -493,7 +493,7 @@ loaded.</p>
 rm(list = ls())
 
 # Specify the required packages
-X &lt;- c(&quot;devtools&quot;, &quot;dplyr&quot;, &quot;stringdist&quot;, &quot;tidyverse&quot;, &quot;ggplot2&quot;, &quot;apcluster&quot;, &quot;soundgen&quot;, &quot;parallel&quot;, &quot;stringr&quot;, &quot;data.table&quot;, &quot;tuneR&quot;, &quot;pbapply&quot;, &quot;warbleR&quot;)
+X &lt;- c(&quot;devtools&quot;, &quot;dplyr&quot;, &quot;stringdist&quot;, &quot;tidyverse&quot;, &quot;ggplot2&quot;, &quot;apcluster&quot;, &quot;soundgen&quot;, &quot;parallel&quot;, &quot;stringr&quot;, &quot;data.table&quot;, &quot;tuneR&quot;, &quot;pbapply&quot;, &quot;warbleR&quot;, &quot;magrittr&quot;)
 
 # Install the packages in X if not already installed
 is_installed &lt;- function(p) is.element(p, installed.packages()[,1])
@@ -505,80 +505,13 @@ invisible(lapply(1:length(X), function(x){
 }))
 
 # Install the paRsynth package from GitHub if you haven&#39;t installed it already
-devtools::install_github(&quot;gsvidaurre/paRsynth&quot;)</code></pre>
-<pre><code>## Skipping install of &#39;paRsynth&#39; from a github remote, the SHA1 (dce1fcda) has not changed since last install.
-##   Use `force = TRUE` to force installation</code></pre>
-<pre class="r"><code># Add paRsynth to the list of packages to load
+devtools::install_github(&quot;gsvidaurre/paRsynth&quot;)
+
+# Add paRsynth to the list of packages to load
 X &lt;- c(X, &quot;paRsynth&quot;)
 
 # Load all of the packages specified above
 invisible(lapply(X, library, character.only = TRUE))</code></pre>
-<pre><code>## Loading required package: usethis</code></pre>
-<pre><code>## 
-## Attaching package: &#39;dplyr&#39;</code></pre>
-<pre><code>## The following objects are masked from &#39;package:stats&#39;:
-## 
-##     filter, lag</code></pre>
-<pre><code>## The following objects are masked from &#39;package:base&#39;:
-## 
-##     intersect, setdiff, setequal, union</code></pre>
-<pre><code>## Warning: package &#39;stringdist&#39; was built under R version 4.2.3</code></pre>
-<pre><code>## ── Attaching core tidyverse packages ──────────────────────── tidyverse 2.0.0 ──
-## ✔ forcats   1.0.0     ✔ readr     2.1.4
-## ✔ ggplot2   3.4.3     ✔ stringr   1.5.0
-## ✔ lubridate 1.9.3     ✔ tibble    3.2.1
-## ✔ purrr     1.0.1     ✔ tidyr     1.3.0</code></pre>
-<pre><code>## ── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
-## ✖ tidyr::extract() masks stringdist::extract()
-## ✖ dplyr::filter()  masks stats::filter()
-## ✖ dplyr::lag()     masks stats::lag()
-## ℹ Use the conflicted package (&lt;http://conflicted.r-lib.org/&gt;) to force all conflicts to become errors</code></pre>
-<pre><code>## Warning: package &#39;apcluster&#39; was built under R version 4.2.3</code></pre>
-<pre><code>## Warning in .recacheSubclasses(def@className, def, env): undefined subclass
-## &quot;ndiMatrix&quot; of class &quot;AnyMatrix&quot;; definition not updated</code></pre>
-<pre><code>## Warning in .recacheSubclasses(def@className, def, env): undefined subclass
-## &quot;pcorMatrix&quot; of class &quot;AnyMatrix&quot;; definition not updated</code></pre>
-<pre><code>## 
-## Attaching package: &#39;apcluster&#39;
-## 
-## The following object is masked from &#39;package:stats&#39;:
-## 
-##     heatmap
-## 
-## Loading required package: shinyBS
-## Soundgen 2.7.1
-## Tips &amp; demos on project&#39;s homepage: http://cogsci.se/soundgen.html
-## Please cite as: Anikin, A. (2019). Soundgen: an open-source tool for synthesizing nonverbal vocalizations. Behavior Research Methods, 51(2), 778-792.
-## 
-## Attaching package: &#39;data.table&#39;
-## 
-## The following objects are masked from &#39;package:lubridate&#39;:
-## 
-##     hour, isoweek, mday, minute, month, quarter, second, wday, week,
-##     yday, year
-## 
-## The following object is masked from &#39;package:purrr&#39;:
-## 
-##     transpose
-## 
-## The following objects are masked from &#39;package:dplyr&#39;:
-## 
-##     between, first, last</code></pre>
-<pre><code>## Warning: package &#39;tuneR&#39; was built under R version 4.2.3</code></pre>
-<pre><code>## Loading required package: seewave
-## 
-## Attaching package: &#39;seewave&#39;
-## 
-## The following object is masked from &#39;package:lubridate&#39;:
-## 
-##     duration
-## 
-## The following object is masked from &#39;package:readr&#39;:
-## 
-##     spec
-## 
-## Loading required package: NatureSounds
-## Loading required package: knitr</code></pre>
 <p><u> Step 2. Initialize working directories for data on your local
 machine </u></p>
 <p>It is important to have your files organized especially when creating

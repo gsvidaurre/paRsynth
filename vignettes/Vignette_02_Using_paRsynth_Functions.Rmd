@@ -5,9 +5,12 @@ date: "2024-12-02"
 output: html_document
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+```{r setup, include = FALSE}
+
+knitr::opts_chunk$set(echo = TRUE, eval = TRUE)
+
 ```
+
 <h2>How to Use paRsynth Functions</h2>
 
 In this vignette, we will go through how to create vocalizations strings, convert them into Parsons code, calculate frequency anchors, and generate synthetic audio files using the paRsynth package for downstream bioacoustics analyses. 
@@ -16,7 +19,7 @@ In this vignette, we will go through how to create vocalizations strings, conver
 
 After installing paRsynth and loading the relevant libraries, you will be able to take the first step into creating synthetic bird calls. The first step is generating the character strings that represent vocalizations using the function generate_strings(). These strings encode both group membership (characters that are shared across individuals within a group) and individual identity (characters that are unique to each individual in a group). The function allows you to specify the length of the string as well as how much of the string encodes group versus individual identity information. It also allows you to control the number of groups, individuals in each group and calls per individual. These variables that you can control are known as the parameters of the function. 
 
-```{r}
+```{r message = FALSE, warning = FALSE}
 
 # Set the seed for reproducibility
 set.seed(123)
@@ -42,7 +45,7 @@ calls <- paRsynth::generate_strings(
   individual_information = individual_information
   )
 
-# glimpse(calls)
+dplyr::glimpse(calls)
 
 ```
 
@@ -58,7 +61,7 @@ calls_parsons <- paRsynth::parsons_code(
   df = calls, 
   string_col = "Call", 
   mapping = list("A" = "up", "B" = "down", "C" = "constant")
-  )
+)
 
 glimpse(calls_parsons)
 
@@ -109,4 +112,16 @@ glimpse(synthetic_call_metadata)
 
 This will create files with the extension .wav for each vocalization and will save them in your desired and specified directory with a prefix of your preference.
 
-Navigate to Vignette 03 Analysis to learn how to use the generated outputs of the package described above for downstream bioacoustics analysis.
+<u> Step 5: Save the metadata for the synthetic audio files to a CSV file </u>
+
+The data frames that you generate in R using paRsynth can be saved as physical files in your working directory. You can also save your paRsynth generated metadata into a CSV file. I recommend using this file type since it is compatible with R, Microsoft Word, and other software. You can use the function `write.csv()` to save data frames to .csv spreadsheets on your computer:
+
+```{r}
+
+# Add extra metadata for upcoming image files names and rearrange columns
+synthetic_call_metadata %>%
+  write.csv(., file = file.path(analysis_path, "synthetic_call_metadata.csv"), row.names = FALSE) 
+
+```
+
+Now that you have generated your metadata with paRsyth and it has been saved as a CSV file, navigate to Vignette 03 Analysis to learn how to use the generated outputs of the package described above for downstream bioacoustics analysis.
