@@ -58,14 +58,42 @@
 
 write_audio <- function(df, sylLen = 200, sampling_rate = 200000, smoothing = list(interpol = "loess", loessSpan = 1, discontThres = 0, jumpThres = 0), rollofExact = c(0.25, 0.25, 0.25, 0.25, 0.25), formants = NA, vocalTract = NA, temperature = 0, subratio = 2, vibratoFreq = 1, prefix = "IndividualSignatures", save_path) {
 
-  # Ensure the save path exists
+  if (!is.data.frame(df)) {
+    stop("The 'df' argument must be a data frame.")
+  }
+  if (nrow(df) == 0) {
+    stop("Input data frame is empty")
+  }
+  if (!all(c("Group", "Individual", "Call_ID") %in% colnames(df))) {
+    stop("One or more columns were not found in the data frame")
+  }
+  if (!is.character(save_path)) {
+    stop("The 'save_path' argument must be a character string.")
+  }
+  if (sampling_rate <= 0) {
+    stop("sampling_rate must be a positive value")
+  }
+  if (sylLen <= 0) {
+    stop("sylLen must be a positive value")
+  }
+  if (!is.numeric(sampling_rate)) {
+    stop("The 'sampling_rate' argument must be a numeric value.")
+  }
+  if (!is.numeric(sylLen)) {
+    stop("The 'sylLen' argument must be a numeric value.")
+  }
+  if (!is.character(prefix)) {
+    stop("The 'prefix' argument must be a character string.")
+  }
+
+    # Ensure the save path exists
   if (!dir.exists(save_path)) {
     dir.create(save_path, recursive = TRUE)
   }
 
-  df2 <- data.table::rbindlist(lapply(1:nrow(df), function(i){
-
-    # Extract the frequency anchors from the data frame
+  df2 <- data.table::rbindlist(lapply(seq_len(nrow(df)), function(i) {
+    
+    # Extract frequencies from the data frame
     frequencies <- as.numeric(df[i, grep("^Frequency", colnames(df))])
 
     # Adjust pitch floor and ceiling based on the sampling rate
