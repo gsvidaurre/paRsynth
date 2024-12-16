@@ -55,12 +55,7 @@ test_that("The function creates and removes audio files correctly", {
   audio_files <- result_df$audio_file_name
   expect_true(all(file.exists(file.path(tmp_dir, audio_files))))
 
-  # Remove the files created during the test
-  if (file.exists(file.path(tmp_dir, audio_files))) {
-    file.remove(file.path(tmp_dir, audio_files))
-    }
-
-  # Remove the test directory
+  # Remove the test directory (and since recursive = TRUE, all files within it too)
   if (dir.exists(tmp_dir)) {
     unlink(tmp_dir, recursive = TRUE)
     }
@@ -113,7 +108,7 @@ test_that("The function creates data frame with correct audio file name format",
   expect_equal(result_df$audio_file_name[1], expected_filename)
 
   # Remove the created directory and files
-  if (dir.exists(tmp_dir)) {
+  if (dir.exists(tmp_dir) && tmp_dir == file.path(desktop_path, "R_test_temp")) {
     unlink(tmp_dir, recursive = TRUE)
     }
 })
@@ -161,7 +156,7 @@ test_that("The function creates files that have the correct .wav extension", {
   expect_true(all(grepl("\\.wav$", audio_files)))
 
   # Remove the created directory and files
-  if (dir.exists(tmp_dir)) {
+  if (dir.exists(tmp_dir) && tmp_dir == file.path(desktop_path, "R_test_temp")) {
     unlink(tmp_dir, recursive = TRUE)
     }
 })
