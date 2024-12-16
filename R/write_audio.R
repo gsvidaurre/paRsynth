@@ -45,7 +45,6 @@
 #' }
 #'
 #' @export write_audio
-library(magrittr)
 
 write_audio <- function(df, save_path, sampling_rate = 150000, sylLen = 200, prefix = "IndividualSignatures") {
 
@@ -121,8 +120,6 @@ write_audio <- function(df, save_path, sampling_rate = 150000, sylLen = 200, pre
 # sampling_rate <- 150000
 # sylLen <- 200
 # gen_synth_signal(frequencies, audio_filename, sampling_rate, sylLen)
-
-library(soundgen)
 
 gen_synth_signal <- function(frequencies, audio_filename, sampling_rate, sylLen) {
 

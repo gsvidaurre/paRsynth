@@ -23,7 +23,6 @@
 #' glimpse(example_calls_parsons)
 #'
 #' @export parsons_code
- library(dplyr)
 parsons_code <- function(df, string_col, mapping = list("A" = "up", "B" = "down", "C" = "constant")) {
   
   if (!is.data.frame(df)) {
