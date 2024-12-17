@@ -3,14 +3,6 @@
 # G.A. Juarez
 # 5Dec24 - Grammar check
 
-rm(list = ls())
-
-if (!require(testthat)) install.packages('testthat')
-library(testthat)
-
-# Change "~Desktop/.../GitHub_repos" based on where paRsynth is stored
-source("~/Desktop/BIRDS/GitHub_repos/paRsynth/R/write_audio.R")
-
 desktop_path <- "~/Desktop"
 
 # 1. Unit test to check for correct audio file creation
