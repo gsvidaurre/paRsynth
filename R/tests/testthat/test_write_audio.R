@@ -56,7 +56,7 @@ test_that("The function creates and removes audio files correctly", {
   expect_true(all(file.exists(file.path(tmp_dir, audio_files))))
 
   # Remove the test directory (and since recursive = TRUE, all files within it too)
-  if (dir.exists(tmp_dir)) {
+  if (dir.exists(tmp_dir) && tmp_dir == file.path(desktop_path, "R_test_temp")) {
     unlink(tmp_dir, recursive = TRUE)
     }
 })
