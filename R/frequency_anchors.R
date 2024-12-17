@@ -52,40 +52,31 @@ frequency_anchors <- function(df, parsons_col, group_id_col, individual_id_col, 
     call_id <- df[[call_id_col]][i]
     call_string <- df[[call_string_col]][i] # Fix: Added [i] to access specific row
 
-    # Raneem's additions - separate out the different sections of the string based on known column names
-    global_head <- df$Global_head[i]
-    group_head <- df$Group_head[i]
-    individual_middle <- df$Individual_middle[i]
-    group_tail <- df$Group_tail[i]
-    global_tail <- df$Global_tail[i]
+    sections <- c("global_head", "group_head", "individual_middle", "group_tail", "global_tail")
+    
+    # separate out the different sections of the string based on known column names
+    sections_data <- lapply(sections, function(section) { 
+      strsplit(df[[sections]][i], "")[[1]] #spliting each row in the column (for each section) into a vector of individual characters
+    })
 
     # Initialize an empty vector for frequency anchors
     frequencies <- c()
 
     # Initialize the frequencies vector with the starting frequency for each section
     previous_frequency <- starting_frequency
-
+  
+  # Loop over the sections to generate frequencies
+  for (sec in 1:length(sections)) {
+    section_code <- generate_frequencies_from_section(sections_data[[sec]], previous_frequency)
     if (section_transition == "starting_frequency") {
-        # Raneem's additions - Process each section separately
-        global_head_frequencies <- generate_frequencies_from_section(strsplit(global_head, "")[[1]], previous_frequency)
-        group_head_frequencies <- generate_frequencies_from_section(strsplit(group_head, "")[[1]], previous_frequency)
-        individual_middle_frequencies <- generate_frequencies_from_section(strsplit(individual_middle, "")[[1]], previous_frequency)
-        group_tail_frequencies <- generate_frequencies_from_section(strsplit(group_tail, "")[[1]], previous_frequency)
-        global_tail_frequencies <- generate_frequencies_from_section(strsplit(global_tail, "")[[1]], previous_frequency)
+      section_frequencies <- generate_frequencies_from_section(section_code, previous_frequency)
     } else if (section_transition == "continuous_trajectory") {
-        global_head_frequencies <- generate_frequencies_from_section(strsplit(global_head, "")[[1]], previous_frequency)
-          previous_frequency <- tail(global_head_frequencies, 1)
-        group_head_frequencies <- generate_frequencies_from_section(strsplit(group_head, "")[[1]], previous_frequency)
-          previous_frequency <- tail(group_head_frequencies, 1)
-        individual_middle_frequencies <- generate_frequencies_from_section(strsplit(individual_middle, "")[[1]], previous_frequency)
-          previous_frequency <- tail(individual_middle_frequencies, 1)
-        group_tail_frequencies <- generate_frequencies_from_section(strsplit(group_tail, "")[[1]], previous_frequency)
-          previous_frequency <- tail(group_tail_frequencies, 1)
-        global_tail_frequencies <- generate_frequencies_from_section(strsplit(global_tail, "")[[1]], previous_frequency)
+      section_frequencies <- generate_frequencies_from_section(section_code, previous_frequency)
+      previous_frequency <- tail(section_frequencies, 1) # Update previous_frequency for the next section based on the last frequency value in the current section
     }
-
-  # Concatenate all frequencies into one final vector
-  frequencies <- c(global_head_frequencies, group_head_frequencies, individual_middle_frequencies, group_tail_frequencies, global_tail_frequencies)
+    # Concatenate all frequencies into one final vector by appending the frequencies from the current section to the existing list of frequencies
+    frequencies <- c(frequencies, section_frequencies)
+  }
 
   # Store the results in a list then data frame for output
   results[[i]] <- c(
