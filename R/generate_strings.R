@@ -33,24 +33,32 @@
 
 generate_strings <- function(n_groups = 2, n_individuals = 5, n_calls = 10, string_length = 16, group_information = 8, individual_information = 2) {
 
-  if (string_length < 6 || string_length > 200) {
-    stop("string_length must be between 6 and 200")
-  }
-  if(missing(group_information)){
-    stop("group_information must be specified")
-  }
-  if(missing(individual_information)){
-    stop("individual_information must be specified")
-  }
-  if (group_information || individual_information %% 2 != 0) {
-    stop("group_information and individual_information must be even numbers")
-  }
-  if (!is.integer(n_groups) || !is.integer(n_individuals) || !is.integer(n_calls) || !is.integer(string_length) || !is.integer(group_information) || !is.integer(individual_information)) {
-    stop("All arguments must be integers")
-  }
-  if (n_calls < 1 || n_groups < 1 || n_individuals < 1) {
-    stop("All arguments must be greater than 0")
-  }
+if (string_length < 6 || string_length > 200) {
+  stop("string_length must be between 6 and 200")
+}
+if (missing(group_information)) {
+  stop("group_information must be specified")
+}
+if (missing(individual_information)) {
+  stop("individual_information must be specified")
+}
+if (!is.numeric(group_information) || length(group_information) != 1) { #ensures that the input is not a vector and is numeric
+  stop("group_information must be numeric")
+}
+if (!is.numeric(individual_information) || length(individual_information) != 1) {
+  stop("individual_information must be numeric")
+}
+if (floor(n_groups) != n_groups || floor(n_individuals) != n_individuals || 
+    floor(n_calls) != n_calls || floor(string_length) != string_length || 
+    floor(group_information) != group_information || floor(individual_information) != individual_information) {
+  stop("All arguments must be integers")
+}
+if (n_calls < 1 || n_groups < 1 || n_individuals < 1) {
+  stop("All arguments must be greater than 0")
+}
+if (group_information %% 2 != 0 || individual_information %% 2 != 0) {
+  stop("group_information and individual_information must be even numbers")
+}
 
   # Create global header and tail strings. The length of these strings will vary depending on the length of the group-specific information (group_information) and the individual-specific information (individual_information)
   head_tail_length <- floor((string_length - group_information - individual_information) / 2)
