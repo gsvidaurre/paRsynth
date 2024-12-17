@@ -11,11 +11,11 @@
 #' @param call_id_col Character string. The name of the column in the data frame containing unique numeric identifiers for each vocalization per individual.
 #' @param call_string_col Character string. The name of the column in the data frame that contains the character string per vocalization.
 #' @param starting_frequency Numeric value. A numeric value in Hz that specifies the frequency value that will be used as a baseline for creating frequency anchors with Parsons code. For instance, if this value is 4000 Hz and the first Parsons code value is "constant", then the first frequency anchor will be 4000 Hz. The default value is 4000 Hz.
-#' @param frequency_shift Numeric value. A numeric value in Hz that specifies the frequency value that will be used to shift direction (or not) from the previous frequency anchor based on the Parsons code. For instance, if `frequency_shift` is 1000 Hz and the first Parsons code value is "up", then the first frequency anchor will be 5000 Hz. The default value is 1000 Hz, but we have found that when the total string length is over 60 characters, it is better to use a smaller value (100 Hz), which avoids generating negative or zero values.
+#' @param frequency_shift Numeric value. A numeric value in Hz that specifies the frequency value that will be used to shift direction (or not). This is from the previous frequency anchor based on the Parsons code. For instance, if `frequency_shift` is 1000 Hz and the first Parsons code value is "up", then the first frequency anchor will be 5000 Hz. The default value is 1000 Hz. We have found that for total string lengths over 60 characters, it is better to use a smaller value (100 Hz). This avoids generating negative or zero values.
 #'
-#' @details `frequency_anchors()` returns the same data frame that was used as input, and with additional columns that hold frequency values in Hz. These columns will be used as anchors to guide frequency modulation patterns when creating syntheic audio files with the `soundgen` package. The starting frequency value is also used to end the frequency anchors. The number of frequency anchor columns in the data frame returned by the function will depend on the length of each string. Currently, this function internally corrects frequency anchors that are negative or zero by setting those values to the same value as the frequency shift (default of 1 kHz). While testing this function, we found that setting negative or zero values in the resulting data frame to 1000 Hz worked well, but this change has not been thoroughly tested.
+#' @details `frequency_anchors()` returns the same data frame that was used as input with additional columns that hold frequency values in Hz. These columns will be used as anchors to guide frequency modulation patterns when creating synthetic audio files with the `soundgen` package. The starting frequency value is also used to end the frequency anchors. The number of frequency anchor columns in the data frame returned by the function depends on the length of each string. Currently, this function internally corrects frequency anchors that are negative or zero. It sets those values to the same value as the frequency shift (default of 1 kHz). While testing this function, we found that setting negative or zero values in the resulting data frame to 1000 Hz worked well. However, this change has not been thoroughly tested.
 #'
-#' @return A data frame containing the string of the vocalization, the original Parsons code string, and one column per frequency anchor value. This data structure facilitates calculating the minimum and maximum frequency anchors across vocalizations, which can in turn facilitate writing synthetic audio files with `soundgen` and making spectrogram image files.
+#' @return This function returns a data frame containing the string of the vocalization, the original Parsons code string, and one column per frequency anchor value. This data structure facilitates calculating the minimum and maximum frequency anchors across vocalizations. This can facilitate writing synthetic audio files with `soundgen` and making spectrogram image files.
 #'
 #' @examples
 #' seed <- 8
@@ -34,6 +34,23 @@
 
 frequency_anchors <- function(df, parsons_col, group_id_col, individual_id_col, call_id_col, call_string_col, starting_frequency = 4000, frequency_shift = 1000, section_transition = "starting_frequency") {
 
+  if (starting_frequency <= 0) {
+    stop("starting_frequency must be a positive value")
+  }
+  if (frequency_shift <= 0) {
+    stop("frequency_shift must be a positive value")
+  }
+  if (nrow(df) == 0) {
+    stop("Input data frame is empty")
+  }
+  if (!all(c(parsons_col, group_id_col, individual_id_col, call_id_col, call_string_col) %in% colnames(df))) {
+    stop("One or more columns were not found in the data frame")
+  }
+  if (section_transition != "starting_frequency" && section_transition != "continuous_trajectory") {
+    stop("section_transition must be 'starting_frequency' or 'continuous_trajectory'")
+  }
+
+
   # Ensure column names are case-insensitive
   colnames(df) <- tolower(colnames(df))
   parsons_col <- tolower(parsons_col)
@@ -46,7 +63,8 @@ frequency_anchors <- function(df, parsons_col, group_id_col, individual_id_col, 
   results <- list()
 
   # Iterate over each row in the data frame
-  for (i in 1:nrow(df)) {
+  for (i in seq_len(nrow(df))) {
+    parsons_code <- df[[parsons_col]][i]
     group_id <- df[[group_id_col]][i]
     individual_id <- df[[individual_id_col]][i]
     call_id <- df[[call_id_col]][i]
