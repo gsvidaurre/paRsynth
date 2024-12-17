@@ -79,6 +79,12 @@ if (group_information %% 2 != 0 || individual_information %% 2 != 0) {
   groups <- rep(1:n_groups, each = n_individuals * n_calls)
   individuals <- numeric(n_groups * n_individuals * n_calls)
   call_numbers <- numeric(n_groups * n_individuals * n_calls)
+  # Raneem's additions
+  global_head_calls  <- character(n_groups * n_individuals * n_calls)
+  global_tail_calls <- character(n_groups * n_individuals * n_calls)
+  individual_middle_calls <- character(n_groups * n_individuals * n_calls)
+  group_head_calls <-  character(n_groups * n_individuals * n_calls)
+  group_tail_calls <-  character(n_groups * n_individuals * n_calls)
 
   for (group in 1:n_groups) {
     for (ind in 1:n_individuals) {
@@ -110,6 +116,12 @@ if (group_information %% 2 != 0 || individual_information %% 2 != 0) {
         calls[idx] <- individual_call
         individuals[idx] <- ind
         call_numbers[idx] <- call
+        # Raneem's additions
+        global_head_calls[idx] <- global_head
+        global_tail_calls[idx] <- global_tail
+        individual_middle_calls[idx] <- individual_middle
+        group_head_calls[idx] <- group_head
+        group_tail_calls[idx] <- group_tail
       }
     }
   }
@@ -119,6 +131,14 @@ if (group_information %% 2 != 0 || individual_information %% 2 != 0) {
     Individual = individuals,
     Call_ID = call_numbers,
     Call = calls,
+    # Raneem's additions
+    Global_head = global_head_calls,
+    Group_head = group_head_calls,
+    Individual_middle = individual_middle_calls,
+    Group_tail = group_tail_calls,
+    Global_tail = global_tail_calls,
+
+
     stringsAsFactors = FALSE
   )
 }
