@@ -17,3 +17,8 @@ test_file(file.path(testing_path, "test_parsons_code.R"))
 test_file(file.path(testing_path, "test_frequency_anchors.R"))
 
 test_file(file.path(testing_path, "test_write_audio.R"))
+
+test_file(file.path(testing_path, "test_write_audio_error_handling.R"))
+test_file(file.path(testing_path, "test_parsons_code_error_handling.R"))
+test_file(file.path(testing_path, "test_generate_strings_error_handling.R"))
+test_file(file.path(testing_path, "test_frequency_anchors_error_handling.R"))

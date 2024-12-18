@@ -66,8 +66,8 @@ write_audio <- function(df, sylLen = 200, sampling_rate = 200000, smoothing = li
   if (!all(c("Group", "Individual", "Call_ID") %in% colnames(df))) {
     stop("One or more columns were not found in the data frame")
   }
-  if (!is.character(save_path)) {
-    stop("The 'save_path' argument must be a character string.")
+  if (missing(save_path) || is.null(save_path) || save_path == "") {
+    stop("The 'save_path' argument must be provided and cannot be empty.")
   }
   if (sampling_rate <= 0) {
     stop("sampling_rate must be a positive value")
