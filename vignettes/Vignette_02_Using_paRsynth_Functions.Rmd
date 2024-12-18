@@ -232,8 +232,6 @@ synthetic_call_metadata %>%
 
 Now that you have generated your metadata with paRsyth and it has been saved as a CSV file, navigate to Vignette 03 Analysis to learn how to use the generated outputs of the package described above for downstream bioacoustics analysis.
 
+Let us do a 2nd example where individual information is greater than group information. Run the same steps above, but interchange individual_information and group_information in the code. Make sure to reassign group_information to an even integer larger than 8 and reassign factor_ratio to a smaller even integer, like 2 or 4.
 
-
-
-
-
+TK Provide Code TK
