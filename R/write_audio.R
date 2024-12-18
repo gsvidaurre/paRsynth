@@ -10,7 +10,7 @@
 #' @param smoothing A list with the named elements `interpol`, `loessSpan`, `discontThres`, and `jumpThres` to control how smoothing of frequency contours is performed by `soundgen` when audio files are generated using frequency anchors. The default list provided to this argument is `list(interpol = "loess", loessSpan = 1, discontThres = 0, jumpThres = 0)` to perform strong Loess smoothing (local polynomial regression).
 #' @param rolloffExact A numeric object encoding static amplitude values across the fundamental and harmonics (a vector) or encoding dynamic changes in amplitude across the fundamental and harmonics (a matrix). Numeric values representing amplitudes in this object should be scaled from 0 to 1. The default list provided to this argument is `rollofExact = c(0.25, 0.25, 0.25, 0.25, 0.25)`, which assigns amplitude values of 0.25 to the fundamental and each of 4 harmomics (or overtones). Since there is one numeric value assigned to the fundamental and each harmonic, the amplitude values will not change over time. To encode dynamic changes in amplitude across the fundamental and harmonics, create a matrix of amplitude values in which each row corresponds to a timepoint and each column corresponds to the fundamental or a harmonic, such as:
 `matrix(c(0.5, 0.2, 1, 0.02, 0.22, # strength of F0 - H4 at time 0
-          1, 0.4, .01, 0.05, 0.2), # strength of F0 - H4 at time 200 (when `sylLen` = 200)
+          1, 0.4, .01, 0.05, 0.2), # strength of F0 - H4 at time 200 (when "sylLen" = 200)
         ncol = 2)`
 #' @param formants A vector of formant frequencies or a list of manually specified formant times, frequencies, amplitudes, and bandwidths. If you want to automatically generate formant times, amplitudes, and bandwidths, then specify only a vector of numeric values to indicate the frequencies for a given number of formants, although this will result in `soundgen` generating formants using knowledge about formants from human vocal production. The best practice for including formants in synthetic audio files meant to simulate non-human animal vocalizations will be to manually specify a biologically relevant number of stationary or dynamic formants, and the frequency, amplitude, and bandwidth of each formant (see section 2.9.2 od the `soundgen` sound generation vignette for more info, link below). The default value is `NA`, which will not generate formants.
 #' @param vocalTract A numeric value indicating the vocal tract length of the organism that "produced" the synthetic vocalization. This argument is used only if `formants` is not `NA`. The default value of this argument here is `NA`.
@@ -67,8 +67,8 @@ write_audio <- function(df, sylLen = 200, sampling_rate = 200000, smoothing = li
   if (!all(c("Group", "Individual", "Call_ID") %in% colnames(df))) {
     stop("One or more columns were not found in the data frame")
   }
-  if (!is.character(save_path)) {
-    stop("The 'save_path' argument must be a character string.")
+  if (missing(save_path) || is.null(save_path) || save_path == "") {
+    stop("The 'save_path' argument must be provided and cannot be empty.")
   }
   if (sampling_rate <= 0) {
     stop("sampling_rate must be a positive value")

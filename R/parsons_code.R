@@ -31,14 +31,14 @@ parsons_code <- function(df, string_col, mapping = list("A" = "up", "B" = "down"
   if (!is.list(mapping)) {
     stop("The 'mapping' argument must be a list.")
   }
-  if (!string_col %in% colnames(df)) {
-    stop(paste("Column", string_col, "does not exist in the data frame."))
-  }
   if (!is.character(string_col)) {
     stop("The 'string_col' argument must be a character string.")
   }
   if (nrow(df) == 0) {
     stop("Input data frame is empty")
+  }
+  if (!string_col %in% colnames(df)) {
+    stop("string_col provided does not exist in the data frame.")
   }
   if (length(mapping) == 0) {
     stop("The 'mapping' list must contain at least one element.")
