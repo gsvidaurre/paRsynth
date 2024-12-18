@@ -232,6 +232,106 @@ synthetic_call_metadata %>%
 
 Now that you have generated your metadata with paRsyth and it has been saved as a CSV file, navigate to Vignette 03 Analysis to learn how to use the generated outputs of the package described above for downstream bioacoustics analysis.
 
-Let us do a 2nd example where individual information is greater than group information. Run the same steps above, but interchange individual_information and group_information in the code. Make sure to reassign group_information to an even integer larger than 8 and reassign factor_ratio to a smaller even integer, like 2 or 4.
+**2nd Example - Individual Information > Group Information**
 
-TK Provide Code TK
+Let us do a 2nd example where individual information is greater than group information. Run the same steps above, but interchange 'individual_information' and 'group_information in the code. Make sure to reassign group_information to an even integer larger than 8 and reassign factor_ratio to a smaller even integer starting from 2 - 10.
+
+```{r eval = TRUE}
+
+# Initialize a base path (this will need to be different per user)
+# path <- "/Users/raneemsamman/Desktop" # Raneem's path
+# path <- "/Users/gracesmith-vidaurre/Desktop" # Grace's path
+path <- "/Users/gretheljuarez/Desktop" # Alexandra's path
+
+# Initialize the directory for analysis on your local computer
+analysis_dir2 <- "paRsynth_methods_synthetic_dataset2"
+
+# Combine the base path and the data directory into a single path
+analysis_path2 <- file.path(path, analysis_dir2)
+
+# Create the data directory if it doesn't already exist on your computer
+if(!dir.exists(analysis_path2)){ 
+  dir.create(analysis_path2)
+}
+
+# Specify a folder inside the analysis directory where audio will be written out/read in
+audio_dir2 <- "audio2"
+
+# Combine the base path, the analysis directory, and the audio directory into a single path
+audio_path2 <- file.path(path, analysis_dir2, audio_dir2)
+
+# Create the audio directory if it doesn't already exist on your computer
+if(!dir.exists(audio_path2)){ 
+  dir.create(audio_path2)
+}
+
+# Specify a folder inside the analysis directory where images will be written out/read in
+images_dir2 <- "images2"
+
+# Combine the base path, the analysis directory, and the data directory into a single path
+images_path2 <- file.path(path, analysis_dir2, images_dir2)
+
+# Create the data directory if it doesn't already exist on your computer
+if(!dir.exists(images_path2)){ 
+  dir.create(images_path2)
+}
+
+# Set the seed for reproducibility
+set.seed(456)
+
+# Interchange individual_information with group_information. Reassign factor_ratio to 2 and group_information to 8
+factor_ratio2 <- 2
+group_information2 <- 8
+individual_information2 <- group_information2 * factor_ratio2
+n_groups2 <- 2
+n_individuals2 <- 4
+n_calls2 <- 3
+string_length2 <- (group_information + individual_information) + 10
+
+### Generate the string for each call
+calls2 <- generate_strings(
+  n_groups = n_groups2, 
+  n_individuals = n_individuals2, 
+  n_calls = n_calls2, 
+  string_length = string_length2, 
+  group_information = group_information2, 
+  individual_information = individual_information2
+  )
+
+### Convert each string to Parsons code
+calls_parsons2 <- parsons_code(
+  df = calls2, 
+  string_col = "Call", 
+  mapping = list("A" = "up", "B" = "down", "C" = "constant")
+)
+
+### Convert each Parsons code to frequency values
+calls_parsons_frequencies2 <- frequency_anchors(
+  df = calls_parsons2, 
+  parsons_col = "Parsons_Code", 
+  group_id_col = "Group", 
+  individual_id_col = "Individual", 
+  call_id_col = "Call_ID", 
+  call_string_col = "Call", 
+  starting_frequency = 4000, 
+  frequency_shift = 1000
+  )
+
+### For each call, use the frequency vectors to generate synthetic audio files with the soundgen package
+synthetic_call_metadata2 <- write_audio(
+  df = calls_parsons_frequencies2, 
+  save_path = audio_path2, 
+  sampling_rate = 150000, 
+  sylLen = 400, 
+  prefix = "2GroupMembership"
+  )
+
+### Save the metadata for the synthetic audio files to a CSV file
+# Add extra metadata for upcoming image files names and rearrange columns
+synthetic_call_metadata2 %>%
+  write.csv(., file = file.path(analysis_path2, "synthetic_call_metadata2.csv"), row.names = FALSE)
+
+glimpse(synthetic_call_metadata2)
+```
+
+After running this code you will have two datasets: 1) reflects vocalizations with more group information than individual and 2) vice versa. This will be extremely beneficial when conducting downstream bioacoustic analysis. Navigate to Vignette 03 to learn how to analyze these outputs you created with paRsynth.
