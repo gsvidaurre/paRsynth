@@ -15,7 +15,7 @@ knitr::opts_chunk$set(echo = TRUE, eval = TRUE)
 
 In this vignette, we will go through how to create vocalizations strings, convert them into Parsons code, calculate frequency anchors, and generate synthetic audio files using the paRsynth package for downstream bioacoustics analyses. 
 
-#Preliminary Steps
+**Preliminary Step**
 
 Before using the functions in the paRsynth package, there are some preliminary steps we must go through to ensure it will work appropriately and organized neatly.
 
@@ -41,10 +41,19 @@ invisible(lapply(1:length(X), function(x){
 }))
 
 # Install the paRsynth package from GitHub if you haven't installed it already
-devtools::install_github("gsvidaurre/paRsynth")
+# devtools::install_github("gsvidaurre/paRsynth")
 
 # Add paRsynth to the list of packages to load
-X <- c(X, "paRsynth")
+# X <- c(X, "paRsynth")
+
+# Change "Desktop/.../GitHub_repos" based on where paRsynth is stored on your local machine
+testing_path <- "~/Desktop/BIRDS/GitHub_repos/paRsynth/R"
+
+# Load the paRsynth functions that will be tested below
+source(file.path(testing_path, "generate_strings.R"))
+source(file.path(testing_path, "parsons_code.R"))
+source(file.path(testing_path, "frequency_anchors.R"))
+source(file.path(testing_path, "write_audio.R"))
 
 # Load all of the packages specified above
 invisible(lapply(X, library, character.only = TRUE))
@@ -103,14 +112,14 @@ Before using the paRsynth package, it would be beneficial for you to go over the
 
 ```{r}
 
-?paRsynth::generate_strings
-?paRsynth::parsons_code
-?paRsynth::frequency_anchors
-?paRsynth::write_audio
+# ?paRsynth::generate_strings
+# ?paRsynth::parsons_code
+# ?paRsynth::frequency_anchors
+# ?paRsynth::write_audio
 
 ```
 
-#paRsynth Functions
+**paRsynth Functions**
 
 <u> STEP 1: Create character strings representing vocal signals with more group membership information than individual information </u>
 
@@ -133,7 +142,7 @@ n_calls <- 3
 string_length <- (group_information + individual_information) + 10
 
 ### Generate the string for each call
-calls <- paRsynth::generate_strings(
+calls <- generate_strings(
   n_groups = n_groups, 
   n_individuals = n_individuals, 
   n_calls = n_calls, 
@@ -154,7 +163,7 @@ Now that you have a data frame of generated calls, you can use the parsons_code(
 
 ```{r}
 
-calls_parsons <- paRsynth::parsons_code(
+calls_parsons <- parsons_code(
   df = calls, 
   string_col = "Call", 
   mapping = list("A" = "up", "B" = "down", "C" = "constant")
@@ -222,3 +231,9 @@ synthetic_call_metadata %>%
 ```
 
 Now that you have generated your metadata with paRsyth and it has been saved as a CSV file, navigate to Vignette 03 Analysis to learn how to use the generated outputs of the package described above for downstream bioacoustics analysis.
+
+
+
+
+
+
