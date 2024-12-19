@@ -64,76 +64,77 @@ frequency_anchors <- function(df, parsons_col, group_id_col, individual_id_col, 
 
   # Iterate over each row in the data frame
   for (i in seq_len(nrow(df))) {
-    parsons_code <- df[[parsons_col]][i]
     group_id <- df[[group_id_col]][i]
     individual_id <- df[[individual_id_col]][i]
     call_id <- df[[call_id_col]][i]
     call_string <- df[[call_string_col]][i] # Fix: Added [i] to access specific row
 
+    frequencies <- numeric(0) #initiating an empty vector to store the frequencies later
+    previous_value <- starting_frequency 
     sections <- c("global_head", "group_head", "individual_middle", "group_tail", "global_tail")
+
+    # Iterate over each section in the Parsons_code columns, split the code, and calculate the frequencies
+    for (section in sections) {
+      section_code <- df[[paste0(section, "_parsons_code")]][i]
+      split_parsons_code <- strsplit(section_code, "-")[[1]]
+      call_length <- length(split_parsons_code)
+      # Calculate frequencies for the current section
+      section_frequencies <- numeric(call_length + 1)
+      section_frequencies[1] <- previous_value  # Start with the previous section's last frequency
     
-    # separate out the different sections of the string based on known column names
-    sections_data <- lapply(sections, function(section) { 
-      strsplit(df[[sections]][i], "")[[1]] #spliting each row in the column (for each section) into a vector of individual characters
-    })
+      for (j in seq_len(call_length)) {
+        direction <- split_parsons_code[j]
 
-    # Initialize an empty vector for frequency anchors
-    frequencies <- c()
+        if (direction == "up") {
+          frequency <- previous_value + frequency_shift
+        } else if (direction == "down") {
+          frequency <- previous_value - frequency_shift
+        } else if (direction == "constant") {
+          frequency <- previous_value
+        } else {
+          stop("Invalid direction: ", direction)
+        }
+        # Correct for negative or zero frequencies immediately
+        if (frequency <= 0) {
+          frequency <- frequency_shift
+        }
+        # Update previous_value to the current section frequency
+        section_frequencies[j + 1] <- frequency
+        previous_value <- frequency
+      }
+      frequencies <- c(frequencies, section_frequencies[-1])  # Exclude the first value to avoid repetition
 
-    # Initialize the frequencies vector with the starting frequency for each section
-    previous_frequency <- starting_frequency
-  
-  # Loop over the sections to generate frequencies
-  for (sec in 1:length(sections)) {
-    section_code <- generate_frequencies_from_section(sections_data[[sec]], previous_frequency)
-    if (section_transition == "starting_frequency") {
-      section_frequencies <- generate_frequencies_from_section(section_code, previous_frequency)
-    } else if (section_transition == "continuous_trajectory") {
-      section_frequencies <- generate_frequencies_from_section(section_code, previous_frequency)
-      previous_frequency <- tail(section_frequencies, 1) # Update previous_frequency for the next section based on the last frequency value in the current section
+      # After each section, reset the frequency or continue the trajectory
+      if (section_transition == "starting_frequency") {
+        previous_value <- starting_frequency
+      } else {
+      # In continuous trajectory mode, retain the last frequency value for the next section
+      previous_value <- frequencies[length(frequencies)]
+        }
     }
-    # Concatenate all frequencies into one final vector by appending the frequencies from the current section to the existing list of frequencies
-    frequencies <- c(frequencies, section_frequencies)
+  
+  frequencies <- c(starting_frequency, frequencies, starting_frequency)
+
+    # Create a data frame with the metadata and frequency values for the current call
+    freq_df <- data.frame(
+      Group = group_id,
+      Individual = individual_id,
+      Call_ID = call_id,
+      Call = call_string,
+      Parsons_Code = section_code,
+      stringsAsFactors = FALSE
+    )
+
+    # Add frequency columns to the data frame
+    for (k in 1:length(frequencies)) { # Fix: Iterate over length of frequencies correctly
+      freq_df[[paste0("Frequency", k)]] <- frequencies[k]
+    }
+
+    # Append the data frame to the results list
+    results[[i]] <- freq_df
   }
 
-  # Store the results in a list then data frame for output
-  results[[i]] <- c(
-    group_id = group_id,
-    individual_id = individual_id,
-    call_id = call_id,
-    call_string = call_string,
-    frequencies = list(frequencies)
-  )
-}
-
-  # Convert the list of results into a data frame with metadata and frequency values for the calls
-  final_df <- do.call(rbind, lapply(results, as.data.frame))
-
+  # Combine all results into a single data frame
+  final_df <- do.call(rbind, results)
   return(final_df)
 }
-
-# Helper function to generate frequencies from a section of Parsons code
-generate_frequencies_from_section <- function(section_code, previous_value, frequency_shift=frequency_shift) {
-  section_frequencies <- numeric(length(section_code))
-  for (j in 1:length(section_code)) {
-    direction <- section_code[j]
-    if (direction == "up") {
-      frequency <- previous_value + frequency_shift
-    } else if (direction == "down") {
-      frequency <- previous_value - frequency_shift
-    } else if (direction == "constant") {
-      frequency <- previous_value
-    } else {
-      stop("Invalid direction: ", direction)
-    
-    # Internally correct any frequency values that are zero or negative
-    # Set these values to the frequency shift v
-    if (frequency <= 0) {
-      frequency <- frequency_shift
-    }
-    # Update the previous frequency value to have accurate frequency value assignment when the directionality is "constant" (in which the current frequency value should be the same as the previous value, but not the starting value)
-    previous_value <- frequency
-    section_frequencies[j] <- frequency
-  }
-  return(section_frequencies)
-}}
