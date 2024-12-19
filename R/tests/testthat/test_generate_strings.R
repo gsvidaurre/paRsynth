@@ -7,7 +7,6 @@ test_that("The function generates strings that have the correct length", {
   # Avoid library calls and other changes to the virtual environment
   # See https://r-pkgs.org/testing-design.html
   withr::local_package("tidyverse")
-  withr::local_package("dplyr")
   withr::local_package("lubridate")
 
   # Just for code development
@@ -41,7 +40,6 @@ test_that("The function generates the correct number of strings", {
   # Avoid library calls and other changes to the virtual environment
   # See https://r-pkgs.org/testing-design.html
   withr::local_package("tidyverse")
-  withr::local_package("dplyr")
   withr::local_package("lubridate")
 
   # Just for code development
@@ -76,10 +74,8 @@ test_that("The function generates the number of groups and individuals", {
   # Avoid library calls and other changes to the virtual environment
   # See https://r-pkgs.org/testing-design.html
   withr::local_package("tidyverse")
-  withr::local_package("dplyr")
   withr::local_package("lubridate")
   withr::local_package("data.table")
-  withr::local_package("stringr")
 
   # Just for code development
   # library(tidyverse)
@@ -130,10 +126,8 @@ test_that("The function generates character-based vocal strings per catergory", 
   # Avoid library calls and other changes to the virtual environment
   # See https://r-pkgs.org/testing-design.html
   withr::local_package("tidyverse")
-  withr::local_package("dplyr")
   withr::local_package("lubridate")
   withr::local_package("data.table")
-  withr::local_package("stringr")
 
   # Just for code development
   # library(tidyverse)
@@ -210,10 +204,8 @@ test_that("The function generates strings of individuals assigned to one social 
   # Avoid library calls and other changes to the virtual environment
   # See https://r-pkgs.org/testing-design.html
   withr::local_package("tidyverse")
-  withr::local_package("dplyr")
   withr::local_package("lubridate")
   withr::local_package("data.table")
-  withr::local_package("stringr")
 
   # Just for code development
   # library(tidyverse)

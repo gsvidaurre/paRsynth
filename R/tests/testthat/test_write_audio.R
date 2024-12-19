@@ -9,7 +9,6 @@ test_that("The function creates and removes audio files correctly", {
   # Avoid library calls and other changes to the virtual environment
   # See https://r-pkgs.org/testing-design.html
   withr::local_package("tidyverse")
-  withr::local_package("dplyr")
   withr::local_package("lubridate")
   withr::local_package("soundgen")
 
@@ -58,7 +57,6 @@ test_that("The function creates data frame with correct audio file name format",
   # Avoid library calls and other changes to the virtual environment
   # See https://r-pkgs.org/testing-design.html
   withr::local_package("tidyverse")
-  withr::local_package("dplyr")
   withr::local_package("lubridate")
   withr::local_package("soundgen")
 
@@ -109,7 +107,6 @@ test_that("The function creates files that have the correct .wav extension", {
   # Avoid library calls and other changes to the virtual environment
   # See https://r-pkgs.org/testing-design.html
   withr::local_package("tidyverse")
-  withr::local_package("dplyr")
   withr::local_package("lubridate")
   withr::local_package("soundgen")
 

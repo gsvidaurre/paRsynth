@@ -5,9 +5,13 @@ rm(list = ls())
 
 if (!require(testthat)) install.packages('testthat')
 library(testthat)
+library(dplyr)
+library(stringr)
+library(rlang)
 
 # Change "Desktop/.../GitHub_repos" based on where paRsynth is stored on your local machine
 testing_path <- "~/Desktop/BIRDS/GitHub_repos/paRsynth/R"
+desktop_path <- "~/Desktop"
 
 # Load the paRsynth functions that will be tested below
 source(file.path(testing_path, "generate_strings.R"))
