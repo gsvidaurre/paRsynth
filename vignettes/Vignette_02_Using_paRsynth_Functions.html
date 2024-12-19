@@ -416,7 +416,7 @@ the data you create with paRsynth.</p>
 <pre class="r"><code># Initialize a base path (this will need to be different per user)
 # path &lt;- &quot;/Users/raneemsamman/Desktop&quot; # Raneem&#39;s path
 # path &lt;- &quot;/Users/gracesmith-vidaurre/Desktop&quot; # Grace&#39;s path
-path &lt;- &quot;/Users/gretheljuarez/Desktop&quot; # Alexandra&#39;s path
+path &lt;- &quot;/Users/gretheljuarez/Desktop/BIRDS/paRsynth_Data&quot; # Alexandra&#39;s path
 
 # Initialize the directory for analysis on your local computer
 analysis_dir &lt;- &quot;paRsynth_methods_synthetic_dataset&quot;
@@ -615,8 +615,8 @@ generate synthetic audio files with the soundgen package </u></p>
 generate the audio files that will allow you to hear the synthetic bird
 calls we generated! To do that, we will use the function write_audio().
 This function creates a sound file (in .wav format) for each
-vocalisation and saves it to your desired directory. Each file will
-represent one vocalisation with its own unique frequency modulation
+vocalization and saves it to your desired directory. Each file will
+represent one vocalization with its own unique frequency modulation
 pattern that was developed in step 3. This function has five parameters:
 the data frame with frequency anchors and string metadata (df), the
 directory where the audio files will be saved (save_path), the sampling
@@ -631,7 +631,7 @@ level because the group information string is longer).</p>
   save_path = audio_path, 
   sampling_rate = 150000, 
   sylLen = 400, 
-  prefix = &quot;GroupMembership&quot;
+  prefix = &quot;HighGroupMembership&quot;
   )
 
 glimpse(synthetic_call_metadata)</code></pre>
@@ -676,7 +676,7 @@ glimpse(synthetic_call_metadata)</code></pre>
 ## $ Frequency32     &lt;dbl&gt; 2000, 2000, 2000, 1000, 1000, 1000, 1000, 1000, 1000, …
 ## $ Frequency33     &lt;dbl&gt; 3000, 3000, 3000, 2000, 2000, 2000, 1000, 1000, 1000, …
 ## $ Frequency34     &lt;dbl&gt; 4000, 4000, 4000, 4000, 4000, 4000, 4000, 4000, 4000, …
-## $ audio_file_name &lt;chr&gt; &quot;GroupMembership_Group1_Ind1_Call1.wav&quot;, &quot;GroupMembers…</code></pre>
+## $ audio_file_name &lt;chr&gt; &quot;HighGroupMembership_Group1_Ind1_Call1.wav&quot;, &quot;HighGrou…</code></pre>
 <p>This will create files with the extension .wav for each vocalization
 and will save them in your desired and specified directory with a prefix
 of your preference.</p>
@@ -703,45 +703,7 @@ group information. Run the same steps above, but interchange
 to reassign group_information to an even integer larger than 8 and
 reassign factor_ratio to a smaller even integer starting from 2 -
 10.</p>
-<pre class="r"><code># Initialize a base path (this will need to be different per user)
-# path &lt;- &quot;/Users/raneemsamman/Desktop&quot; # Raneem&#39;s path
-# path &lt;- &quot;/Users/gracesmith-vidaurre/Desktop&quot; # Grace&#39;s path
-path &lt;- &quot;/Users/gretheljuarez/Desktop&quot; # Alexandra&#39;s path
-
-# Initialize the directory for analysis on your local computer
-analysis_dir2 &lt;- &quot;paRsynth_methods_synthetic_dataset2&quot;
-
-# Combine the base path and the data directory into a single path
-analysis_path2 &lt;- file.path(path, analysis_dir2)
-
-# Create the data directory if it doesn&#39;t already exist on your computer
-if(!dir.exists(analysis_path2)){ 
-  dir.create(analysis_path2)
-}
-
-# Specify a folder inside the analysis directory where audio will be written out/read in
-audio_dir2 &lt;- &quot;audio2&quot;
-
-# Combine the base path, the analysis directory, and the audio directory into a single path
-audio_path2 &lt;- file.path(path, analysis_dir2, audio_dir2)
-
-# Create the audio directory if it doesn&#39;t already exist on your computer
-if(!dir.exists(audio_path2)){ 
-  dir.create(audio_path2)
-}
-
-# Specify a folder inside the analysis directory where images will be written out/read in
-images_dir2 &lt;- &quot;images2&quot;
-
-# Combine the base path, the analysis directory, and the data directory into a single path
-images_path2 &lt;- file.path(path, analysis_dir2, images_dir2)
-
-# Create the data directory if it doesn&#39;t already exist on your computer
-if(!dir.exists(images_path2)){ 
-  dir.create(images_path2)
-}
-
-# Set the seed for reproducibility
+<pre class="r"><code># Set the seed for reproducibility
 set.seed(456)
 
 # Interchange individual_information with group_information. Reassign factor_ratio to 2 and group_information to 8
@@ -785,16 +747,60 @@ calls_parsons_frequencies2 &lt;- frequency_anchors(
 ### For each call, use the frequency vectors to generate synthetic audio files with the soundgen package
 synthetic_call_metadata2 &lt;- write_audio(
   df = calls_parsons_frequencies2, 
-  save_path = audio_path2, 
+  save_path = audio_path, 
   sampling_rate = 150000, 
   sylLen = 400, 
-  prefix = &quot;2GroupMembership&quot;
+  prefix = &quot;HighIndividualIdentity&quot;
   )
 
 ### Save the metadata for the synthetic audio files to a CSV file
 # Add extra metadata for upcoming image files names and rearrange columns
 synthetic_call_metadata2 %&gt;%
-  write.csv(., file = file.path(analysis_path2, &quot;synthetic_call_metadata2.csv&quot;), row.names = FALSE)</code></pre>
+  write.csv(., file = file.path(analysis_path, &quot;synthetic_call_metadata2.csv&quot;), row.names = FALSE)
+
+glimpse(synthetic_call_metadata2)</code></pre>
+<pre><code>## Rows: 24
+## Columns: 40
+## $ Group           &lt;int&gt; 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, …
+## $ Individual      &lt;dbl&gt; 1, 1, 1, 2, 2, 2, 3, 3, 3, 4, 4, 4, 1, 1, 1, 2, 2, 2, …
+## $ Call_ID         &lt;dbl&gt; 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, …
+## $ Call            &lt;chr&gt; &quot;AACBCBACBAABBCBCABACBCBBBCCCACAB&quot;, &quot;AACBCBACBAABBCBCA…
+## $ Parsons_Code    &lt;chr&gt; &quot;up-up-constant-down-constant-down-up-constant-down-up…
+## $ Frequency1      &lt;dbl&gt; 4000, 4000, 4000, 4000, 4000, 4000, 4000, 4000, 4000, …
+## $ Frequency2      &lt;dbl&gt; 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, …
+## $ Frequency3      &lt;dbl&gt; 6000, 6000, 6000, 6000, 6000, 6000, 6000, 6000, 6000, …
+## $ Frequency4      &lt;dbl&gt; 6000, 6000, 6000, 6000, 6000, 6000, 6000, 6000, 6000, …
+## $ Frequency5      &lt;dbl&gt; 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, …
+## $ Frequency6      &lt;dbl&gt; 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, …
+## $ Frequency7      &lt;dbl&gt; 4000, 4000, 4000, 4000, 4000, 4000, 4000, 4000, 4000, …
+## $ Frequency8      &lt;dbl&gt; 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, …
+## $ Frequency9      &lt;dbl&gt; 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, …
+## $ Frequency10     &lt;dbl&gt; 4000, 4000, 4000, 5000, 5000, 5000, 4000, 4000, 4000, …
+## $ Frequency11     &lt;dbl&gt; 5000, 5000, 5000, 4000, 4000, 4000, 4000, 4000, 4000, …
+## $ Frequency12     &lt;dbl&gt; 6000, 6000, 6000, 4000, 4000, 4000, 4000, 4000, 4000, …
+## $ Frequency13     &lt;dbl&gt; 5000, 5000, 5000, 4000, 4000, 4000, 5000, 5000, 5000, …
+## $ Frequency14     &lt;dbl&gt; 4000, 4000, 4000, 5000, 5000, 5000, 5000, 5000, 5000, …
+## $ Frequency15     &lt;dbl&gt; 4000, 4000, 4000, 6000, 6000, 6000, 6000, 6000, 6000, …
+## $ Frequency16     &lt;dbl&gt; 3000, 3000, 3000, 7000, 7000, 7000, 5000, 5000, 5000, …
+## $ Frequency17     &lt;dbl&gt; 3000, 3000, 3000, 6000, 6000, 6000, 6000, 6000, 6000, …
+## $ Frequency18     &lt;dbl&gt; 4000, 4000, 4000, 5000, 5000, 5000, 7000, 7000, 7000, …
+## $ Frequency19     &lt;dbl&gt; 3000, 3000, 3000, 5000, 5000, 5000, 6000, 6000, 6000, …
+## $ Frequency20     &lt;dbl&gt; 4000, 4000, 4000, 5000, 5000, 5000, 6000, 6000, 6000, …
+## $ Frequency21     &lt;dbl&gt; 4000, 4000, 4000, 4000, 4000, 4000, 6000, 6000, 6000, …
+## $ Frequency22     &lt;dbl&gt; 3000, 3000, 3000, 3000, 3000, 3000, 7000, 7000, 7000, …
+## $ Frequency23     &lt;dbl&gt; 3000, 3000, 3000, 4000, 4000, 4000, 8000, 8000, 8000, …
+## $ Frequency24     &lt;dbl&gt; 2000, 2000, 2000, 4000, 4000, 4000, 7000, 7000, 7000, …
+## $ Frequency25     &lt;dbl&gt; 1000, 1000, 1000, 4000, 4000, 4000, 6000, 6000, 6000, …
+## $ Frequency26     &lt;dbl&gt; 1000, 1000, 1000, 3000, 3000, 3000, 5000, 5000, 5000, …
+## $ Frequency27     &lt;dbl&gt; 1000, 1000, 1000, 3000, 3000, 3000, 5000, 5000, 5000, …
+## $ Frequency28     &lt;dbl&gt; 1000, 1000, 1000, 3000, 3000, 3000, 5000, 5000, 5000, …
+## $ Frequency29     &lt;dbl&gt; 1000, 1000, 1000, 3000, 3000, 3000, 5000, 5000, 5000, …
+## $ Frequency30     &lt;dbl&gt; 1000, 1000, 1000, 4000, 4000, 4000, 6000, 6000, 6000, …
+## $ Frequency31     &lt;dbl&gt; 1000, 1000, 1000, 4000, 4000, 4000, 6000, 6000, 6000, …
+## $ Frequency32     &lt;dbl&gt; 2000, 2000, 2000, 5000, 5000, 5000, 7000, 7000, 7000, …
+## $ Frequency33     &lt;dbl&gt; 1000, 1000, 1000, 4000, 4000, 4000, 6000, 6000, 6000, …
+## $ Frequency34     &lt;dbl&gt; 4000, 4000, 4000, 4000, 4000, 4000, 4000, 4000, 4000, …
+## $ audio_file_name &lt;chr&gt; &quot;HighIndividualIdentity_Group1_Ind1_Call1.wav&quot;, &quot;HighI…</code></pre>
 <p>After running this code you will have two datasets: 1) reflects
 vocalizations with more group information than individual and 2) vice
 versa. This will be extremely beneficial when conducting downstream
