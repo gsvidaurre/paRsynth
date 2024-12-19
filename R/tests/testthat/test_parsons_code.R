@@ -1,15 +1,6 @@
 # G.A. Juarez
 # 4 Dec 2024
 
-rm(list = ls())
-
-if (!require(testthat)) install.packages('testthat')
-library(testthat)
-
-# Change "~Desktop/.../GitHub_repos" based on where paRsynth is stored
-source("~/Desktop/BIRDS/GitHub_repos/paRsynth/R/generate_strings.R")
-source("~/Desktop/BIRDS/GitHub_repos/paRsynth/R/parsons_code.R")
-
 # 1. Unit test to check that the parsons code is the correct length
 test_that("This functions generates the correct length of parsons code", {
 

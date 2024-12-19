@@ -3,14 +3,6 @@
 # G.A. Juarez
 # 5Dec24 - Grammar check
 
-rm(list = ls())
-
-if (!require(testthat)) install.packages('testthat')
-library(testthat)
-
-# Change "~Desktop/.../GitHub_repos" based on where paRsynth is stored
-source("~/Desktop/BIRDS/GitHub_repos/paRsynth/R/frequency_anchors.R")
-
 # 1. Unit test to check that the generation of df with multiple rows input
 test_that("The function generates df with multiple rows data frame", {
 

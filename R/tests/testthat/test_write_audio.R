@@ -3,16 +3,6 @@
 # G.A. Juarez
 # 5Dec24 - Grammar check
 
-rm(list = ls())
-
-if (!require(testthat)) install.packages('testthat')
-library(testthat)
-
-# Change "~Desktop/.../GitHub_repos" based on where paRsynth is stored
-source("~/Desktop/BIRDS/GitHub_repos/paRsynth/R/write_audio.R")
-
-desktop_path <- "~/Desktop"
-
 # 1. Unit test to check for correct audio file creation
 test_that("The function creates and removes audio files correctly", {
 
@@ -78,7 +68,7 @@ test_that("The function creates data frame with correct audio file name format",
   # library(testthat)
   # library(dplyr)
   # library(soundgen)
-  
+
   # Create a temporary directory on the Desktop for storing files (for test purposes)
   tmp_dir <- file.path(desktop_path, "R_test_temp")
 
