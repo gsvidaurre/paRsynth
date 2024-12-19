@@ -440,6 +440,6 @@ mds_df2 %>%
 
 ```
 
-This will output acoustic space plots to represent the acoustic similarity of the paRsynth generated vocalizations using the spectrograms created in vignette 02 for the second data set that has more group information. 
+This will output acoustic space plots to represent the acoustic similarity of the paRsynth generated vocalizations using the spectrograms created in vignette 02 for the second data set that has more individual information. 
 
-This last vignette has showed you how to conduct downstream bioacoustic analysis on two datasets: 1) more group information and 2) more individual information using 
+This last vignette has showed you how to conduct downstream bioacoustic analysis on two datasets: 1) more group information and 2) more individual information and create acoustic space plots for them. You completed the final vignette of the paRsynth package, well done!
