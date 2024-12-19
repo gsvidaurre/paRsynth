@@ -209,7 +209,7 @@ synthetic_call_metadata <- write_audio(
   save_path = audio_path, 
   sampling_rate = 150000, 
   sylLen = 400, 
-  prefix = "HighGroupMembership"
+  prefix = "GroupMembership"
   )
 
 glimpse(synthetic_call_metadata)
@@ -285,7 +285,7 @@ synthetic_call_metadata2 <- write_audio(
   save_path = audio_path, 
   sampling_rate = 150000, 
   sylLen = 400, 
-  prefix = "HighIndividualIdentity"
+  prefix = "IndividualIdentity"
   )
 
 ### Save the metadata for the synthetic audio files to a CSV file

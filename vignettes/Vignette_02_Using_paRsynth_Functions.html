@@ -631,7 +631,7 @@ level because the group information string is longer).</p>
   save_path = audio_path, 
   sampling_rate = 150000, 
   sylLen = 400, 
-  prefix = &quot;HighGroupMembership&quot;
+  prefix = &quot;GroupMembership&quot;
   )
 
 glimpse(synthetic_call_metadata)</code></pre>
@@ -676,7 +676,7 @@ glimpse(synthetic_call_metadata)</code></pre>
 ## $ Frequency32     &lt;dbl&gt; 2000, 2000, 2000, 1000, 1000, 1000, 1000, 1000, 1000, …
 ## $ Frequency33     &lt;dbl&gt; 3000, 3000, 3000, 2000, 2000, 2000, 1000, 1000, 1000, …
 ## $ Frequency34     &lt;dbl&gt; 4000, 4000, 4000, 4000, 4000, 4000, 4000, 4000, 4000, …
-## $ audio_file_name &lt;chr&gt; &quot;HighGroupMembership_Group1_Ind1_Call1.wav&quot;, &quot;HighGrou…</code></pre>
+## $ audio_file_name &lt;chr&gt; &quot;GroupMembership_Group1_Ind1_Call1.wav&quot;, &quot;GroupMembers…</code></pre>
 <p>This will create files with the extension .wav for each vocalization
 and will save them in your desired and specified directory with a prefix
 of your preference.</p>
@@ -750,7 +750,7 @@ synthetic_call_metadata2 &lt;- write_audio(
   save_path = audio_path, 
   sampling_rate = 150000, 
   sylLen = 400, 
-  prefix = &quot;HighIndividualIdentity&quot;
+  prefix = &quot;IndividualIdentity&quot;
   )
 
 ### Save the metadata for the synthetic audio files to a CSV file
@@ -800,7 +800,7 @@ glimpse(synthetic_call_metadata2)</code></pre>
 ## $ Frequency32     &lt;dbl&gt; 2000, 2000, 2000, 5000, 5000, 5000, 7000, 7000, 7000, …
 ## $ Frequency33     &lt;dbl&gt; 1000, 1000, 1000, 4000, 4000, 4000, 6000, 6000, 6000, …
 ## $ Frequency34     &lt;dbl&gt; 4000, 4000, 4000, 4000, 4000, 4000, 4000, 4000, 4000, …
-## $ audio_file_name &lt;chr&gt; &quot;HighIndividualIdentity_Group1_Ind1_Call1.wav&quot;, &quot;HighI…</code></pre>
+## $ audio_file_name &lt;chr&gt; &quot;IndividualIdentity_Group1_Ind1_Call1.wav&quot;, &quot;Individua…</code></pre>
 <p>After running this code you will have two datasets: 1) reflects
 vocalizations with more group information than individual and 2) vice
 versa. This will be extremely beneficial when conducting downstream
