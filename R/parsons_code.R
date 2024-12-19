@@ -23,7 +23,8 @@
 #' glimpse(example_calls_parsons)
 #'
 #' @export parsons_code
-parsons_code <- function(df, string_col, mapping = list("A" = "up", "B" = "down", "C" = "constant")) {
+
+parsons_code <- function(df, string_col, global_head_col, group_head_col, individual_middle_col, group_tail_col, global_tail_col, mapping = list("A" = "up", "B" = "down", "C" = "constant")) {
   
   if (!is.data.frame(df)) {
     stop("The 'df' argument must be a data frame.")
@@ -31,22 +32,27 @@ parsons_code <- function(df, string_col, mapping = list("A" = "up", "B" = "down"
   if (!is.list(mapping)) {
     stop("The 'mapping' argument must be a list.")
   }
-  if (!string_col %in% colnames(df)) {
-    stop(paste("Column", string_col, "does not exist in the data frame."))
-  }
   if (!is.character(string_col)) {
     stop("The 'string_col' argument must be a character string.")
   }
   if (nrow(df) == 0) {
     stop("Input data frame is empty")
   }
+  if (!string_col %in% colnames(df)) {
+    stop("string_col provided does not exist in the data frame.")
+  }
   if (length(mapping) == 0) {
     stop("The 'mapping' list must contain at least one element.")
   }
   
   df %>%
-    dplyr::mutate(Parsons_Code = sapply(!!rlang::sym(string_col), function(string) paste(convert_to_parsons_code(string, mapping), collapse = "-")))
-  
+    dplyr::mutate(Call_Parsons_Code = sapply(!!rlang::sym(string_col), function(string) paste(convert_to_parsons_code(string, mapping), collapse = "-"))) %>%
+    # Raneem's additions
+    dplyr::mutate(Global_Head_Parsons_Code = sapply(!!rlang::sym(global_head_col), function(string) paste(convert_to_parsons_code(string, mapping), collapse = "-"))) %>%
+    dplyr::mutate(Group_Head_Parsons_Code = sapply(!!rlang::sym(group_head_col), function(string) paste(convert_to_parsons_code(string, mapping), collapse = "-"))) %>%
+    dplyr::mutate(Individual_Middle_Parsons_Code = sapply(!!rlang::sym(individual_middle_col), function(string) paste(convert_to_parsons_code(string, mapping), collapse = "-"))) %>%
+    dplyr::mutate(Group_Tail_Parsons_Code = sapply(!!rlang::sym(group_tail_col), function(string) paste(convert_to_parsons_code(string, mapping), collapse = "-"))) %>%
+    dplyr::mutate(Global_Tail_Parsons_Code = sapply(!!rlang::sym(global_tail_col), function(string) paste(convert_to_parsons_code(string, mapping), collapse = "-")))
 }
 
 # Helper function to generate Parsons code for existing sequences

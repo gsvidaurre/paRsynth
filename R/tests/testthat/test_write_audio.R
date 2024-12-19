@@ -47,11 +47,10 @@ test_that("The function creates and removes audio files correctly", {
   audio_files <- result_df$audio_file_name
   expect_true(all(file.exists(file.path(tmp_dir, audio_files))))
 
-  # Remove the files created during the test
-  file.remove(file.path(tmp_dir, audio_files))
-
-  # Remove the test directory
-  unlink(tmp_dir, recursive = TRUE)
+  # Remove the test directory (and since recursive = TRUE, all files within it too)
+  if (dir.exists(tmp_dir) && tmp_dir == file.path(desktop_path, "R_test_temp")) {
+    unlink(tmp_dir, recursive = TRUE)
+    }
 })
 
 
@@ -71,7 +70,7 @@ test_that("The function creates data frame with correct audio file name format",
   # library(testthat)
   # library(dplyr)
   # library(soundgen)
-
+  
   # Create a temporary directory on the Desktop for storing files (for test purposes)
   tmp_dir <- file.path(desktop_path, "R_test_temp")
 
@@ -100,8 +99,10 @@ test_that("The function creates data frame with correct audio file name format",
   expected_filename <- paste0("TestPrefix", "_Group", df_test$Group[1], "_Ind", df_test$Individual[1],"_Call", df_test$Call_ID[1], ".wav")
   expect_equal(result_df$audio_file_name[1], expected_filename)
 
-  # Remove the created files
-  unlink(tmp_dir, recursive = TRUE)
+  # Remove the created directory and files
+  if (dir.exists(tmp_dir) && tmp_dir == file.path(desktop_path, "R_test_temp")) {
+    unlink(tmp_dir, recursive = TRUE)
+    }
 })
 
 # 3. Unit test to check whether the resulting files contain the correct file extension
@@ -146,6 +147,8 @@ test_that("The function creates files that have the correct .wav extension", {
   audio_files <- result_df$audio_file_name
   expect_true(all(grepl("\\.wav$", audio_files)))
 
-  # Remove the created files
-  unlink(tmp_dir, recursive = TRUE)
+  # Remove the created directory and files
+  if (dir.exists(tmp_dir) && tmp_dir == file.path(desktop_path, "R_test_temp")) {
+    unlink(tmp_dir, recursive = TRUE)
+    }
 })
