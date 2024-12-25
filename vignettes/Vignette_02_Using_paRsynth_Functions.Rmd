@@ -128,18 +128,20 @@ After installing paRsynth and loading the relevant libraries, you will be able t
 ```{r message = FALSE, warning = FALSE}
 
 # Set the seed for reproducibility
-set.seed(123)
+set.seed(44)
 
 # Initialize the values of group_information and individual_information, which correspond to the length of the string that will be allocated to encoding group membership or individual identity information
 # Group information can outweigh individual information by a factor of at least 10 or higher
-factor_ratio <- 10
+factor_ratio <- 4
 individual_information <- 2
 group_information <- individual_information * factor_ratio
+
 # Initialize the values of the number of groups, individuals, calls, and string length
 n_groups <- 2
-n_individuals <- 4
-n_calls <- 3
-string_length <- (group_information + individual_information) + 10
+n_individuals <- 10
+n_calls <- 2
+n_global <- 4
+string_length <- (group_information + individual_information) + n_global
 
 ### Generate the string for each call
 calls <- generate_strings(
@@ -241,14 +243,15 @@ Let us do a 2nd example where individual information is greater than group infor
 # Set the seed for reproducibility
 set.seed(456)
 
-# Interchange individual_information with group_information. Reassign factor_ratio to 2 and group_information to 8
-factor_ratio2 <- 2
-group_information2 <- 8
+# Interchange individual_information with group_information
+factor_ratio2 <- 4
+group_information2 <- 2
 individual_information2 <- group_information2 * factor_ratio2
 n_groups2 <- 2
-n_individuals2 <- 4
-n_calls2 <- 3
-string_length2 <- (group_information + individual_information) + 10
+n_individuals2 <- 10
+n_calls2 <- 2
+n_global <- 4
+string_length2 <- (group_information2 + individual_information2) + n_global
 
 ### Generate the string for each call
 calls2 <- generate_strings(

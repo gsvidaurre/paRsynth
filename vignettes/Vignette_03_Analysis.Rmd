@@ -274,17 +274,19 @@ mds_df <- data.frame(
   )
 
 glimpse(mds_df)
-# View(mds_df)
+View(mds_df)
 
 levels(mds_df$group_ID)
 levels(mds_df$individual_ID)
 levels(mds_df$unique_individuals)
 
 # Colors by group
-cols <- scales::alpha(c("navy", "orange", "forestgreen", "firebrick", "grey"), 0.65)
+cols <- scales::alpha(c("navy", "orange", "forestgreen", "firebrick", "grey", "#7F00FF", "#FFD300", "#000000", "#964B00", "#ffc0cb"), 0.65)
+length(cols)
 
 # Shapes by individual within groups
-shps <- rep(c(21, 23, 24, 6), length(levels(mds_df$group_ID)))
+shps <- rep(c(0, 1, 2, 5, 6, 15, 19, 17, 18, 14), length(levels(mds_df$individual_ID)))
+length(shps)
 
 # Convex hull polygons per group or unique individual
 # hulls <- plyr::ddply(mds_df, "unique_individuals", function(x){
@@ -305,7 +307,10 @@ mds_df %>%
   scale_color_manual(values = cols) +
   scale_fill_manual(values = cols) +
   xlab("") + ylab("") + 
-  guides(color = "none", shape = "none", fill = "none") +
+  guides(
+    color = guide_legend(title = "Group", position = "top"), 
+    shape = guide_legend(title = "Individual", position = "top", override.aes = list(cols)),
+    fill = "none") +
   theme_bw() +
   theme(
     axis.title = element_text(size = 14),
@@ -317,10 +322,10 @@ mds_df %>%
     axis.ticks = element_line(size = 0.25),
     plot.margin = margin(0, 3, -3, -3)
   )
-
+  
 ```
 
-This will output acoustic space plots to represent the acoustic similarity of the paRsynth generated vocalizations using the spectrograms created in vignette 02 for the first data set that has more group information. 
+This will output an acoustic space plot to represent the acoustic similarity of the paRsynth generated vocalizations using the spectrograms created in vignette 02 for the first data set that has more group information. 
 
 **2nd Example - Individual Information > Group Information**
 
@@ -440,6 +445,152 @@ mds_df2 %>%
 
 ```
 
-This will output acoustic space plots to represent the acoustic similarity of the paRsynth generated vocalizations using the spectrograms created in vignette 02 for the second data set that has more individual information. 
+This will output an acoustic space plot to represent the acoustic similarity of the paRsynth generated vocalizations using the spectrograms created in vignette 02 for the second data set that has more individual information. 
 
 This last vignette has showed you how to conduct downstream bioacoustic analysis on two datasets: 1) more group information and 2) more individual information and create acoustic space plots for them. You completed the final vignette of the paRsynth package, well done!
+
+<h2>Extra Example</h2>
+
+You may create vocalization that have much greater group information than individual information to the point when you make the acoustic space plot it result in all the individuals of one group to be clustered on top of each other and each group are a outstandingly great distance from each other. 
+
+```{r, eval=TRUE, echo=FALSE}
+set.seed(123)
+factor_ratio <- 10
+individual_information <- 2
+group_information <- individual_information * factor_ratio
+n_groups <- 2
+n_individuals <- 4
+n_calls <- 3
+string_length <- (group_information + individual_information) + 10
+
+calls <- generate_strings(
+  n_groups = n_groups, 
+  n_individuals = n_individuals, 
+  n_calls = n_calls, 
+  string_length = string_length, 
+  group_information = group_information, 
+  individual_information = individual_information
+  )
+
+calls_parsons <- parsons_code(
+  df = calls, 
+  string_col = "Call", 
+  mapping = list("A" = "up", "B" = "down", "C" = "constant")
+)
+
+calls_parsons_frequencies <- frequency_anchors(
+  df = calls_parsons, 
+  parsons_col = "Parsons_Code", 
+  group_id_col = "Group", 
+  individual_id_col = "Individual", 
+  call_id_col = "Call_ID", 
+  call_string_col = "Call", 
+  starting_frequency = 4000, 
+  frequency_shift = 1000
+  )
+
+ExtraExample <- write_audio(
+  df = calls_parsons_frequencies, 
+  save_path = audio_path, 
+  sampling_rate = 150000, 
+  sylLen = 400, 
+  prefix = "ExtraExample"
+  )
+
+ExtraExample %>%
+  write.csv(., file = file.path(analysis_path, "ExtraExample.csv"), row.names = FALSE) 
+
+ExtraExample_sel_tbl <- sel_tbl %>%
+    dplyr::filter(grepl("ExtraExample", sound.files))
+
+warbleR::spectrograms(ExtraExample_sel_tbl, wl = 512, flim = c(0, 12), wn = "hanning", pal = reverse.gray.colors.2,ovlp = 90, inner.mar = c(5, 4, 4, 2), outer.mar = c(0, 0, 0, 0), picsize = 1, res = 100, cexlab = 1, propwidth = FALSE, xl = 1, osci = FALSE, gr = FALSE, sc = FALSE, line = FALSE, mar = 0.05, it = "jpeg", parallel = 1, path = audio_path, pb = TRUE, fast.spec = FALSE, by.song = NULL, sel.labels = NULL, title.labels = NULL, dest.path = images_path, box = TRUE, axis = TRUE)
+
+imgs <- list.files(images_path)
+imgs
+
+new_nms <- gsub(".wav-1", "", imgs)
+new_nms
+
+invisible(file.rename(file.path(images_path, imgs), file.path(images_path, new_nms)))
+
+xc_matEE <- warbleR::cross_correlation(ExtraExample_sel_tbl, wl = 512, ovlp = 90, bp = c(0, 20), wn = "hanning", cor.method = "pearson", parallel = 1, na.rm = FALSE, type = "spectrogram", path = audio_path)
+
+str(xc_matEE)
+dim(xc_matEE)
+
+xc_matEE[xc_matEE < 0]
+
+neg_valuesEE <- length(xc_matEE[xc_matEE<0])/(dim(xc_matEE)[1]*dim(xc_matEE)[2])
+
+if(neg_valuesEE > 0){
+  stop("Negative values are present in the spectrographic cross-correlation matrix")
+}
+
+xc_matEE[xc_matEE < 0]
+
+dimnames(xc_matEE) <- list(ExtraExample_sel_tbl$sound.files, ExtraExample_sel_tbl$sound.files)
+
+
+dist_matEE <- stats::as.dist(1 - xc_matEE, diag = TRUE, upper = TRUE)
+
+isoEE <- invisible(MASS::isoMDS(dist_matEE, k = 2, maxit = 1000, trace = FALSE))
+str(isoEE)
+
+mds_dfEE <- data.frame(
+  sound.files = dimnames(xc_matEE)[[1]],
+  X = as.vector(isoEE$points[, 1]), 
+  Y = as.vector(isoEE$points[, 2])
+) %>% 
+  inner_join(
+    ExtraExample_sel_tbl %>% 
+      dplyr::select(sound.files, group_ID, individual_ID),
+    by = c("sound.files")
+  ) %>% 
+  # glimpse()
+  dplyr::mutate(
+    group_ID = paste("group", group_ID, sep = "_"),
+    individual_ID = paste("individual", individual_ID, sep = "_"),
+    unique_individuals = paste(group_ID, individual_ID, sep = " - "),
+    group_ID = factor(group_ID),
+    individual_ID = factor(individual_ID),
+    unique_individuals = factor(unique_individuals)
+  )
+
+levels(mds_dfEE$group_ID)
+levels(mds_dfEE$individual_ID)
+levels(mds_dfEE$unique_individuals)
+
+# Colors by group
+cols <- scales::alpha(c("navy", "orange", "forestgreen", "firebrick", "grey"), 0.65)
+
+# Shapes by individual within groups
+shps <- rep(c(21, 23, 24, 6), length(levels(mds_dfEE$group_ID)))
+
+hullsEE <- plyr::ddply(mds_dfEE, "group_ID", function(x){
+  x[chull(x$X, x$Y), ]
+})
+
+mds_dfEE %>%
+  ggplot(aes(x = X, y = Y, color = group_ID)) +
+  geom_polygon(data = hullsEE, aes(x = X, y = Y, fill = group_ID, color = group_ID), alpha = 0.2, size = 0.2, show.legend = FALSE) +
+  geom_point(aes(fill = group_ID, color = group_ID, shape = individual_ID), size = 2, stroke = 0.5) +
+  scale_shape_manual(values = shps) +
+  scale_color_manual(values = cols) +
+  scale_fill_manual(values = cols) +
+  xlab("") + ylab("") + 
+  guides(color = "none", shape = "none", fill = "none") +
+  theme_bw() +
+  theme(
+    axis.title = element_text(size = 14),
+    axis.text = element_text(size = 9),
+    strip.text.x = element_text(size = 12),
+    strip.text.y = element_text(size = 10),
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    axis.ticks = element_line(size = 0.25),
+    plot.margin = margin(0, 3, -3, -3)
+  )
+```
+
+This is an example of an acoustic plot of a dataset that has too much group information compared to individual information. To solve this try changing the parameters so that the different between them are not that striking.
+
