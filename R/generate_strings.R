@@ -33,41 +33,41 @@
 #' @export generate_strings
 
 generate_strings <- function(n_groups = 2, n_individuals = 5, n_calls = 10, string_length = 16, group_information = 8, individual_information = 2, random_variation = 2) {
-
-if (string_length < 6 || string_length > 200) {
-  stop("string_length must be between 6 and 200")
-}
-if (missing(group_information)) {
-  stop("group_information must be specified")
-}
-if (missing(individual_information)) {
-  stop("individual_information must be specified")
-}
-if (!is.numeric(group_information) || length(group_information) != 1) { #ensures that the input is not a vector and is numeric
-  stop("group_information must be numeric")
-}
-if (!is.numeric(individual_information) || length(individual_information) != 1) {
-  stop("individual_information must be numeric")
-}
-if (floor(n_groups) != n_groups || floor(n_individuals) != n_individuals || 
-    floor(n_calls) != n_calls || floor(string_length) != string_length || 
-    floor(group_information) != group_information || floor(individual_information) != individual_information) {
-  stop("All arguments must be integers")
-}
-if (n_calls < 1 || n_groups < 1 || n_individuals < 1) {
-  stop("All arguments must be greater than 0")
-}
-if (group_information %% 2 != 0 || individual_information %% 2 != 0) {
-  stop("group_information and individual_information must be even numbers")
-}
-
+  
+  if (string_length < 6 || string_length > 200) {
+    stop("string_length must be between 6 and 200")
+  }
+  if (missing(group_information)) {
+    stop("group_information must be specified")
+  }
+  if (missing(individual_information)) {
+    stop("individual_information must be specified")
+  }
+  if (!is.numeric(group_information) || length(group_information) != 1) { #ensures that the input is not a vector and is numeric
+    stop("group_information must be numeric")
+  }
+  if (!is.numeric(individual_information) || length(individual_information) != 1) {
+    stop("individual_information must be numeric")
+  }
+  if (floor(n_groups) != n_groups || floor(n_individuals) != n_individuals || 
+      floor(n_calls) != n_calls || floor(string_length) != string_length || 
+      floor(group_information) != group_information || floor(individual_information) != individual_information) {
+    stop("All arguments must be integers")
+  }
+  if (n_calls < 1 || n_groups < 1 || n_individuals < 1) {
+    stop("All arguments must be greater than 0")
+  }
+  if (group_information %% 2 != 0 || individual_information %% 2 != 0) {
+    stop("group_information and individual_information must be even numbers")
+  }
+  
   # Create global header and tail strings. The length of these strings will vary depending on the length of the group-specific information (group_information) and the individual-specific information (individual_information)
   head_tail_length <- floor((string_length - group_information - individual_information - random_variation) / 2)
-
+  
   # Generate a single head and tail for all groups
   global_head <- generate_random_string(head_tail_length)
   global_tail <- generate_random_string(head_tail_length)
-
+  
   if (group_information > 0) {
     # Generate distinct group middle sections
     group_middles <- character(n_groups)
@@ -75,7 +75,7 @@ if (group_information %% 2 != 0 || individual_information %% 2 != 0) {
       group_middles[g] <- generate_random_string(group_information)
     }
   }
-
+  
   calls <- character(n_groups * n_individuals * n_calls)
   groups <- rep(1:n_groups, each = n_individuals * n_calls)
   individuals <- numeric(n_groups * n_individuals * n_calls)
@@ -86,37 +86,43 @@ if (group_information %% 2 != 0 || individual_information %% 2 != 0) {
   random_string_calls <- character(n_groups * n_individuals * n_calls)
   group_head_calls <-  character(n_groups * n_individuals * n_calls)
   group_tail_calls <-  character(n_groups * n_individuals * n_calls)
-
+  
   for (group in 1:n_groups) {
     for (ind in 1:n_individuals) {
+      
       # Generate a unique middle part for each individual
       individual_middle <- generate_random_string(individual_information)
-      # Also generate random variation that will be appended after the individual information
-      random_string <- generate_random_string(random_variation)
-      if (group_information > 0) {
-        group_info <- group_middles[group]
-        group_head <- substr(group_info, 1, group_information / 2)
-        group_tail <- substr(group_info, group_information / 2 + 1, group_information)
-
-        # Combine all components to create a string that represents a vocalization. Append the random information after the individual identity information
-        individual_call <- paste0(
-          global_head,
-          group_head,
-          individual_middle,
-          random_string,
-          group_tail,
-          global_tail
-        )
-      } else {
-        individual_call <- paste0(
-          global_head,
-          individual_middle,
-          random_string,
-          global_tail
-        )
-      }
-
+      
       for (call in 1:n_calls) {
+        
+        # Generate random variation per call that will be appended after the individual information (to create variation within individuals)
+        random_string <- generate_random_string(random_variation)
+        
+        if (group_information > 0) {
+          
+          group_info <- group_middles[group]
+          group_head <- substr(group_info, 1, group_information / 2)
+          group_tail <- substr(group_info, group_information / 2 + 1, group_information)
+          
+          # Combine all components to create a string that represents a vocalization. Append the random information after the individual identity information
+          individual_call <- paste0(
+            global_head,
+            group_head,
+            individual_middle,
+            random_string,
+            group_tail,
+            global_tail
+          )
+          
+        } else {
+          individual_call <- paste0(
+            global_head,
+            individual_middle,
+            random_string,
+            global_tail
+          )
+        }
+        
         idx <- ((group - 1) * n_individuals * n_calls) + ((ind - 1) * n_calls) + call
         calls[idx] <- individual_call
         individuals[idx] <- ind
@@ -130,7 +136,7 @@ if (group_information %% 2 != 0 || individual_information %% 2 != 0) {
       }
     }
   }
-
+  
   data.frame(
     Group = groups,
     Individual = individuals,
@@ -142,8 +148,8 @@ if (group_information %% 2 != 0 || individual_information %% 2 != 0) {
     Random_variation = random_string_calls,
     Group_tail = group_tail_calls,
     Global_tail = global_tail_calls,
-
-
+    
+    
     stringsAsFactors = FALSE
   )
 }
