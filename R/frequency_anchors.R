@@ -50,7 +50,6 @@ frequency_anchors <- function(df, parsons_col, group_id_col, individual_id_col, 
     stop("section_transition must be 'starting_frequency' or 'continuous_trajectory'")
   }
 
-
   # Ensure column names are case-insensitive
   colnames(df) <- tolower(colnames(df))
   parsons_col <- tolower(parsons_col)
@@ -71,7 +70,7 @@ frequency_anchors <- function(df, parsons_col, group_id_col, individual_id_col, 
 
     frequencies <- numeric(0) #initiating an empty vector to store the frequencies later
     previous_value <- starting_frequency 
-    sections <- c("global_head", "group_head", "individual_middle", "group_tail", "global_tail")
+    sections <- c("global_head", "group_head", "individual_middle", "random_variation", "group_tail", "global_tail")
 
     # Iterate over each section in the Parsons_code columns, split the code, and calculate the frequencies
     for (section in sections) {

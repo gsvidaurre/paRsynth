@@ -9,8 +9,10 @@ library(dplyr)
 library(stringr)
 library(rlang)
 
-# Change "Desktop/.../GitHub_repos" based on where paRsynth is stored on your local machine
-testing_path <- "~/Desktop/BIRDS/GitHub_repos/paRsynth/R"
+# Change the path for testing to reflect where the package is installed on your local machine
+testing_path <- "~/Desktop/GitHub_repos/paRsynth/R"
+
+# Change the desktop path to reflect where temporary directories for testing will be created to save files generated during testing
 desktop_path <- "~/Desktop"
 
 # Load the paRsynth functions that will be tested below
