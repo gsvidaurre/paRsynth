@@ -1,22 +1,12 @@
 # G.A. Juarez
 # 4 Dec 2024
 
-rm(list = ls())
-
-if (!require(testthat)) install.packages('testthat')
-library(testthat)
-
-# Change "~Desktop/.../GitHub_repos" based on where paRsynth is stored
-source("~/Desktop/BIRDS/GitHub_repos/paRsynth/R/generate_strings.R")
-source("~/Desktop/BIRDS/GitHub_repos/paRsynth/R/parsons_code.R")
-
 # 1. Unit test to check that the parsons code is the correct length
 test_that("This functions generates the correct length of parsons code", {
 
   # Avoid library calls and other changes to the virtual environment
   # See https://r-pkgs.org/testing-design.html
   withr::local_package("tidyverse")
-  withr::local_package("dplyr")
   withr::local_package("lubridate")
 
   # Just for code development
@@ -63,7 +53,6 @@ test_that("The functions generates the correct number of parson codes", {
   # Avoid library calls and other changes to the virtual environment
   # See https://r-pkgs.org/testing-design.html
   withr::local_package("tidyverse")
-  withr::local_package("dplyr")
   withr::local_package("lubridate")
 
   # Just for code development
@@ -101,7 +90,6 @@ test_that("The function generates correct parsons code",{
   # Avoid library calls and other changes to the virtual environment
   # See https://r-pkgs.org/testing-design.html
   withr::local_package("tidyverse")
-  withr::local_package("dplyr")
   withr::local_package("lubridate")
 
   # Just for code development
@@ -130,7 +118,6 @@ test_that("The function generates a data frame that has the right number of rows
   # Avoid library calls and other changes to the virtual environment
   # See https://r-pkgs.org/testing-design.html
   withr::local_package("tidyverse")
-  withr::local_package("dplyr")
   withr::local_package("lubridate")
 
   # Just for code development

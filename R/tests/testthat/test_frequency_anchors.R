@@ -3,21 +3,12 @@
 # G.A. Juarez
 # 5Dec24 - Grammar check
 
-rm(list = ls())
-
-if (!require(testthat)) install.packages('testthat')
-library(testthat)
-
-# Change "~Desktop/.../GitHub_repos" based on where paRsynth is stored
-source("~/Desktop/BIRDS/GitHub_repos/paRsynth/R/frequency_anchors.R")
-
 # 1. Unit test to check that the generation of df with multiple rows input
 test_that("The function generates df with multiple rows data frame", {
 
   # Avoid library calls and other changes to the virtual environment
   # See https://r-pkgs.org/testing-design.html
   withr::local_package("tidyverse")
-  withr::local_package("dplyr")
   withr::local_package("lubridate")
 
   # Just for code development
@@ -75,7 +66,6 @@ test_that("This function shifts up, constant, and down directions frequency corr
   # Avoid library calls and other changes to the virtual environment
   # See https://r-pkgs.org/testing-design.html
   withr::local_package("tidyverse")
-  withr::local_package("dplyr")
   withr::local_package("lubridate")
 
   # Just for code development
@@ -122,7 +112,6 @@ test_that("The function corrects negative or zero frequencies", {
   # Avoid library calls and other changes to the virtual environment
   # See https://r-pkgs.org/testing-design.html
   withr::local_package("tidyverse")
-  withr::local_package("dplyr")
   withr::local_package("lubridate")
 
   # Just for code development
