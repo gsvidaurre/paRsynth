@@ -92,7 +92,7 @@ test_that("The function creates data frame with correct audio file name format",
   expect_true("audio_file_name" %in% colnames(result_df))
 
   # Check the naming format for the first row
-  expected_filename <- paste0("TestPrefix", "_Group", df_test$Group[1], "_Ind", df_test$Individual[1],"_Call", df_test$Call_ID[1], ".wav")
+  expected_filename <- paste0("TestPrefix", "_Group", df_test$Group[1], "_Indiv", df_test$Individual[1],"_Call", df_test$Call_ID[1], ".wav")
   expect_equal(result_df$audio_file_name[1], expected_filename)
 
   # Remove the created directory and files

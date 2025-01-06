@@ -13,10 +13,11 @@
 #' @param string_length Integer. The number of characters in the string that encode individual- and group-level information through frequency modulation patterns. The current minimum is 6 characters and the maximum is 200 characters. The length of the character string can influence visualizations of synthetic vocalizations in ways that depend on the duration of the vocalization (see details below).
 #' @param group_information Integer. The number of characters that vary in the middle of the string across groups. The default is 8 characters. The user must provide an even value; negative values will result in unexpected behavior.
 #' @param individual_information Integer. The number of characters that vary in the middle of the string within groups. The default is 2 characters. The user must provide an even value; negative values will result in unexpected behavior.
+#' @param random_variation Integer. The number of characters that will vary randomly and will be appended after the individual information. The default is 2 characters. The user must provide an even value; negative values will result in unexpected behavior.
 #'
 #' @details The individual-specific and group-specific string components are combined to form the middle of a longer string. The individual-specific component of the string may not be unique to a single individual within a group, as individual distinctiveness  depends on the total number of individuals in the group, the length of the individually-specific string component, and the number of unique characters or symbols available for creating strings (which may vary depending on how users modify the function). For example, if the length of the individual-specific string component is 2 characters long and 3 unique characters are used, there will be 3^2 (or 9) possible unique individual signatures.
 #'
-#' The final string is composed of a global head (a short string of characters shared across all individuals), the group membership information, individual identity information, and a global tail (a short string of characters shared across all individuals). The global heads and tails are used to guide the start and end of frequency modulation patterns created after converting the character strings to Parsons code in later functions. The relative amount of group versus individual information across calls can be controlled by setting the length of `group_information` and `individual_information`, respectively. For example, when `group_information` is longer than `individual_information`, there will be more group membership information encoded in strings, and vice versa. The current version of the function does not facilitate varying string length within or across individuals.
+#' The final string is composed of a global head (a short string of characters shared across all individuals), the group membership information, individual identity information, random variation, and a global tail (a short string of characters shared across all individuals). The global heads and tails are used to guide the start and end of frequency modulation patterns created after converting the character strings to Parsons code in later functions. The relative amount of group versus individual information across calls can be controlled by setting the length of `group_information` and `individual_information`, respectively. For example, when `group_information` is longer than `individual_information`, there will be more group membership information encoded in strings, and vice versa. The current version of the function does not facilitate varying string length within or across individuals. The random variation added to each string simulates the stochasticity in vocal production to facilitate variation within an individual.
 #'
 #' The length of the character string can influence visualizations of the synthetic vocalizations, depending on the duration of the synthetic vocalization (which is set in `write_audio()`). Long character strings that are converted to short synthetic vocalizations may have frequency contours that appear thick and blurry in spectrograms. A general rule of thumb to yield clearer frequency contours can be to increase the duration of the synthetic vocalization (although this will increase computational time for large datasets). We have found that vocalizations of 200 ms duration have clearer frequency contours when character string length in `generate_strings()` is set to 10 characters or fewer. For strings that are 12 to about 22 characters long, a 400 ms duration vocalization will have clearer contours.
 #'
@@ -31,7 +32,7 @@
 #'
 #' @export generate_strings
 
-generate_strings <- function(n_groups = 2, n_individuals = 5, n_calls = 10, string_length = 16, group_information = 8, individual_information = 2) {
+generate_strings <- function(n_groups = 2, n_individuals = 5, n_calls = 10, string_length = 16, group_information = 8, individual_information = 2, random_variation = 2) {
 
 if (string_length < 6 || string_length > 200) {
   stop("string_length must be between 6 and 200")
@@ -61,7 +62,7 @@ if (group_information %% 2 != 0 || individual_information %% 2 != 0) {
 }
 
   # Create global header and tail strings. The length of these strings will vary depending on the length of the group-specific information (group_information) and the individual-specific information (individual_information)
-  head_tail_length <- floor((string_length - group_information - individual_information) / 2)
+  head_tail_length <- floor((string_length - group_information - individual_information - random_variation) / 2)
 
   # Generate a single head and tail for all groups
   global_head <- generate_random_string(head_tail_length)
@@ -79,10 +80,10 @@ if (group_information %% 2 != 0 || individual_information %% 2 != 0) {
   groups <- rep(1:n_groups, each = n_individuals * n_calls)
   individuals <- numeric(n_groups * n_individuals * n_calls)
   call_numbers <- numeric(n_groups * n_individuals * n_calls)
-  # Raneem's additions
   global_head_calls  <- character(n_groups * n_individuals * n_calls)
   global_tail_calls <- character(n_groups * n_individuals * n_calls)
   individual_middle_calls <- character(n_groups * n_individuals * n_calls)
+  random_string_calls <- character(n_groups * n_individuals * n_calls)
   group_head_calls <-  character(n_groups * n_individuals * n_calls)
   group_tail_calls <-  character(n_groups * n_individuals * n_calls)
 
@@ -90,16 +91,19 @@ if (group_information %% 2 != 0 || individual_information %% 2 != 0) {
     for (ind in 1:n_individuals) {
       # Generate a unique middle part for each individual
       individual_middle <- generate_random_string(individual_information)
+      # Also generate random variation that will be appended after the individual information
+      random_string <- generate_random_string(random_variation)
       if (group_information > 0) {
         group_info <- group_middles[group]
         group_head <- substr(group_info, 1, group_information / 2)
         group_tail <- substr(group_info, group_information / 2 + 1, group_information)
 
-        # Combine all components to create a string that represents a vocalization
+        # Combine all components to create a string that represents a vocalization. Append the random information after the individual identity information
         individual_call <- paste0(
           global_head,
           group_head,
           individual_middle,
+          random_string,
           group_tail,
           global_tail
         )
@@ -107,6 +111,7 @@ if (group_information %% 2 != 0 || individual_information %% 2 != 0) {
         individual_call <- paste0(
           global_head,
           individual_middle,
+          random_string,
           global_tail
         )
       }
@@ -116,10 +121,10 @@ if (group_information %% 2 != 0 || individual_information %% 2 != 0) {
         calls[idx] <- individual_call
         individuals[idx] <- ind
         call_numbers[idx] <- call
-        # Raneem's additions
         global_head_calls[idx] <- global_head
         global_tail_calls[idx] <- global_tail
         individual_middle_calls[idx] <- individual_middle
+        random_string_calls[idx] <- random_string 
         group_head_calls[idx] <- group_head
         group_tail_calls[idx] <- group_tail
       }
@@ -131,10 +136,10 @@ if (group_information %% 2 != 0 || individual_information %% 2 != 0) {
     Individual = individuals,
     Call_ID = call_numbers,
     Call = calls,
-    # Raneem's additions
     Global_head = global_head_calls,
     Group_head = group_head_calls,
     Individual_middle = individual_middle_calls,
+    Random_variation = random_string_calls,
     Group_tail = group_tail_calls,
     Global_tail = global_tail_calls,
 

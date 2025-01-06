@@ -24,7 +24,7 @@
 #'
 #' @export parsons_code
 
-parsons_code <- function(df, string_col, global_head_col, group_head_col, individual_middle_col, group_tail_col, global_tail_col, mapping = list("A" = "up", "B" = "down", "C" = "constant")) {
+parsons_code <- function(df, string_col, global_head_col, group_head_col, individual_middle_col, random_variation_col, group_tail_col, global_tail_col, mapping = list("A" = "up", "B" = "down", "C" = "constant")) {
   
   if (!is.data.frame(df)) {
     stop("The 'df' argument must be a data frame.")
@@ -51,6 +51,7 @@ parsons_code <- function(df, string_col, global_head_col, group_head_col, indivi
     dplyr::mutate(Global_Head_Parsons_Code = sapply(!!rlang::sym(global_head_col), function(string) paste(convert_to_parsons_code(string, mapping), collapse = "-"))) %>%
     dplyr::mutate(Group_Head_Parsons_Code = sapply(!!rlang::sym(group_head_col), function(string) paste(convert_to_parsons_code(string, mapping), collapse = "-"))) %>%
     dplyr::mutate(Individual_Middle_Parsons_Code = sapply(!!rlang::sym(individual_middle_col), function(string) paste(convert_to_parsons_code(string, mapping), collapse = "-"))) %>%
+    dplyr::mutate(Random_Variation_Parsons_Code = sapply(!!rlang::sym(random_variation_col), function(string) paste(convert_to_parsons_code(string, mapping), collapse = "-"))) %>%
     dplyr::mutate(Group_Tail_Parsons_Code = sapply(!!rlang::sym(group_tail_col), function(string) paste(convert_to_parsons_code(string, mapping), collapse = "-"))) %>%
     dplyr::mutate(Global_Tail_Parsons_Code = sapply(!!rlang::sym(global_tail_col), function(string) paste(convert_to_parsons_code(string, mapping), collapse = "-")))
 }

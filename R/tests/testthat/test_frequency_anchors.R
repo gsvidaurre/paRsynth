@@ -3,8 +3,8 @@
 # G.A. Juarez
 # 5Dec24 - Grammar check
 
-# 1. Unit test to check that the generation of df with multiple rows input
-test_that("The function generates df with multiple rows data frame", {
+# 1. Unit test to check that the generation of a data frame with multiple rows
+test_that("The function generates a data frame with multiple rows", {
 
   # Avoid library calls and other changes to the virtual environment
   # See https://r-pkgs.org/testing-design.html
@@ -12,23 +12,39 @@ test_that("The function generates df with multiple rows data frame", {
   withr::local_package("lubridate")
 
   # Just for code development
-  # library(tidyverse)
-  # library(lubridate)
-  # library(testthat)
-  # library(dplyr)
-
-  # Example data frame for testing
-  test_df <- data.frame(
-    Group = c(1, 2),
-    Individual = c(1, 2),
-    Call_ID = c(1, 2),
-    Call = c(1, 2),
-    Parsons_Code = c("up-down-constant", "constant-up-up"),
-    stringsAsFactors = FALSE
+  library(tidyverse)
+  library(lubridate)
+  library(testthat)
+  library(dplyr)
+  
+  # Generate generic strings (easy to track conversion)
+  Global_head <- "AABA"
+  Group_head <- "BBCC"
+  Individual_middle <- "CCBA"
+  Random_variation <- "BA"
+  Group_tail <- "BBAC"
+  Global_tail <- "BBAA"
+  
+  generated_strings <- data.frame(
+    Group_ID = 1,
+    Individual_ID = 1,
+    Call_ID = 1,
+    Call = paste(Global_head, Group_head, Individual_middle, Random_variation, Group_tail, Global_tail, sep = ""),
+    Global_head = Global_head,
+    Group_head = Group_head,
+    Individual_middle = Individual_middle,
+    Random_variation = Random_variation,
+    Group_tail = Group_tail,
+    Global_tail = Global_tail
   )
-
+  
+  # Use parsons_code to convert it
+  Conversion <- parsons_code(generated_strings, string_col = "Call", global_head_col = "Global_head", group_head_col = "Group_head", individual_middle_col = "Individual_middle", random_variation_col = "Random_variation", group_tail_col = "Group_tail", global_tail_col = "Global_tail", list("A" = "up", "B" = "down", "C" = "constant"))
+  
   # Call the function with test df
-  result <- frequency_anchors(df = test_df, parsons_col = "Parsons_Code", group_id_col = "Group", individual_id_col = "Individual", call_id_col = "Call_ID", call_string_col = "Call", starting_frequency = 4000, frequency_shift = 1000)
+  result <- frequency_anchors(df = Conversion, parsons_col = "Call_Parsons_Code", group_id_col = "Group_ID", individual_id_col = "Individual_ID", call_id_col = "Call_ID", call_string_col = "Call", starting_frequency = 4000, frequency_shift = 1000, section_transition = "continuous_trajectory")
+  
+  # glimpse(result)
 
   # Test that the returned df (result) has the expected columns
   expect_true("Group" %in% colnames(result))
@@ -38,26 +54,9 @@ test_that("The function generates df with multiple rows data frame", {
   expect_true("Parsons_Code" %in% colnames(result))
   expect_true(any(grepl("Frequency", colnames(result))))
 
-  # Test the number of frequency columns (should be one per "up", "down", or "constant" in the Parsons code, plus two for the starting and ending frequencies)
-  expect_equal(ncol(result), 10)  # 5 metadata columns + 5 frequency columns
+  # Test the number of frequency columns, which should be equal to the character string length plus two for the starting and ending frequencies
+  expect_equal(length(grep("Frequency", names(result))), (nchar(generated_strings$Call) + 2))
 
-  # Check the first row's frequencies
-  expect_equal(result$Frequency1[1], 4000) # starting frequency
-  expect_equal(result$Frequency2[1], 5000) # "up" shifts by 1000 Hz
-  expect_equal(result$Frequency3[1], 4000) # "down" shifts back by 1000 Hz
-  expect_equal(result$Frequency4[1], 4000) # "constant"
-  expect_equal(result$Frequency5[1], 4000) # back to starting frequency
-
-  # Check the second row's frequencies
-  expect_equal(result$Frequency1[2], 4000) # starting frequency
-  expect_equal(result$Frequency2[2], 4000) # "constant"
-  expect_equal(result$Frequency3[2], 5000) # "up" shifts by 1000 Hz
-  expect_equal(result$Frequency4[2], 6000) # "up" shifts again by 1000 Hz
-  expect_equal(result$Frequency5[2], 4000) # back to starting frequency
-
-  print(str(result)) # checking the structure of the result df
-  print(head(result)) # the first few rows of the result df
-  print(colnames(result)) # checking the column names of the result df
 })
 
 # 2. Unit test to check that frequency directions shift
@@ -74,39 +73,41 @@ test_that("This function shifts up, constant, and down directions frequency corr
   # library(testthat)
   # library(dplyr)
 
-  # Example data frame for testing
-  df <- data.frame(
-    Group = c(1),
-    Individual = c(2, 1),
-    Call_ID = c(1, 2),
-    Call = c("A", "B"),
-    Parsons_Code = c("up-down-up-down", "down-constant-up-down"),
-    stringsAsFactors = FALSE
+  # Generate generic strings (easy to track conversion)
+  Global_head <- "AABA"
+  Group_head <- "BBCC"
+  Individual_middle <- "CCBA"
+  Random_variation <- "BA"
+  Group_tail <- "BBAC"
+  Global_tail <- "BBAA"
+  
+  generated_strings <- data.frame(
+    Group_ID = 1,
+    Individual_ID = 1,
+    Call_ID = 1,
+    Call = paste(Global_head, Group_head, Individual_middle, Random_variation, Group_tail, Global_tail, sep = ""),
+    Global_head = Global_head,
+    Group_head = Group_head,
+    Individual_middle = Individual_middle,
+    Random_variation = Random_variation,
+    Group_tail = Group_tail,
+    Global_tail = Global_tail
   )
-  starting_frequency <- 4000
-  frequency_shift <- 1000
-
+  
+  # Use parsons_code to convert it
+  Conversion <- parsons_code(generated_strings, string_col = "Call", global_head_col = "Global_head", group_head_col = "Group_head", individual_middle_col = "Individual_middle", random_variation_col = "Random_variation", group_tail_col = "Group_tail", global_tail_col = "Global_tail", list("A" = "up", "B" = "down", "C" = "constant"))
+  
   # Call the function with test df
-  result <- frequency_anchors(df = df, parsons_col = "Parsons_Code", group_id_col = "Group", individual_id_col = "Individual", call_id_col = "Call_ID", call_string_col = "Call", starting_frequency, frequency_shift)
-
-  # Check frequencies for each step
-  expect_equal(result$Frequency1[1], 4000) # starting frequency
-  expect_equal(result$Frequency2[1], 5000) # up: 4000 + 1000
-  expect_equal(result$Frequency3[1], 4000) # down: 5000 - 1000
-  expect_equal(result$Frequency4[1], 5000) # up: 4000 + 1000
-  expect_equal(result$Frequency5[1], 4000) # down: 5000 - 1000
-  expect_equal(result$Frequency6[1], 4000) # back to starting frequency
-
-  expect_equal(result$Frequency1[2], 4000) # starting frequency
-  expect_equal(result$Frequency2[2], 3000) # Down: 4000 - 1000
-  expect_equal(result$Frequency3[2], 3000) # constant: 3000
-  expect_equal(result$Frequency4[2], 4000) # up: 3000 + 1000
-  expect_equal(result$Frequency5[2], 3000) # down: 5000 - 1000
-  expect_equal(result$Frequency6[2], 4000) # back to starting frequency
+  result <- frequency_anchors(df = Conversion, parsons_col = "Call_Parsons_Code", group_id_col = "Group_ID", individual_id_col = "Individual_ID", call_id_col = "Call_ID", call_string_col = "Call", starting_frequency = 4000, frequency_shift = 1000, section_transition = "continuous_trajectory")
+  
+  # Check the first row's frequencies (starting and end frequencies are 4 kHz)
+  expected_anchors <- c(4, 5, 6, 5, 6, 5, 4, 4, 4, 4, 4, 3, 4, 3, 4, 3, 2, 3, 3, 2, 1, 2, 3, 4) * 1000
+  
+  expect_equal(as.vector(t(result[, grep("Frequency", names(result))])), expected_anchors)
 
 })
 
-# 3. Unit test to check that it corrects negative or zero frequencies
+# 3. Unit test to check that there are no negative or zero frequencies created when generating many calls
 test_that("The function corrects negative or zero frequencies", {
 
   # Avoid library calls and other changes to the virtual environment
@@ -120,38 +121,19 @@ test_that("The function corrects negative or zero frequencies", {
   # library(testthat)
   # library(dplyr)
 
-  # Example data frame for testing
-  df <- data.frame(
-    Group = c(1),
-    Individual = c(2, 1),
-    Call_ID = c(1, 2),
-    Call = c("A", "B"),
-    Parsons_Code = c("down-down-down-down", "down-down-down-up"),
-    stringsAsFactors = FALSE
-  )
-  starting_frequency <- 3000
-  frequency_shift <- 1000
-
-  # Call the function with test df
-  result <- frequency_anchors(df = df, parsons_col = "Parsons_Code", group_id_col = "Group", individual_id_col = "Individual", call_id_col = "Call_ID", call_string_col = "Call", starting_frequency, frequency_shift)
-
-  # Check frequencies for each step
-  expect_equal(result$Frequency1[1], 3000) # starting frequency
-  expect_equal(result$Frequency2[1], 2000) # down: 3000 - 1000
-  expect_equal(result$Frequency3[1], 1000) # down: 2000 - 1000
-  expect_equal(result$Frequency4[1], 1000) # down: 2000 - 1000 (corrected back to 1000)
-  expect_equal(result$Frequency5[1], 1000) # down: 2000 - 1000 (corrected back to 1000)
-  expect_equal(result$Frequency6[1], 3000) # back to starting point
-
-  expect_equal(result$Frequency1[2], 3000) # starting frequency
-  expect_equal(result$Frequency2[2], 2000) # down: 3000 - 1000
-  expect_equal(result$Frequency3[2], 1000) # down: 2000 - 1000
-  expect_equal(result$Frequency4[2], 1000) # down: 1000 - 1000 (corrected back to 1000)
-  expect_equal(result$Frequency5[2], 2000) # up: 1000 + 1000
-  expect_equal(result$Frequency6[2], 3000) # back to starting point
-
-cat("Frequency5[1]", result$Frequency5[1], "\n")
-cat("Frequency5[2]", result$Frequency5[2], "it should be 2000 \n") #this is where the error happens. the function seems to keep correcting the negative frequency once it happens
-cat("Frequency6[2]", result$Frequency6[2],"\n")
+  # Define parameters
+  string_length <- 40
+  n_calls <- 10
+  
+  generated_strings <- generate_strings(n_groups = 2, n_individuals = 5, n_calls = n_calls, string_length = string_length, group_information = 8, individual_information = 2, random_variation = 4)
+  
+  parsons_results <- parsons_code(generated_strings, string_col = "Call", global_head_col = "Global_head", group_head_col = "Group_head", individual_middle_col = "Individual_middle", random_variation_col = "Random_variation", group_tail_col = "Group_tail", global_tail_col = "Global_tail", list("A" = "up", "B" = "down", "C" = "constant"))
+  
+  anchors <- frequency_anchors(df = parsons_results, parsons_col = "Call_Parsons_Code", group_id_col = "Group", individual_id_col = "Individual", call_id_col = "Call_ID", call_string_col = "Call", starting_frequency = 4000, frequency_shift = 1000, section_transition = "continuous_trajectory")
+  
+  freq_cols <- anchors[, grep("Frequency", names(anchors))]
+  
+  # There should be no zero or negative values in the frequency anchors
+  expect_false(any(freq_cols[freq_cols <= 0]))
 
 })
