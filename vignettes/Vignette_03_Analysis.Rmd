@@ -644,5 +644,4 @@ mds_dfEE %>%
 
 ```
 
-This is an example of an acoustic plot of a dataset that has too much group information compared to individual information. To solve this try changing the parameters so that the different between them are not that striking.
-
+This is an example of an acoustic plot of a dataset that has too much group information compared to individual information. There are to unique dots at the opposite ends of the group. There is not a lot of relevant information here to conduct downstream bioacoustic analysis. To solve this, try changing the parameters so that the difference between them are not as striking.
