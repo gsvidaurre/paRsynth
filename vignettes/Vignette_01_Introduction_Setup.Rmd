@@ -11,23 +11,23 @@ knitr::opts_chunk$set(echo = TRUE, eval = TRUE)
 
 ```
 
-This vignette will go through how to set up the paRsynth package appropriately before utilizing it for your research purposes, its functions, and purpose.
+This vignette will go through how to set up the paRsynth package appropriately before utilizing it for your research purposes, outlining its functions and purpose.
 
 <h2>Software Setup</h2>
 
 <u>Install R and RStudio</u>
 
-If you are new to using R (a programming language for statistical analysis) and RStudio (a graphical user interface for R), then I recommend checking out the introductory lesson [R for Reproducible Scientific Analysis](https://swcarpentry.github.io/r-novice-gapminder/) provided by the [Software Carpentry](https://software-carpentry.org/).
+If you are new to using R (a programming language for data visualization and statistical analysis) and RStudio (a graphical user interface for R), then I recommend checking out the introductory lesson [R for Reproducible Scientific Analysis](https://swcarpentry.github.io/r-novice-gapminder/) provided by the [Software Carpentry](https://software-carpentry.org/).
 
 * To install R on your computer, go to the [R project website](https://www.r-project.org/) and download the latest version of R for your operating system (Windows, macOS, or Linux). Follow the installation instructions provided on the site.
 
-* To install RStudio on your computer, go to the [RStudio website](https://posit.co/download/rstudio-desktop/). RStudio is an integrated development environment (IDE) that makes working with R a better and more user-friendly experience. Follow the installation instructions provided on the site.
+* To install RStudio on your computer, go to the [RStudio website](https://posit.co/download/rstudio-desktop/). RStudio is an integrated development environment (IDE) that makes working with R an accessible and more user-friendly experience. Follow the installation instructions provided on the site.
 
 Once you have R and RStudio installed on your computer, you can open RStudio by clicking on the software icon.
 
 <u>Configure your RStudio session</u>
 
-You can reconfigure the panes so that the source and console panes are horizontally adjacent to one another. This makes it easier to immediately check the output of any code that you run.
+RStudio displays four panes in your workspace: source, console, environment, and files. You can reconfigure the panes so that the source and console panes are horizontally adjacent to one another. This makes it easier to immediately check the output of any code that you run.
 
 * Go to the menu along the top bar of the RStudio window and select the option "Tools"
 
@@ -37,7 +37,7 @@ You can reconfigure the panes so that the source and console panes are horizonta
 
 * Use the dropdown menus to select "Source" as the top right pane and "Console" as the top left pane
 
-* Select "Apply" to apply those changes, then "Ok" to exit this window 
+* Select "Apply" to apply those changes, then "OK" to exit this window 
 
 You can also reconfigure the soft-wrapping lines of text and code. You don't have to scroll horizontally to see long lines of text in your Source pane.
 
@@ -47,9 +47,9 @@ You can also reconfigure the soft-wrapping lines of text and code. You don't hav
 
 * Select the option "Code" along the left hand side
 
-* Check the box next to the option "Soft-wrap R source files"
+* Check the box next to the option "Soft-wrap source files"
 
-* Select "Apply" to apply those changes, then "Ok" to exit this window 
+* Select "Apply" to apply those changes, then "OK" to exit this window 
 
 You can also change the font size, font color, and background color of your RStudio workspace. 
 
@@ -83,7 +83,7 @@ You will need to install GitHub Desktop to later clone the paRsynth package on y
 
 * Click on the blue "Clone" button 
 
-* Check to see that the paRsynth package is located in the appropriate local path of your machine that you assigned it
+* Check to see that the paRsynth package is located in the appropriate local path of your machine that you assigned it to
 
 <h2> Package Introduction</h2>
 
@@ -93,7 +93,7 @@ Please read the README.rmd file for more information on the package, code collab
 
 <u>Purpose</u>
 
-paRsynth provides four functions for the simulation of vocalizations with representation of both individual identity and group membership information. These vocalizations are encoded as strings that can be used for generating synthetic audio signals for bioacoustic analysis. This vignette will demonstrate how to use the package's functions to generate vocalizations strings, convert them into Parsons code, calculate frequency anchors, and generate synthetic audio files.
+paRsynth provides four functions for the simulation of vocalizations with representation of both individual identity and group membership information. These vocalizations are encoded as strings that can be used for generating synthetic audio signals for bioacoustic analysis. The next vignette (Vignette_02_Using_paRsynth_Functions) will demonstrate how to use the package's functions to generate vocalizations strings, convert them into Parsons code, calculate frequency anchors, and generate synthetic audio files.
 
 1. generate_strings(): generates strings that encode group membership information and individual identity information.
 
@@ -108,4 +108,4 @@ paRsynth provides four functions for the simulation of vocalizations with repres
 <br>
 ![paRsynth graphic workflow](~/Desktop/BIRDS/WorkflowGraphics/paRsynthMethods/paRsynth_methods_workflow_horizontal.svg)
 
-Navigate to Vignette 02 Using paRsynth Functions to learn how to use the package described above for your projects.
+Navigate to Vignette 02 (Using paRsynth Functions) to learn how to use the package described above for your projects.
