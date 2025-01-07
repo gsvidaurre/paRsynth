@@ -12,10 +12,10 @@ test_that("The function generates a data frame with multiple rows", {
   withr::local_package("lubridate")
 
   # Just for code development
-  library(tidyverse)
-  library(lubridate)
-  library(testthat)
-  library(dplyr)
+  # library(tidyverse)
+  # library(lubridate)
+  # library(testthat)
+  # library(dplyr)
   
   # Generate generic strings (easy to track conversion)
   Global_head <- "AABA"
@@ -54,8 +54,8 @@ test_that("The function generates a data frame with multiple rows", {
   expect_true("Parsons_Code" %in% colnames(result))
   expect_true(any(grepl("Frequency", colnames(result))))
 
-  # Test the number of frequency columns, which should be equal to the character string length plus two for the starting and ending frequencies
-  expect_equal(length(grep("Frequency", names(result))), (nchar(generated_strings$Call) + 2))
+  # Test the number of frequency columns, which should be equal to the character string length plus 1 for the starting frequency
+  expect_equal(length(grep("Frequency", names(result))), (nchar(generated_strings$Call) + 1))
 
 })
 
@@ -68,10 +68,10 @@ test_that("This function shifts up, constant, and down directions frequency corr
   withr::local_package("lubridate")
 
   # Just for code development
-  # library(tidyverse)
-  # library(lubridate)
-  # library(testthat)
-  # library(dplyr)
+  library(tidyverse)
+  library(lubridate)
+  library(testthat)
+  library(dplyr)
 
   # Generate generic strings (easy to track conversion)
   Global_head <- "AABA"
@@ -100,8 +100,8 @@ test_that("This function shifts up, constant, and down directions frequency corr
   # Call the function with test df
   result <- frequency_anchors(df = Conversion, parsons_col = "Call_Parsons_Code", group_id_col = "Group_ID", individual_id_col = "Individual_ID", call_id_col = "Call_ID", call_string_col = "Call", starting_frequency = 4000, frequency_shift = 1000, section_transition = "continuous_trajectory")
   
-  # Check the first row's frequencies (starting and end frequencies are 4 kHz)
-  expected_anchors <- c(4, 5, 6, 5, 6, 5, 4, 4, 4, 4, 4, 3, 4, 3, 4, 3, 2, 3, 3, 2, 1, 2, 3, 4) * 1000
+  # Check the first row's frequencies (the starting frequency is 4 kHz)
+  expected_anchors <- c(4, 5, 6, 5, 6, 5, 4, 4, 4, 4, 4, 3, 4, 3, 4, 3, 2, 3, 3, 2, 1, 2, 3) * 1000
   
   expect_equal(as.vector(t(result[, grep("Frequency", names(result))])), expected_anchors)
 
