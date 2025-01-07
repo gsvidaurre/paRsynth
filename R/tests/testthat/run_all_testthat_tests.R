@@ -8,6 +8,7 @@ library(testthat)
 library(dplyr)
 library(stringr)
 library(rlang)
+library(pbapply)
 
 # Change the path for testing to reflect where the package is installed on your local machine
 testing_path <- "~/Desktop/GitHub_repos/paRsynth/R"

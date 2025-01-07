@@ -90,8 +90,8 @@ write_audio <- function(df, sylLen = 200, sampling_rate = 200000, smoothing = li
     dir.create(save_path, recursive = TRUE)
   }
 
-  df2 <- data.table::rbindlist(lapply(seq_len(nrow(df)), function(i) {
-    
+  df2 <- data.table::rbindlist(pblapply(seq_len(nrow(df)), function(i) {
+
     # Extract frequencies from the data frame
     frequencies <- as.numeric(df[i, grep("^Frequency", colnames(df))])
 
