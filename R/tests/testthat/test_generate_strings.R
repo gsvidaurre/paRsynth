@@ -10,9 +10,9 @@ test_that("The function generates strings that have the correct length", {
   withr::local_package("lubridate")
   
   # Just for code development
-  # library(tidyverse)
-  # library(lubridate)
-  # library(testthat)
+  library(tidyverse)
+  library(lubridate)
+  library(testthat)
   
   # Define parameters
   group_information <- 8

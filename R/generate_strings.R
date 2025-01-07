@@ -98,14 +98,6 @@ generate_strings <- function(n_groups = 2, n_individuals = 5, n_calls = 10, stri
         # Generate random variation per call that will be appended after the individual information (to create variation within individuals)
         random_string <- generate_random_string(random_variation)
         
-        # Save general values for the current loop iteration
-        idx <- ((group - 1) * n_individuals * n_calls) + ((ind - 1) * n_calls) + call
-        individuals[idx] <- ind
-        call_numbers[idx] <- call
-        global_head_calls[idx] <- global_head
-        global_tail_calls[idx] <- global_tail
-        random_string_calls[idx] <- random_string 
-        
         # Assemble the string with both group and individual information if both group and individual information are greater than 0
         if(group_information > 0 & individual_information > 0){
           
@@ -123,9 +115,19 @@ generate_strings <- function(n_groups = 2, n_individuals = 5, n_calls = 10, stri
             global_tail
           )
           
+          # Save general values for the current loop iteration
+          idx <- ((group - 1) * n_individuals * n_calls) + ((ind - 1) * n_calls) + call
+          individuals[idx] <- ind
+          call_numbers[idx] <- call
+          global_head_calls[idx] <- global_head
+          global_tail_calls[idx] <- global_tail
+          random_string_calls[idx] <- random_string
           individual_middle_calls[idx] <- individual_middle
           group_head_calls[idx] <- group_head
           group_tail_calls[idx] <- group_tail
+          
+          # Save the full assembled vocalization for the current loop iteration
+          calls[idx] <- individual_call
           
           # Assemble the string with individual information only if group information is 0
         } else if(group_information == 0 & individual_information > 0){
@@ -137,9 +139,19 @@ generate_strings <- function(n_groups = 2, n_individuals = 5, n_calls = 10, stri
             global_tail
           )
           
-          individual_middle_calls[idx] <- NA
-          group_head_calls[idx] <- group_head
-          group_tail_calls[idx] <- group_tail
+          # Save general values for the current loop iteration
+          idx <- ((group - 1) * n_individuals * n_calls) + ((ind - 1) * n_calls) + call
+          individuals[idx] <- ind
+          call_numbers[idx] <- call
+          global_head_calls[idx] <- global_head
+          global_tail_calls[idx] <- global_tail
+          random_string_calls[idx] <- random_string
+          individual_middle_calls[idx] <- individual_middle
+          group_head_calls[idx] <- NA
+          group_tail_calls[idx] <- NA
+          
+          # Save the full assembled vocalization for the current loop iteration
+          calls[idx] <- individual_call
           
           # Assemble the string with group information only if individual information is 0
         } else if(group_information > 0 & individual_information == 0){
@@ -156,14 +168,21 @@ generate_strings <- function(n_groups = 2, n_individuals = 5, n_calls = 10, stri
             global_tail
           )
           
-          individual_middle_calls[idx] <- individual_middle
-          group_head_calls[idx] <- NA
-          group_tail_calls[idx] <- NA
+          # Save general values for the current loop iteration
+          idx <- ((group - 1) * n_individuals * n_calls) + ((ind - 1) * n_calls) + call
+          individuals[idx] <- ind
+          call_numbers[idx] <- call
+          global_head_calls[idx] <- global_head
+          global_tail_calls[idx] <- global_tail
+          random_string_calls[idx] <- random_string 
+          individual_middle_calls[idx] <- NA
+          group_head_calls[idx] <- group_head
+          group_tail_calls[idx] <- group_tail
+          
+          # Save the full assembled vocalization for the current loop iteration
+          calls[idx] <- individual_call
           
         }
-        
-        # Save the full assembled vocalization for the current loop iteration
-        calls[idx] <- individual_call
         
       }
     }
@@ -180,10 +199,7 @@ generate_strings <- function(n_groups = 2, n_individuals = 5, n_calls = 10, stri
     Individual_middle = individual_middle_calls,
     Random_variation = random_string_calls,
     Group_tail = group_tail_calls,
-    Global_tail = global_tail_calls,
-    
-    
-    stringsAsFactors = FALSE
+    Global_tail = global_tail_calls
   )
 }
 
