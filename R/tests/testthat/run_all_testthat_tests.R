@@ -29,3 +29,4 @@ test_file(file.path(testing_path, "tests/testthat", "test_parsons_code.R"))
 test_file(file.path(testing_path, "tests/testthat", "test_frequency_anchors.R"))
 
 test_file(file.path(testing_path, "tests/testthat", "test_write_audio.R"))
+
