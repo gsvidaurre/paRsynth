@@ -204,6 +204,9 @@ invisible(file.rename(file.path(images_path, imgs), file.path(images_path, new_n
 
 This will output appropriately named spectrograms for the generated vocalizations in the selection table created previously. 
 
+<br>
+![Example Spectrogram: GroupMembership_Group1_Ind1_Call1](~/Desktop/BIRDS/paRsynth_Data/paRsynth_methods_synthetic_dataset/Figures/GroupMembership_Group1_Ind1_Call1 copy.png)
+
 <u> Step 3: Perform spectrogrphic cross-correlation (SPCC) to measure acoustic similarity of all calls in dataset (pairwise similarity matrix) </u>
 
 Now, we are getting the key analysis step. Using warbleR, an spectrographic cross-correlation (SPCC) can be performed to find acoustic similarities in the spectrograms created. 
@@ -324,7 +327,10 @@ mds_df %>%
   
 ```
 
-This will output an acoustic space plot to represent the acoustic similarity of the paRsynth generated vocalizations using the spectrograms created in vignette 02 for the first data set that has more group information. 
+This will output an acoustic space plot to represent the acoustic similarity of the paRsynth generated vocalizations using the spectrograms created in vignette 02 for the first data set that has more group information.
+
+<br>
+![Acoustic Space Plot for Example 1](~/Desktop/BIRDS/paRsynth_Data/paRsynth_methods_synthetic_dataset/Figures/Acoustic_Space_Plot_1.png)
 
 **2nd Example - Individual Information > Group Information**
 
@@ -447,7 +453,10 @@ mds_df2 %>%
 
 ```
 
-This will output an acoustic space plot to represent the acoustic similarity of the paRsynth generated vocalizations using the spectrograms created in vignette 02 for the second data set that has more individual information. 
+This will output an acoustic space plot to represent the acoustic similarity of the paRsynth generated vocalizations using the spectrograms created in vignette 02 for the second data set that has more individual information.
+
+<br>
+![Acoustic Space Plot for Example 2](~/Desktop/BIRDS/paRsynth_Data/paRsynth_methods_synthetic_dataset/Figures/Acoustic_Space_Plot_2.png)
 
 This last vignette has showed you how to conduct downstream bioacoustic analysis on two datasets: 1) more group information and 2) more individual information and create acoustic space plots for them. You completed the final vignette of the paRsynth package, well done!
 
@@ -643,5 +652,8 @@ mds_dfEE %>%
   )
 
 ```
+
+<br>
+![Acoustic Space Plot for Example 1](~/Desktop/BIRDS/paRsynth_Data/paRsynth_methods_synthetic_dataset/Figures/Acoustic_Space_Plot_EE.png)
 
 This is an example of an acoustic plot of a dataset that has too much group information compared to individual information. There are to unique dots at the opposite ends of the group. There is not a lot of relevant information here to conduct downstream bioacoustic analysis. To solve this, try changing the parameters so that the difference between them are not as striking.
