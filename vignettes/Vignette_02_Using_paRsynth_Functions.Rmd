@@ -47,7 +47,8 @@ invisible(lapply(1:length(X), function(x){
 # X <- c(X, "paRsynth")
 
 # Change "Desktop/.../GitHub_repos" based on where paRsynth is stored on your local machine
-testing_path <- "C://Users/summe/OneDrive/Desktop/github_repo/paRsynth/R/"
+# testing_path <- "C://Users/summe/OneDrive/Desktop/github_repo/paRsynth/R/" # Summer's testing path
+testing_path <- "~/Desktop/BIRDS/GitHub_repos/paRsynth/R" # Alexandra's testing path
 
 # Load the paRsynth functions that will be tested below
 source(file.path(testing_path, "generate_strings.R"))
@@ -69,8 +70,8 @@ It is important to have your files organized, especially when creating many diff
 # Initialize a base path (this will need to be different per user)
 # path <- "/Users/raneemsamman/Desktop" # Raneem's path
 # path <- "/Users/gracesmith-vidaurre/Desktop" # Grace's path
-# path <- "/Users/gretheljuarez/Desktop/BIRDS/paRsynth_Data" # Alexandra's path
-path <- "/Users/summe/OneDrive/Desktop/" # Summer's path
+path <- "/Users/gretheljuarez/Desktop/BIRDS/paRsynth_Data" # Alexandra's path
+# path <- "/Users/summe/OneDrive/Desktop/" # Summer's path
 
 # Initialize the directory for analysis on your local computer
 analysis_dir <- "paRsynth_methods_synthetic_dataset"
@@ -138,11 +139,11 @@ individual_information <- 2
 group_information <- individual_information * factor_ratio
 
 # Initialize the values of the number of groups, individuals, calls, and string length
-n_groups <- 3
+n_groups <- 2
 n_individuals <- 10
-n_calls <- 4
+n_calls <- 2
 
-#There are pieces of the string at the head and tail that is shared among all individuals to bound the variation. Number input here is split in half and those amount of characters are allocated to head and tail of string
+# The global_strings refers to the number of characters in the the head and tail shared among all calls in the dataset to bound the variation. Number input here is split in half and those amount of characters are allocated to head and tail of string
 global_strings <- 4 
 string_length <- (group_information + individual_information) + global_strings
 
@@ -309,8 +310,10 @@ It may be helpful for downstream bioacoustic analysis to create a CSV file inclu
 ```{r}
 
 # Read the CSV file of each dataset
-group <- read.csv("/Users/summe/OneDrive/Desktop/paRsynth_methods_synthetic_dataset/synthetic_call_metadata1.csv")
-individual <- read.csv("/Users/summe/OneDrive/Desktop/paRsynth_methods_synthetic_dataset/synthetic_call_metadata2.csv")
+# group <- read.csv("/Users/summe/OneDrive/Desktop/paRsynth_methods_synthetic_dataset/synthetic_call_metadata1.csv")
+# individual <- read.csv("/Users/summe/OneDrive/Desktop/paRsynth_methods_synthetic_dataset/synthetic_call_metadata2.csv") # Summer's CSV files
+group <- read.csv("~/Desktop/BIRDS/paRsynth_Data/paRsynth_methods_synthetic_dataset/synthetic_call_metadata1.csv")
+individual <- read.csv("~/Desktop/BIRDS/paRsynth_Data/paRsynth_methods_synthetic_dataset/synthetic_call_metadata2.csv")
 
 # Combine the CSV files of each dataset
 synthetic_call_metadata <- rbind(group, individual)
