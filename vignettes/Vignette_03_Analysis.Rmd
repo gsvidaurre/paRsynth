@@ -522,7 +522,7 @@ sel_tblEE <- data.table::rbindlist(lapply(1:length(wavs), function(w){
   
   tmpEE <- tuneR::readWave(file.path(audio_path, wavs[w]))
   
-  synthetic_call_metadataEEcsv <- read.csv("~/Desktop/BIRDS/paRsynth_Data/paRsynth_methods_synthetic_dataset/synthetic_call_metadataEE.csv")
+  synthetic_call_metadataEEcsv <- read.csv("/Users/summe/OneDrive/Desktop/paRsynth_methods_synthetic_dataset/synthetic_call_metadataEE.csv") #read.csv("~/Desktop/BIRDS/paRsynth_Data/paRsynth_methods_synthetic_dataset/synthetic_call_metadataEE.csv")
   
   metadats_tmpEE <- synthetic_call_metadataEEcsv %>%
     dplyr::filter(grepl(wavs[w], audio_file_name))
@@ -662,4 +662,4 @@ mds_dfEE %>%
 <br>
 ![Acoustic Space Plot for Example 1](~/Desktop/BIRDS/paRsynth_Data/paRsynth_methods_synthetic_dataset/Figures/Acoustic_Space_Plot_EE.png)
 
-This is an example of an acoustic plot of a dataset that has too much group information compared to individual information. There are to unique dots at the opposite ends of the group. There is not a lot of relevant information here to conduct downstream bioacoustic analysis. To solve this, try changing the parameters so that the difference between them are not as striking.
+This is an example of an acoustic plot of a dataset that has too much group information compared to individual information. Two unique dots can be seen at opposite ends of the plot - meaning there is not a lot of relevant information here to conduct acoustic analyses. To solve this, try changing the parameters so that the difference between them are not as striking.
