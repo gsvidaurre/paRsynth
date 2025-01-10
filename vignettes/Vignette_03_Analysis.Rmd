@@ -43,7 +43,8 @@ invisible(lapply(1:length(X), function(x){
 # X <- c(X, "paRsynth")
 
 # Change "Desktop/.../GitHub_repos" based on where paRsynth is stored on your local machine
-testing_path <- "/Users/summe/OneDrive/Desktop/github_repo/paRsynth/R/"
+# testing_path <- "/Users/summe/OneDrive/Desktop/github_repo/paRsynth/R/"
+testing_path <- "~/Desktop/BIRDS/GitHub_repos/paRsynth/R/"
 
 # Load the paRsynth functions that will be tested below
 source(file.path(testing_path, "generate_strings.R"))
@@ -65,8 +66,8 @@ It is important to have your files organized, especially when creating many diff
 # Initialize a base path (this will need to be different per user)
 # path <- "/Users/raneemsamman/Desktop" # Raneem's path
 # path <- "/Users/gracesmith-vidaurre/Desktop" # Grace's path
-# path <- "/Users/gretheljuarez/Desktop/BIRDS/paRsynth_Data" # Alexandra's path
-path <- "/Users/summe/OneDrive/Desktop/"
+path <- "/Users/gretheljuarez/Desktop/BIRDS/paRsynth_Data" # Alexandra's path
+# path <- "/Users/summe/OneDrive/Desktop/"
 
 # Initialize the directory for analysis on your local computer (this is likely the name of the folder all of you data is being stored in)
 analysis_dir <- "paRsynth_methods_synthetic_dataset"
@@ -126,7 +127,7 @@ sel_tbl <- data.table::rbindlist(lapply(1:length(wavs), function(w){
   
   # Return the metadata for the given call using the synthetic metadata generated during audio file generation above
   
-  synthetic_call_metadata <- read.csv("/Users/summe/OneDrive/Desktop/paRsynth_methods_synthetic_dataset/synthetic_call_metadata.csv")
+  synthetic_call_metadata <- read.csv("~/Desktop/BIRDS/paRsynth_Data/paRsynth_methods_synthetic_dataset/synthetic_call_metadata.csv")
   
   metadats_tmp <- synthetic_call_metadata %>%
     dplyr::filter(grepl(wavs[w], audio_file_name))
@@ -172,7 +173,7 @@ sel_tbl <- data.table::rbindlist(lapply(1:length(wavs), function(w){
 View(sel_tbl) 
 glimpse(sel_tbl)
 
-########### Would be helpful to have a comment here as to why we checked that all rows had 150000 for the sampling rate
+# Check the selection table for all the unique sampling rates
 unique(sel_tbl$sampling_rate)
 
 ```
@@ -255,7 +256,7 @@ Using the results from the SPCC, acoustic space plots can be used as a figure to
 
 View(xc_mat)
 
-# Convert to a distance matrix and dist object for isoMDS (######### describe?)
+# Convert to a distance matrix and dist object for isoMDS (helps visualize the data in a simplified way)
 dist_mat <- stats::as.dist(1 - xc_mat, diag = TRUE, upper = TRUE)
 # str(dist_mat)
 
@@ -349,7 +350,6 @@ IndividualIdentity_sel_tbl <- sel_tbl %>%
 
 warbleR::spectrograms(IndividualIdentity_sel_tbl, wl = 512, flim = c(0, 12), wn = "hanning", pal = reverse.gray.colors.2,ovlp = 90, inner.mar = c(5, 4, 4, 2), outer.mar = c(0, 0, 0, 0), picsize = 1, res = 100, cexlab = 1, propwidth = FALSE, xl = 1, osci = FALSE, gr = FALSE, sc = FALSE, line = FALSE, mar = 0.05, it = "jpeg", parallel = 1, path = audio_path, pb = TRUE, fast.spec = FALSE, by.song = NULL, sel.labels = NULL, title.labels = NULL, dest.path = images_path, box = TRUE, axis = TRUE)
 
-# Rename the image files
 imgs <- list.files(images_path)
 imgs
 
@@ -363,28 +363,19 @@ xc_mat2 <- warbleR::cross_correlation(IndividualIdentity_sel_tbl, wl = 512, ovlp
 str(xc_mat2)
 dim(xc_mat2)
 
-# xc_mat[1:5, 16:24]
-
 xc_mat2[xc_mat2 < 0]
 
-# Get the percentage of values that are negative
 neg_values2 <- length(xc_mat2[xc_mat2<0])/(dim(xc_mat2)[1]*dim(xc_mat2)[2])
 
-# Stop the function if the percentage of negative values is > 0%
 if(neg_values2 > 0){
   stop("Negative values are present in the spectrographic cross-correlation matrix")
 }
 
 xc_mat2[xc_mat2 < 0]
 
-# Update the dimension names of the matrix
 dimnames(xc_mat2) <- list(IndividualIdentity_sel_tbl$sound.files, IndividualIdentity_sel_tbl$sound.files)
 
-# View(xc_mat2)
-
-# Convert to a distance matrix and dist object for isoMDS
 dist_mat2 <- stats::as.dist(1 - xc_mat2, diag = TRUE, upper = TRUE)
-# str(dist_mat)
 
 iso2 <- invisible(MASS::isoMDS(dist_mat2, k = 2, maxit = 1000, trace = FALSE))
 str(iso2)
@@ -407,31 +398,19 @@ mds_df2 <- data.frame(
     unique_individuals = factor(unique_individuals)
   )
 
-glimpse(mds_df2)
-# View(mds_df)
-
 levels(mds_df2$group_ID)
 levels(mds_df2$individual_ID)
 levels(mds_df2$unique_individuals)
 
-# Colors by group
 cols <- scales::alpha(c("navy", "orange"), 0.65)
 length(cols)
 
-# Shapes by individual within groups
 shps <- c(0, 1, 2, 5, 6, 15, 19, 17, 18, 14)
 length(shps)
-
-# Convex hull polygons per group or unique individual
-# hulls <- plyr::ddply(mds_df, "unique_individuals", function(x){
-#   x[chull(x$X, x$Y), ]
-# })
 
 hulls2 <- plyr::ddply(mds_df2, "group_ID", function(x){
   x[chull(x$X, x$Y), ]
 })
-
-glimpse(hulls2)
 
 mds_df2 %>%
   ggplot(aes(x = X, y = Y, color = group_ID)) + 
@@ -522,7 +501,8 @@ sel_tblEE <- data.table::rbindlist(lapply(1:length(wavs), function(w){
   
   tmpEE <- tuneR::readWave(file.path(audio_path, wavs[w]))
   
-  synthetic_call_metadataEEcsv <- read.csv("/Users/summe/OneDrive/Desktop/paRsynth_methods_synthetic_dataset/synthetic_call_metadataEE.csv") #read.csv("~/Desktop/BIRDS/paRsynth_Data/paRsynth_methods_synthetic_dataset/synthetic_call_metadataEE.csv")
+  # synthetic_call_metadataEEcsv <- read.csv("/Users/summe/OneDrive/Desktop/paRsynth_methods_synthetic_dataset/synthetic_call_metadataEE.csv")  
+  synthetic_call_metadataEEcsv <-read.csv("~/Desktop/BIRDS/paRsynth_Data/paRsynth_methods_synthetic_dataset/synthetic_call_metadataEE.csv")
   
   metadats_tmpEE <- synthetic_call_metadataEEcsv %>%
     dplyr::filter(grepl(wavs[w], audio_file_name))
@@ -558,9 +538,6 @@ sel_tblEE <- data.table::rbindlist(lapply(1:length(wavs), function(w){
   return(resEE)
   
 }))
-
-
-glimpse(sel_tblEE)
 
 unique(sel_tblEE$sampling_rate)
 
