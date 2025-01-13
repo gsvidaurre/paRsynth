@@ -8,7 +8,6 @@ output: html_document
 ```{r setup, include = FALSE}
 
 knitr::opts_chunk$set(echo = TRUE, eval = TRUE)
-
 ```
 
 This vignette will go through how to set up the paRsynth package appropriately before utilizing it for your research purposes, outlining its functions and purpose.
@@ -104,8 +103,6 @@ paRsynth provides four functions for the simulation of vocalizations with repres
 4. write_audio(): uses frequency anchors and the 'soundgen' package to generate and save synthetic audio files.
 
 <br>
-![paRsynth graphic workflow](~/Desktop/BIRDS/WorkflowGraphics/paRsynthMethods/paRsynth_methods_workflow.svg)
-<br>
-![paRsynth graphic workflow](~/Desktop/BIRDS/WorkflowGraphics/paRsynthMethods/paRsynth_methods_workflow_horizontal.svg)
+![paRsynth Functions Workflow](~/Desktop/BIRDS/WorkflowGraphics/paRsynthMethods/paRsynth_methods_workflow_horizontal_vignette.svg)
 
 Navigate to Vignette 02 (Using paRsynth Functions) to learn how to use the package described above for your projects.
