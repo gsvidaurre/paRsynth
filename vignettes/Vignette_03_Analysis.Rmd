@@ -170,7 +170,6 @@ sel_tbl <- data.table::rbindlist(lapply(1:length(wavs), function(w){
 }))
 
 # See the selection table in warbleR format with all useful metadata for the synthetic experiment
-View(sel_tbl) 
 glimpse(sel_tbl)
 
 # Check the selection table for all the unique sampling rates
@@ -253,9 +252,6 @@ This will output data about the measured acoustic similarities of all the vocali
 Using the results from the SPCC, acoustic space plots can be used as a figure to represent the acoustic similarity of all the calls in the dataset. Here we will use the vocalizations where more group information is encoded within the calls.
 
 ```{r message = FALSE, warning = FALSE}
-
-View(xc_mat)
-
 # Convert to a distance matrix and dist object for isoMDS (helps visualize the data in a simplified way)
 dist_mat <- stats::as.dist(1 - xc_mat, diag = TRUE, upper = TRUE)
 # str(dist_mat)
