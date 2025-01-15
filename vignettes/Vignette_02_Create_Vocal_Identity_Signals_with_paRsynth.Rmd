@@ -193,7 +193,7 @@ calls_parsons_frequencies <- frequency_anchors(
   call_id_col = "Call_ID", 
   call_string_col = "Call", 
   starting_frequency = 4000, 
-  frequency_shift = 1000
+  frequency_shift = 1000,
   )
 
 glimpse(calls_parsons_frequencies)
