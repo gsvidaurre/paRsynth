@@ -1,5 +1,5 @@
 ---
-title: "Vignette 01 Introduction/Setup"
+title: "Vignette 01: Setup and Introduction"
 author: "GAJ"
 date: "2024-11-25"
 output: html_document
@@ -12,21 +12,19 @@ knitr::opts_chunk$set(echo = TRUE, eval = TRUE)
 
 This vignette will go through how to set up the paRsynth package appropriately before utilizing it for your research purposes, outlining its functions and purpose.
 
-<h2>Software Setup</h2>
-
-<u>Install R and RStudio</u>
-
-If you are new to using R (a programming language for data visualization and statistical analysis) and RStudio (a graphical user interface for R), then I recommend checking out the introductory lesson [R for Reproducible Scientific Analysis](https://swcarpentry.github.io/r-novice-gapminder/) provided by the [Software Carpentry](https://software-carpentry.org/).
+<h2>Install R and RStudio</h2>
 
 * To install R on your computer, go to the [R project website](https://www.r-project.org/) and download the latest version of R for your operating system (Windows, macOS, or Linux). Follow the installation instructions provided on the site.
 
 * To install RStudio on your computer, go to the [RStudio website](https://posit.co/download/rstudio-desktop/). RStudio is an integrated development environment (IDE) that makes working with R an accessible and more user-friendly experience. Follow the installation instructions provided on the site.
 
+Check out the introductory lesson [R for Reproducible Scientific Analysis](https://swcarpentry.github.io/r-novice-gapminder/) provided by the [Software Carpentry](https://software-carpentry.org/) if you are new to R and RStudio.
+
 Once you have R and RStudio installed on your computer, you can open RStudio by clicking on the software icon.
 
-<u>Configure your RStudio session</u>
+<h2>Configure your RStudio session</h2>
 
-RStudio displays four panes in your workspace: source, console, environment, and files. You can reconfigure the panes so that the source and console panes are horizontally adjacent to one another. This makes it easier to immediately check the output of any code that you run.
+RStudio displays four panes in your workspace: source, console, environment, and files. You can reconfigure the panes so that the source and console panes are horizontally next to one another. This makes it easier to immediately check the output of any code that you run.
 
 * Go to the menu along the top bar of the RStudio window and select the option "Tools"
 
@@ -58,7 +56,7 @@ You can also change the font size, font color, and background color of your RStu
 
 * Select the option "Appearance" along the left hand side to see some different options
 
-<u>Install GitHub</u>
+<h2>Install GitHub</h2>
 
 You will need to install GitHub Desktop to later clone the paRsynth package on your local machine.
 
@@ -66,7 +64,7 @@ You will need to install GitHub Desktop to later clone the paRsynth package on y
 
 * Open GitHub Desktop by clicking on the software icon after downloaded 
 
-<u>Clone paRsynth</u>
+<h2>Clone paRsynth</h2>
 
 * Open the [paRsynth GitHub repository](https://github.com/gsvidaurre/paRsynth) on your internet browser
 
@@ -90,7 +88,7 @@ paRsynth uses Parsons code to convert character strings to frequency modulated v
 
 Please read the README.rmd file for more information on the package, code collaborators, code collaboration guidelines and package usage/maintenance. Refer to that file if you have trouble-shooting errors or would like to know how to report a bug on GitHub.
 
-<u>Purpose</u>
+<h2>Purpose</h2>
 
 paRsynth provides four functions for the simulation of vocalizations with representation of both individual identity and group membership information. These vocalizations are encoded as strings that can be used for generating synthetic audio signals for bioacoustic analysis. The next vignette (Vignette_02_Using_paRsynth_Functions) will demonstrate how to use the package's functions to generate vocalizations strings, convert them into Parsons code, calculate frequency anchors, and generate synthetic audio files.
 
@@ -103,6 +101,4 @@ paRsynth provides four functions for the simulation of vocalizations with repres
 4. write_audio(): uses frequency anchors and the 'soundgen' package to generate and save synthetic audio files.
 
 ![paRsynth Functions Workflow](/Users/gretheljuarez/Desktop/BIRDS/GitHub_repos/paRsynth/vignettes/images/paRsynth_methods_workflow_horizontal_vignette_pic-1-min.png)
-<br>
-
-Navigate to Vignette 02 (Using paRsynth Functions) to learn how to use the package described above for your projects.
+Navigate to Vignette 02: Create Vocal Identity Signals with paRsynth to learn how to use the package described above for your projects.
