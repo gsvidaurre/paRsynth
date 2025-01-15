@@ -70,7 +70,7 @@ It is important to have your files organized, especially when creating many diff
 # Initialize a base path (this will need to be different per user)
 # path <- "/Users/raneemsamman/Desktop" # Raneem's path
 # path <- "/Users/gracesmith-vidaurre/Desktop" # Grace's path
-path <- "/Users/gretheljuarez/Desktop/BIRDS/paRsynth_Data" # Alexandra's path
+path <- "/Users/gretheljuarez/Desktop/BIRDS/" # Alexandra's path
 # path <- "/Users/summe/OneDrive/Desktop/" # Summer's path
 
 # Initialize the directory for analysis on your local computer
@@ -305,6 +305,8 @@ glimpse(synthetic_call_metadata2)
 
 The .wav files for this dataset have been added to the audio folder and a CSV file has been created for it. After running this code you will have two datasets: 1) reflects vocalizations with more group information than individual and 2) vice versa. 
 
+<u> EXTRA STEP 6: Combine datasets into one single CSV file </u>
+
 It may be helpful for downstream bioacoustic analysis to create a CSV file including both datasets.
 
 ```{r}
@@ -312,8 +314,8 @@ It may be helpful for downstream bioacoustic analysis to create a CSV file inclu
 # Read the CSV file of each dataset
 # group <- read.csv("/Users/summe/OneDrive/Desktop/paRsynth_methods_synthetic_dataset/synthetic_call_metadata1.csv")
 # individual <- read.csv("/Users/summe/OneDrive/Desktop/paRsynth_methods_synthetic_dataset/synthetic_call_metadata2.csv") # Summer's CSV files
-group <- read.csv("~/Desktop/BIRDS/paRsynth_Data/paRsynth_methods_synthetic_dataset/synthetic_call_metadata1.csv")
-individual <- read.csv("~/Desktop/BIRDS/paRsynth_Data/paRsynth_methods_synthetic_dataset/synthetic_call_metadata2.csv")
+group <- read.csv("/Users/gretheljuarez/Desktop/BIRDS/paRsynth_methods_synthetic_dataset/synthetic_call_metadata1.csv")
+individual <- read.csv("/Users/gretheljuarez/Desktop/BIRDS/paRsynth_methods_synthetic_dataset/synthetic_call_metadata2.csv")
 
 # Combine the CSV files of each dataset
 synthetic_call_metadata <- rbind(group, individual)
@@ -324,5 +326,5 @@ synthetic_call_metadata %>%
 glimpse(synthetic_call_metadata)
 
 ```
-
+ 
 After running this code you will have two datasets combined into a single CSV: 1) reflects vocalizations with more group information than individual and 2) vice versa. Navigate to Vignette 03 to learn how to analyze these outputs you created with paRsynth.

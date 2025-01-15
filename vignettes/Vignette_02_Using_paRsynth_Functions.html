@@ -417,7 +417,7 @@ understanding the data you create with paRsynth.</p>
 <pre class="r"><code># Initialize a base path (this will need to be different per user)
 # path &lt;- &quot;/Users/raneemsamman/Desktop&quot; # Raneem&#39;s path
 # path &lt;- &quot;/Users/gracesmith-vidaurre/Desktop&quot; # Grace&#39;s path
-path &lt;- &quot;/Users/gretheljuarez/Desktop/BIRDS/paRsynth_Data&quot; # Alexandra&#39;s path
+path &lt;- &quot;/Users/gretheljuarez/Desktop/BIRDS/&quot; # Alexandra&#39;s path
 # path &lt;- &quot;/Users/summe/OneDrive/Desktop/&quot; # Summer&#39;s path
 
 # Initialize the directory for analysis on your local computer
@@ -762,13 +762,14 @@ glimpse(synthetic_call_metadata2)</code></pre>
 and a CSV file has been created for it. After running this code you will
 have two datasets: 1) reflects vocalizations with more group information
 than individual and 2) vice versa.</p>
+<p><u> EXTRA STEP 6: Combine datasets into one single CSV file </u></p>
 <p>It may be helpful for downstream bioacoustic analysis to create a CSV
 file including both datasets.</p>
 <pre class="r"><code># Read the CSV file of each dataset
 # group &lt;- read.csv(&quot;/Users/summe/OneDrive/Desktop/paRsynth_methods_synthetic_dataset/synthetic_call_metadata1.csv&quot;)
 # individual &lt;- read.csv(&quot;/Users/summe/OneDrive/Desktop/paRsynth_methods_synthetic_dataset/synthetic_call_metadata2.csv&quot;) # Summer&#39;s CSV files
-group &lt;- read.csv(&quot;~/Desktop/BIRDS/paRsynth_Data/paRsynth_methods_synthetic_dataset/synthetic_call_metadata1.csv&quot;)
-individual &lt;- read.csv(&quot;~/Desktop/BIRDS/paRsynth_Data/paRsynth_methods_synthetic_dataset/synthetic_call_metadata2.csv&quot;)
+group &lt;- read.csv(&quot;/Users/gretheljuarez/Desktop/BIRDS/paRsynth_methods_synthetic_dataset/synthetic_call_metadata1.csv&quot;)
+individual &lt;- read.csv(&quot;/Users/gretheljuarez/Desktop/BIRDS/paRsynth_methods_synthetic_dataset/synthetic_call_metadata2.csv&quot;)
 
 # Combine the CSV files of each dataset
 synthetic_call_metadata &lt;- rbind(group, individual)

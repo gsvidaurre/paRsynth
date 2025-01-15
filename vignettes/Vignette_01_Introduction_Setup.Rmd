@@ -1,6 +1,6 @@
 ---
 title: "Vignette 01 Introduction/Setup"
-author: "Grethel Alexandra Juarez"
+author: "GAJ"
 date: "2024-11-25"
 output: html_document
 ---
@@ -102,7 +102,7 @@ paRsynth provides four functions for the simulation of vocalizations with repres
 
 4. write_audio(): uses frequency anchors and the 'soundgen' package to generate and save synthetic audio files.
 
+![paRsynth Functions Workflow](/Users/gretheljuarez/Desktop/BIRDS/GitHub_repos/paRsynth/vignettes/images/paRsynth_methods_workflow_horizontal_vignette_pic-1-min.png)
 <br>
-![paRsynth Functions Workflow](~/Desktop/BIRDS/WorkflowGraphics/paRsynthMethods/paRsynth_methods_workflow_horizontal_vignette_pic-1-min.png)
 
 Navigate to Vignette 02 (Using paRsynth Functions) to learn how to use the package described above for your projects.
