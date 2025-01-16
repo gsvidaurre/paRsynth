@@ -23,7 +23,7 @@ Before analyzing the outputs you generated with paRsynth, there are some prelimi
 rm(list = ls())
 
 # Specify the required packages
-X <- c("devtools", "dplyr", "stringdist", "tidyverse", "ggplot2", "apcluster", "soundgen", "parallel", "stringr", "data.table", "tuneR", "pbapply", "warbleR", "magrittr")
+X <- c("devtools", "dplyr", "stringdist", "tidyverse", "ggplot2", "apcluster", "soundgen", "parallel", "stringr", "data.table", "tuneR", "pbapply", "warbleR", "magrittr", "MASS")
 
 # Install the packages in X if not already installed
 is_installed <- function(p) is.element(p, installed.packages()[,1])
@@ -59,7 +59,7 @@ invisible(lapply(X, library, character.only = TRUE))
 
 It is important to have your files organized, especially when creating many different types of output data. Therefore, initializing working directories throughout will be helpful when analyzing the data you create with paRsynth.
 
-```{r eval = TRUE}
+```{r}
 
 # Initialize a base path (this will need to be different per user)
 # path <- "/Users/raneemsamman/Desktop" # Raneem's path
@@ -211,24 +211,19 @@ Now, we are getting the key analysis step. Using warbleR, a spectrographic cross
 
 xc_mat <- warbleR::cross_correlation(GroupMembership_sel_tbl, wl = 512, ovlp = 90, bp = c(0, 20), wn = "hanning", cor.method = "pearson", parallel = 1, na.rm = FALSE, type = "spectrogram", path = audio_path)
 
-# TKTK What do these functions do?
+# Check the structure of xc_mat
 str(xc_mat)
 
+# Check the dimensions of xc_mat
 dim(xc_mat)
 
-# xc_mat[1:5, 16:24] # TKTK Is this for testing?
-
-xc_mat[xc_mat < 0]
-
-# Get the percentage of values that are negative
+# Check the percentage of values that are negative
 neg_values <- length(xc_mat[xc_mat<0])/(dim(xc_mat)[1]*dim(xc_mat)[2])
 
 # Stop the function if the percentage of negative values is > 0%
-if(neg_values > 0){
+if(length(neg_values) > 0){
   stop("Negative values are present in the spectrographic cross-correlation matrix")
 }
-
-xc_mat[xc_mat < 0]
 
 # Update the dimension names of the matrix
 dimnames(xc_mat) <- list(GroupMembership_sel_tbl$sound.files, GroupMembership_sel_tbl$sound.files)
@@ -245,11 +240,17 @@ Using the results from the SPCC, acoustic space plots can be used as a figure to
 
 # Convert to a distance matrix and dist object for isoMDS (helps visualize the data in a simplified way)
 dist_mat <- stats::as.dist(1 - xc_mat, diag = TRUE, upper = TRUE)
-# str(dist_mat)
 
+# Check the structure of dist_mat
+str(dist_mat)
+
+# TKTK
 iso <- invisible(MASS::isoMDS(dist_mat, k = 2, maxit = 1000, trace = FALSE))
+
+# Check the structure of iso
 str(iso)
 
+# Create 
 mds_df <- data.frame(
   sound.files = dimnames(xc_mat)[[1]],
   X = as.vector(iso$points[, 1]), 
@@ -341,19 +342,20 @@ invisible(file.rename(file.path(images_path, imgs), file.path(images_path, new_n
 xc_mat2 <- warbleR::cross_correlation(IndividualIdentity_sel_tbl, wl = 512, ovlp = 90, bp = c(0, 20), wn = "hanning", cor.method = "pearson", parallel = 1, na.rm = FALSE, type = "spectrogram", path = audio_path)
 
 str(xc_mat2)
-dim(xc_mat2)
 
-xc_mat2[xc_mat2 < 0]
+dim(xc_mat2)
 
 neg_values2 <- length(xc_mat2[xc_mat2<0])/(dim(xc_mat2)[1]*dim(xc_mat2)[2])
 
-if(neg_values2 > 0){
+if(length(neg_values2) > 0){
   stop("Negative values are present in the spectrographic cross-correlation matrix")
 }
 
-xc_mat2[xc_mat2 < 0]
-
 dimnames(xc_mat2) <- list(IndividualIdentity_sel_tbl$sound.files, IndividualIdentity_sel_tbl$sound.files)
+
+```
+
+```{r}
 
 dist_mat2 <- stats::as.dist(1 - xc_mat2, diag = TRUE, upper = TRUE)
 
@@ -389,11 +391,6 @@ shps <- c(0, 1, 2, 5, 6, 15, 19, 17, 18, 14)
 hulls2 <- plyr::ddply(mds_df2, "group_ID", function(x){
   x[chull(x$X, x$Y), ]
 })
-```
-
-Create an acoustic space plots for the vocalizations of this dataset.
-
-```{r}
 
 mds_df2 %>%
   ggplot(aes(x = X, y = Y, color = group_ID)) + 
@@ -429,7 +426,7 @@ This last vignette has showed you how to conduct downstream bioacoustics analysi
 
 You may create vocalization that have much greater group information than individual information to the point when you make the acoustic space plot it result in all the individuals of one group to be clustered on top of each other and each group are a outstandingly great distance from each other. 
 
-```{r eval = FALSE}
+```{r}
 
 set.seed(123)
 factor_ratio <- 10
@@ -487,20 +484,14 @@ sel_tbl <- data.table::rbindlist(lapply(1:length(wavs), function(w){
   
   tmp <- tuneR::readWave(file.path(audio_path, wavs[w]))
   
-  # Return the metadata for the given call using the synthetic metadata generated during audio file generation above
-  
   synthetic_call_metadataEEcsv <- read.csv("/Users/gretheljuarez/Desktop/BIRDS/paRsynth_methods_synthetic_dataset/synthetic_call_metadataEE.csv")
   
   metadats_tmpEE <- synthetic_call_metadataEEcsv %>%
     dplyr::filter(grepl(wavs[w], audio_file_name))
   
-  # glimpse(metadats_tmp)
-  
-  # Create a row for the selection table in warbleR format if the audio file exists and metadata for that file also exists
+
   if(nrow(metadats_tmpEE) > 0){
     
-    # Use 0.1s as a margin to indicate where the vocalization starts and ends in the audio file
-    # soundgen::soundgen() adds 100ms of silence before and after the synthetic vocalization by default 
     resEE <- data.frame(
       sound.files = wavs[w], 
       selec = 1,
@@ -553,17 +544,14 @@ invisible(file.rename(file.path(images_path, imgs), file.path(images_path, new_n
 xc_matEE <- warbleR::cross_correlation(ExtraExample_sel_tbl, wl = 512, ovlp = 90, bp = c(0, 20), wn = "hanning", cor.method = "pearson", parallel = 1, na.rm = FALSE, type = "spectrogram", path = audio_path)
 
 str(xc_matEE)
-dim(xc_matEE)
 
-xc_matEE[xc_matEE < 0]
+dim(xc_matEE)
 
 neg_valuesEE <- length(xc_matEE[xc_matEE<0])/(dim(xc_matEE)[1]*dim(xc_matEE)[2])
 
-if(neg_valuesEE > 0){
+if(length(neg_valuesEE) > 0){
   stop("Negative values are present in the spectrographic cross-correlation matrix")
 }
-
-xc_matEE[xc_matEE < 0]
 
 dimnames(xc_matEE) <- list(ExtraExample_sel_tbl$sound.files, ExtraExample_sel_tbl$sound.files)
 
@@ -595,10 +583,8 @@ levels(mds_dfEE$group_ID)
 levels(mds_dfEE$individual_ID)
 levels(mds_dfEE$unique_individuals)
 
-# Colors by group
 cols <- scales::alpha(c("navy", "orange"), 0.65)
 
-# Shapes by individual within groups
 shps <- c(0, 1, 2, 5, 6, 15, 19, 17, 18, 14)
 
 hullsEE <- plyr::ddply(mds_dfEE, "group_ID", function(x){

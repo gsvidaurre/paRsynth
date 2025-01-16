@@ -132,10 +132,11 @@ set.seed(44)
 
 # Initialize the values of group_information and individual_information, which correspond to the length of the string that will be allocated to encoding group membership or individual identity information
 # Group information can outweigh individual information by a factor of at least 10 or higher
+# Random variation should be at least half or more compared to individual information
 factor_ratio <- 4
 individual_information <- 2
 group_information <- individual_information * factor_ratio
-random_variation <- 2
+random_variation <- 
 
 # Initialize the values of the number of groups, individuals, calls, and string length
 n_groups <- 2
