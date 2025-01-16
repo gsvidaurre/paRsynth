@@ -329,7 +329,7 @@ synthetic_call_metadata2 %>%
 
 ```{r}
 
-synthetic_call_metadata2.csv <- read.csv(file.path(analysis_path, "synthetic_call_metadata2.csv"))
+synthetic_call_metadata2csv <- read.csv(file.path(analysis_path, "synthetic_call_metadata2.csv"))
 
 glimpse(synthetic_call_metadata2)
 
