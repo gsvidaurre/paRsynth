@@ -15,11 +15,11 @@ In this vignette, we will go through how to create vocalization strings, convert
 
 <h1>Set Up Working Environment</h1>
 
-Before using the functions in the paRsynth package, there are some preliminary steps we must go through to create a directory where different types of generated data can be automatically stored (audios and images). This automatic organization of generated data will make it easier to streamline process of using the paRsynth functions.
+Before using the functions in the paRsynth package, there are some preliminary steps we must go through to create a directory where different types of generated data can be automatically stored (audios and images). This automatic organization of generated data will make it easier to streamline the process of using paRsynth's functions.
 
 **Load packages and set path**
 
-It is good practice to clean your global environment before using functions from open-sourced packages. In order for paRsynth functions to run, they need specific external R packages as well. For example, 'write_audio' generates and saves audio files in .WAV format which requires the package `soundgen::soundgen()` to be installed and loaded. 
+It is good practice to clean your global environment before using functions from open-sourced packages. In order for paRsynth functions to run, they need specific external R packages as well. For example, 'write_audio' generates and saves audio files in .wav format which requires the package `soundgen::soundgen()` to be installed and loaded. 
 
 ```{r message = FALSE, warning = FALSE}
 
@@ -61,7 +61,7 @@ invisible(lapply(X, library, character.only = TRUE))
 
 **Initialize working directories for data on your local machine**
 
-It is important to have your files organized, especially when creating many different types of output data. Therefore, initializing working directories in the beginning will be helpful in knowing and understanding the data you create with paRsynth and where they are stored.
+It is important to have your files organized, especially when creating many different types of output data (audios and images). Therefore, initializing working directories in the beginning will be helpful in understanding the data you create with paRsynth and where they are stored.
 
 ```{r}
 
@@ -110,12 +110,12 @@ if(!dir.exists(images_path)){
 
 Before using the paRsynth package, it would be beneficial for you to go over the description, usage, arguments, extra details, and examples of each function. 
 
-```{r}
+```{r eval = FALSE}
 
-# ?paRsynth::generate_strings
-# ?paRsynth::parsons_code
-# ?paRsynth::frequency_anchors
-# ?paRsynth::write_audio
+?paRsynth::generate_strings
+?paRsynth::parsons_code
+?paRsynth::frequency_anchors
+?paRsynth::write_audio
 
 ```
 
@@ -125,7 +125,7 @@ Before using the paRsynth package, it would be beneficial for you to go over the
 
 After installing paRsynth and loading the relevant libraries, you will be able to take the first step into creating synthetic bird calls. The first step is generating the character strings that represent vocalizations using the function generate_strings(). These strings encode both group membership (characters that are shared across individuals within a group) and individual identity (characters that are unique to each individual in a group). The function allows you to specify the length of the string as well as how much of the string encodes group versus individual identity information. It also allows you to control the number of groups, individuals in each group and calls per individual. These variables that you can control are known as the parameters of the function. 
 
-```{r message = FALSE, warning = FALSE}
+```{r eval = FALSE}
 
 # Set the seed for reproducibility
 set.seed(44)
@@ -135,6 +135,7 @@ set.seed(44)
 factor_ratio <- 4
 individual_information <- 2
 group_information <- individual_information * factor_ratio
+random_variation <- 2
 
 # Initialize the values of the number of groups, individuals, calls, and string length
 n_groups <- 2
@@ -144,7 +145,9 @@ n_calls <- 2
 # The global_strings refers to the number of characters in the the head and tail shared among all calls in the dataset to bound the variation. Number input here is split in half and those amount of characters are allocated to head and tail of string
 global_strings <- 4 
 string_length <- (group_information + individual_information) + global_strings
+```
 
+```{r}
 ### Generate the string for each call
 calls <- generate_strings(
   n_groups = n_groups, 
@@ -152,7 +155,8 @@ calls <- generate_strings(
   n_calls = n_calls, 
   string_length = string_length, 
   group_information = group_information, 
-  individual_information = individual_information
+  individual_information = individual_information,
+  random_variation = random_variation
   )
 
 dplyr::glimpse(calls)
@@ -170,6 +174,12 @@ Now that you have a data frame of generated calls, you can use the parsons_code(
 calls_parsons <- parsons_code(
   df = calls, 
   string_col = "Call", 
+  global_head_col = "Global_head",
+  group_head_col = "Group_head",
+  individual_middle_col = "Individual_middle",
+  random_variation_col = "Random_variation",
+  group_tail_col = "Group_tail",
+  global_tail_col = "Global_tail",
   mapping = list("A" = "up", "B" = "down", "C" = "constant")
 )
 
@@ -194,6 +204,7 @@ calls_parsons_frequencies <- frequency_anchors(
   call_string_col = "Call", 
   starting_frequency = 4000, 
   frequency_shift = 1000,
+  section_transition = "starting_frequency"
   )
 
 glimpse(calls_parsons_frequencies)
@@ -209,11 +220,19 @@ Now, finally, you are equipped with all the necessary data to generate the audio
 ```{r}
 
 synthetic_call_metadata1 <- write_audio(
-  df = calls_parsons_frequencies, 
+  df = calls_parsons_frequencies,
+  sylLen = 400,
+  sampling_rate = 150000,
+  pitch_sampling_rate = 44100,
+  smoothing = list(interpol = "loess", loessSpan = 1, discontThres = 0, jumpThres = 0),
+  rolloffExact = c(0.25, 0.25, 0.25, 0.25, 0.25),
+  formants = NA,
+  vocalTract = NA,
+  temperature = 0,
+  vibratoFreq = 1,
+  prefix = "GroupMembership",
   save_path = audio_path, 
-  sampling_rate = 150000, 
-  sylLen = 400, 
-  prefix = "GroupMembership"
+  invalidArgAction = "ignore"
   )
 
 glimpse(synthetic_call_metadata1)
@@ -226,11 +245,19 @@ This will create files with the extension .wav for each vocalization and will sa
 
 The data frames that you generate in R using paRsynth can be saved as physical files in your working directory. You can also save your paRsynth generated metadata into a CSV file. I recommend using this file type since it is compatible with R, Microsoft Word, and other software. You can use the function `write.csv()` to save data frames to .csv spreadsheets on your computer:
 
-```{r}
+```{r eval = FALSE}
 
 # Add extra metadata for upcoming image files names and rearrange columns
 synthetic_call_metadata1 %>%
   write.csv(., file = file.path(analysis_path, "synthetic_call_metadata1.csv"), row.names = FALSE) 
+
+```
+
+```{r}
+
+synthetic_call_metadata1csv <- read.csv(file.path(analysis_path, "synthetic_call_metadata1.csv"))
+
+glimpse(synthetic_call_metadata1.csv)
 
 ```
 
@@ -300,10 +327,9 @@ synthetic_call_metadata2 %>%
 
 ```
 
-Read in the spreadsheet you created.
 ```{r}
 
-synthetic_call_metadata2 <- read.csv(file.path(analysis_path, "synthetic_call_metadata2.csv"))
+synthetic_call_metadata2.csv <- read.csv(file.path(analysis_path, "synthetic_call_metadata2.csv"))
 
 glimpse(synthetic_call_metadata2)
 
@@ -315,7 +341,7 @@ The .wav files for this dataset have been added to the audio folder and a CSV fi
 
 It may be helpful for downstream bioacoustic analysis to create a CSV file including both datasets.
 
-```{r}
+```{r eval = FALSE}
 
 # Read the CSV file of each dataset
 # group <- read.csv("/Users/summe/OneDrive/Desktop/paRsynth_methods_synthetic_dataset/synthetic_call_metadata1.csv")
@@ -332,7 +358,6 @@ synthetic_call_metadata %>%
 
 ```
 
-Read in the spreadsheet you created.
 ```{r}
 
 synthetic_call_metadata <- read.csv(file.path(analysis_path, "synthetic_call_metadata.csv"))
@@ -341,4 +366,4 @@ glimpse(synthetic_call_metadata)
 
 ```
  
-After running this code you will have two datasets combined into a single CSV: 1) reflects vocalizations with more group information than individual and 2) vice versa. Navigate to Vignette 03 to learn how to analyze these outputs you created with paRsynth.
+After running this code you will have two datasets combined into a single CSV: 1) reflects vocalizations with more group information than individual and 2) vice versa. Navigate to Vignette 03: Bioacoustics Analysis to learn how to analyze these outputs you created with paRsynth.

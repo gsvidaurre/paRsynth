@@ -42,11 +42,11 @@ You can also reconfigure the soft-wrapping lines of text and code. You don't hav
 
 * Select "Global Options" in the  pop-up menu
 
-* Select the option "Code" along the left hand side
+* Select the option "Code" on the left hand side
 
 * Check the box next to the option "Soft-wrap source files"
 
-* Select "Apply" to apply those changes, then "OK" to exit this window 
+* Select "Apply" to apply those changes, then "OK" to exit 
 
 You can also change the font size, font color, and background color of your RStudio workspace. 
 
@@ -68,7 +68,7 @@ You will need to install GitHub Desktop to later clone the paRsynth package on y
 
 * Open the [paRsynth GitHub repository](https://github.com/gsvidaurre/paRsynth) on your internet browser
 
-* Click on the arrow of the green "Code" button
+* Click on the arrow of the green "Code" button on the top left 
 
 * Click on the copy link icon
 
@@ -90,7 +90,7 @@ Please read the README.rmd file for more information on the package, code collab
 
 <h2>Purpose</h2>
 
-paRsynth provides four functions for the simulation of vocalizations with representation of both individual identity and group membership information. These vocalizations are encoded as strings that can be used for generating synthetic audio signals for bioacoustic analysis. The next vignette (Vignette_02_Using_paRsynth_Functions) will demonstrate how to use the package's functions to generate vocalizations strings, convert them into Parsons code, calculate frequency anchors, and generate synthetic audio files.
+paRsynth provides four functions for the simulation of vocalizations with representation of both individual identity and group membership information. These vocalizations are encoded as strings that can be used for generating synthetic audio signals for bioacoustic analysis. The next vignette (Vignette 02: Create Vocal Identity Signals with paRsynth) will demonstrate how to use the package's functions to generate vocalizations strings, convert them into Parsons code, calculate frequency anchors, and generate synthetic audio files.
 
 1. generate_strings(): generates strings that encode group membership information and individual identity information.
 
@@ -100,5 +100,10 @@ paRsynth provides four functions for the simulation of vocalizations with repres
 
 4. write_audio(): uses frequency anchors and the 'soundgen' package to generate and save synthetic audio files.
 
+<br>
+
 ![paRsynth Functions Workflow](/Users/gretheljuarez/Desktop/BIRDS/GitHub_repos/paRsynth/vignettes/images/paRsynth_methods_workflow_horizontal_vignette_pic-1-min.png)
+
+<br>
+
 Navigate to Vignette 02: Create Vocal Identity Signals with paRsynth to learn how to use the package described above for your projects.

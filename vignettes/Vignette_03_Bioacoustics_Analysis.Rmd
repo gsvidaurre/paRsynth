@@ -108,11 +108,10 @@ if(!dir.exists(images_path)){
 
 To organize all the paRsynth generated outputs you created in the previous vignettes, you will have to create a warbleR selection table. The warbleR package is very useful to streamline bioacustics analysis. First you will list all the .wav files and then organize them in a selection table.
 
-```{r message = FALSE, warning = FALSE}
+```{r}
 
 # Create a vector of all of the audio files in the analysis path
 wavs <- list.files(path = audio_path, pattern = ".wav$", full.names = FALSE)
-tail(wavs)
 
 # w <- 25 # testing
 
@@ -165,11 +164,11 @@ sel_tbl <- data.table::rbindlist(lapply(1:length(wavs), function(w){
   
 }))
 
-# See the selection table in warbleR format with all useful metadata for the synthetic experiment
-glimpse(sel_tbl)
-
 # Check the selection table for all the unique sampling rates
 unique(sel_tbl$sampling_rate)
+
+# See the selection table in warbleR format with all useful metadata for the synthetic experiment
+glimpse(sel_tbl)
 
 ```
 
@@ -181,14 +180,11 @@ Using the warbleR package, spectrogram images can be created from each synthetic
 
 In the following example, we are creating spectrograms for the first dataset we created, where more group information is encoded in the vocalization than individual identity information.
 
-```{r message = FALSE, warning = FALSE}
+```{r}
 
 # To make spectrograms of dataset 1 (more group info), you will need to filter it out from the selection table you made above.
 GroupMembership_sel_tbl <- sel_tbl %>%
     dplyr::filter(grepl("GroupMembership", sound.files))
-
-# View(GroupMembership_sel_tbl)
-glimpse(GroupMembership_sel_tbl)
 
 # Create spectrograms for filtered calls
 warbleR::spectrograms(GroupMembership_sel_tbl, wl = 512, flim = c(0, 12), wn = "hanning", pal = reverse.gray.colors.2,ovlp = 90, inner.mar = c(5, 4, 4, 2), outer.mar = c(0, 0, 0, 0), picsize = 1, res = 100, cexlab = 1, propwidth = FALSE, xl = 1, osci = FALSE, gr = FALSE, sc = FALSE, line = FALSE, mar = 0.05, it = "jpeg", parallel = 1, path = audio_path, pb = TRUE, fast.spec = FALSE, by.song = NULL, sel.labels = NULL, title.labels = NULL, dest.path = images_path, box = TRUE, axis = TRUE)
@@ -211,16 +207,16 @@ This will output appropriately named spectrograms for the synthetically generate
 
 Now, we are getting the key analysis step. Using warbleR, a spectrographic cross-correlation (SPCC) can be performed to find acoustic similarities between the spectrograms created. 
 
-```{r message = FALSE, warning = FALSE}
-
-glimpse(GroupMembership_sel_tbl)
+```{r}
 
 xc_mat <- warbleR::cross_correlation(GroupMembership_sel_tbl, wl = 512, ovlp = 90, bp = c(0, 20), wn = "hanning", cor.method = "pearson", parallel = 1, na.rm = FALSE, type = "spectrogram", path = audio_path)
 
+# TKTK What do these functions do?
 str(xc_mat)
+
 dim(xc_mat)
 
-# xc_mat[1:5, 16:24]
+# xc_mat[1:5, 16:24] # TKTK Is this for testing?
 
 xc_mat[xc_mat < 0]
 
@@ -245,7 +241,8 @@ This will output data about the measured acoustic similarities of all the vocali
 
 Using the results from the SPCC, acoustic space plots can be used as a figure to represent the acoustic similarity of all the calls in the dataset. Here we will use the vocalizations where more group information is encoded within the calls.
 
-```{r message = FALSE, warning = FALSE}
+```{r}
+
 # Convert to a distance matrix and dist object for isoMDS (helps visualize the data in a simplified way)
 dist_mat <- stats::as.dist(1 - xc_mat, diag = TRUE, upper = TRUE)
 # str(dist_mat)
@@ -271,9 +268,6 @@ mds_df <- data.frame(
     unique_individuals = factor(unique_individuals)
   )
 
-glimpse(mds_df)
-# View(mds_df)
-
 levels(mds_df$group_ID)
 levels(mds_df$individual_ID)
 levels(mds_df$unique_individuals)
@@ -292,9 +286,6 @@ shps <- c(0, 1, 2, 5, 6, 15, 19, 17, 18, 14)
 hulls <- plyr::ddply(mds_df, "group_ID", function(x){
   x[chull(x$X, x$Y), ]
 })
-
-glimpse(hulls)
-# view(hulls)
 
 mds_df %>%
   ggplot(aes(x = X, y = Y, color = group_ID)) + 
@@ -432,13 +423,13 @@ mds_df2 %>%
 
 This will output an acoustic space plot to represent the acoustic similarity of the paRsynth generated vocalizations using the spectrograms created in vignette 02 for the second data set that has more individual information.
 
-This last vignette has showed you how to conduct downstream bioacoustics analysis on two datasets: 1) more group information and 2) more individual information and create acoustic space plots for them. You completed the final vignette of the paRsynth package, well done!
+This last vignette has showed you how to conduct downstream bioacoustics analysis on two datasets: 1) more group information than individual information and 2) vice versa. You created acoustic space plots for each data sets. You have completed the final vignette of the paRsynth package, well done!:smile:
 
 <h2>Extreme Group-level Variation Example</h2>
 
 You may create vocalization that have much greater group information than individual information to the point when you make the acoustic space plot it result in all the individuals of one group to be clustered on top of each other and each group are a outstandingly great distance from each other. 
 
-```{r eval = TRUE, echo = FALSE}
+```{r eval = FALSE}
 
 set.seed(123)
 factor_ratio <- 10
@@ -486,24 +477,36 @@ synthetic_call_metadataEE <- write_audio(
 synthetic_call_metadataEE %>%
   write.csv(., file = file.path(analysis_path, "synthetic_call_metadataEE.csv"), row.names = FALSE) 
 
-sel_tblEE <- data.table::rbindlist(lapply(1:length(wavs), function(w){
+```
+
+```{r}
+
+synthetic_call_metadataEEcsv <- read.csv(file.path(analysis_path, "synthetic_call_metadataEE.csv"))
+
+sel_tbl <- data.table::rbindlist(lapply(1:length(wavs), function(w){
   
-  tmpEE <- tuneR::readWave(file.path(audio_path, wavs[w]))
+  tmp <- tuneR::readWave(file.path(audio_path, wavs[w]))
   
-  # synthetic_call_metadataEEcsv <- read.csv("/Users/summe/OneDrive/Desktop/paRsynth_methods_synthetic_dataset/synthetic_call_metadataEE.csv")  
-  synthetic_call_metadataEEcsv <-read.csv("/Users/gretheljuarez/Desktop/BIRDS/paRsynth_methods_synthetic_dataset/synthetic_call_metadataEE.csv")
+  # Return the metadata for the given call using the synthetic metadata generated during audio file generation above
+  
+  synthetic_call_metadataEEcsv <- read.csv("/Users/gretheljuarez/Desktop/BIRDS/paRsynth_methods_synthetic_dataset/synthetic_call_metadataEE.csv")
   
   metadats_tmpEE <- synthetic_call_metadataEEcsv %>%
     dplyr::filter(grepl(wavs[w], audio_file_name))
   
+  # glimpse(metadats_tmp)
+  
+  # Create a row for the selection table in warbleR format if the audio file exists and metadata for that file also exists
   if(nrow(metadats_tmpEE) > 0){
     
+    # Use 0.1s as a margin to indicate where the vocalization starts and ends in the audio file
+    # soundgen::soundgen() adds 100ms of silence before and after the synthetic vocalization by default 
     resEE <- data.frame(
       sound.files = wavs[w], 
       selec = 1,
       start = 0.1, 
-      end = seewave::duration(tmpEE) - 0.1,
-      sampling_rate = tmpEE@samp.rate,
+      end = seewave::duration(tmp) - 0.1,
+      sampling_rate = tmp@samp.rate,
       group_ID = metadats_tmpEE[["Group"]],
       individual_ID = metadats_tmpEE[["Individual"]],
       call_ID = metadats_tmpEE[["Call"]]
@@ -515,7 +518,7 @@ sel_tblEE <- data.table::rbindlist(lapply(1:length(wavs), function(w){
       sound.files = wavs[w], 
       selec = 1, 
       start = 0.1, 
-      end = seewave::duration(tmpEE) + 0.1,
+      end = seewave::duration(tmp) + 0.1,
       sampling_rate = NA,
       group_ID = NA,
       individual_ID = NA,
@@ -528,10 +531,12 @@ sel_tblEE <- data.table::rbindlist(lapply(1:length(wavs), function(w){
   
 }))
 
-unique(sel_tblEE$sampling_rate)
-
-ExtraExample_sel_tbl <- sel_tblEE %>%
+ExtraExample_sel_tbl <- sel_tbl %>%
     dplyr::filter(grepl("ExtraExample", sound.files))
+
+```
+
+```{r eval = FALSE}
 
 warbleR::spectrograms(ExtraExample_sel_tbl, wl = 512, flim = c(0, 12), wn = "hanning", pal = reverse.gray.colors.2,ovlp = 90, inner.mar = c(5, 4, 4, 2), outer.mar = c(0, 0, 0, 0), picsize = 1, res = 100, cexlab = 1, propwidth = FALSE, xl = 1, osci = FALSE, gr = FALSE, sc = FALSE, line = FALSE, mar = 0.05, it = "jpeg", parallel = 1, path = audio_path, pb = TRUE, fast.spec = FALSE, by.song = NULL, sel.labels = NULL, title.labels = NULL, dest.path = images_path, box = TRUE, axis = TRUE)
 
@@ -540,6 +545,10 @@ imgs <- list.files(images_path)
 new_nms <- gsub(".wav-1", "", imgs)
 
 invisible(file.rename(file.path(images_path, imgs), file.path(images_path, new_nms)))
+
+```
+
+```{r}
 
 xc_matEE <- warbleR::cross_correlation(ExtraExample_sel_tbl, wl = 512, ovlp = 90, bp = c(0, 20), wn = "hanning", cor.method = "pearson", parallel = 1, na.rm = FALSE, type = "spectrogram", path = audio_path)
 
