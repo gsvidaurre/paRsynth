@@ -38,7 +38,7 @@ test_that("The function creates and removes audio files correctly", {
   )
 
   # Call the function with test df
-  result_df <- write_audio(df_test, save_path = tmp_dir, sampling_rate = 150000, sylLen = 200, prefix = "TestPrefix")
+  result_df <- write_audio(df_test, save_path = tmp_dir, sampling_rate = 150000, sylLen = 200, prefix = "TestPrefix", shortestEpoch = 300)
 
   # Ensure files are created
   audio_files <- result_df$audio_file_name
@@ -86,7 +86,7 @@ test_that("The function creates data frame with correct audio file name format",
   )
 
   # Call the function with test df
-  result_df <- write_audio(df_test, save_path = tmp_dir, sampling_rate = 150000, sylLen = 200, prefix = "TestPrefix")
+  result_df <- write_audio(df_test, save_path = tmp_dir, sampling_rate = 150000, sylLen = 200, prefix = "TestPrefix", shortestEpoch = 300)
 
   # Test if the audio_file_name column exists and file names are correctly formatted
   expect_true("audio_file_name" %in% colnames(result_df))
@@ -136,7 +136,7 @@ test_that("The function creates files that have the correct .wav extension", {
   )
 
   # Call the function with test df
-  result_df <- write_audio(df_test, save_path = tmp_dir, sampling_rate = 150000, sylLen = 200, prefix = "TestPrefix")
+  result_df <- write_audio(df_test, save_path = tmp_dir, sampling_rate = 150000, sylLen = 200, prefix = "TestPrefix", shortestEpoch = 300)
 
   # Check that all generated files have a .wav extension
   audio_files <- result_df$audio_file_name

@@ -14,6 +14,7 @@
 #' @param vocalTract A numeric value indicating the vocal tract length of the organism that "produced" the synthetic vocalization. This argument is used only if `formants` is not `NA`. The default value of this argument here is `NA`.
 #' @param temperature A numeric argument controlling stochastic sound generation. The default value here is 0.
 #' @param subratio An integer that indicates the ratio of the fundamental frequency (F0) to the first harmonic or overtone (G0). Here the default value is 2, or period doubling, such that G0 = F0 * 2.
+#' @param shortestEpoch Integer. The minimum duration of an epoch with constant subharmonics or locking of formants. This is a soundgen argument in milliseconds that corresponds to how soundgen splits long sounds into smaller sections or epochs to generate harmonics. The default is 300 ms. See the soundgen sound generation vignette for more detailed information.
 #' @param vibratoFreq An integer specifying the amount of baseline pitch modulation or vibrato (in Hz) across the synthetic audio file. Here the default is 1, or the lowest value allowed.
 #' @param prefix Character string. A prefix for each audio file name that can be used to distinguish among calls for different datasets. For example, using "IndividualSignatures" versus "GroupSignatures" when creating datasets with more or less individual versus group information. The default is "IndividualSignatures".
 #' @param save_path Character string. The directory where the sound files will be saved on your machine.
@@ -48,7 +49,7 @@
 #' # Write out a randomly subsample of the full dataset of vocalizations
 #' set.seed(seed)
 #' inds <- sample(1:nrow(anchors), 10, replace = FALSE)
-#' write_audio(anchors[inds, ], sylLen = 200, sampling_rate = 44100, pitch_sampling_rate = 44100, smoothing = list(interpol = "loess", loessSpan = 1, discontThres = 0, jumpThres = 0), rollofExact = c(0.25, 0.25, 0.25, 0.25, 0.25), formants = NA, vocalTract = NA, temperature = 0, subratio = 2, vibratoFreq = 1, prefix = "IndividualSignatures", save_path = tmp_path, invalidArgAction = "ignore")
+#' write_audio(anchors[inds, ], sylLen = 200, sampling_rate = 44100, pitch_sampling_rate = 44100, smoothing = list(interpol = "loess", loessSpan = 1, discontThres = 0, jumpThres = 0), rollofExact = c(0.25, 0.25, 0.25, 0.25, 0.25), formants = NA, vocalTract = NA, temperature = 0, subratio = 2, shortestEpoch = 300, vibratoFreq = 1, prefix = "IndividualSignatures", save_path = tmp_path, invalidArgAction = "ignore")
 #'
 #' # Remove the temporary directory and all files within it
 #' if(tmp_path == file.path(path, tmp_dir)){
@@ -57,7 +58,7 @@
 #'
 #' @export write_audio
 
-write_audio <- function(df, sylLen = 200, sampling_rate = 44100, pitch_sampling_rate = 44100, smoothing = list(interpol = "loess", loessSpan = 1, discontThres = 0, jumpThres = 0), rolloffExact = c(0.25, 0.25, 0.25, 0.25, 0.25), formants = NA, vocalTract = NA, temperature = 0, subratio = 2, vibratoFreq = 1, prefix = "IndividualSignatures", save_path, invalidArgAction = "ignore") {
+write_audio <- function(df, sylLen = 200, sampling_rate = 44100, pitch_sampling_rate = 44100, smoothing = list(interpol = "loess", loessSpan = 1, discontThres = 0, jumpThres = 0), rolloffExact = c(0.25, 0.25, 0.25, 0.25, 0.25), formants = NA, vocalTract = NA, temperature = 0, subratio = 2, shortestEpoch = 300, vibratoFreq = 1, prefix = "IndividualSignatures", save_path, invalidArgAction = "ignore") {
 
   if (!is.data.frame(df)) {
     stop("The 'df' argument must be a data frame.")
@@ -120,6 +121,7 @@ write_audio <- function(df, sylLen = 200, sampling_rate = 44100, pitch_sampling_
       formants = formants,
       vocalTract = vocalTract,
       temperature = temperature,
+      shortestEpoch = shortestEpoch,
       vibratoFreq = vibratoFreq,
       saveAudio = audio_pathname,
       invalidArgAction = invalidArgAction
