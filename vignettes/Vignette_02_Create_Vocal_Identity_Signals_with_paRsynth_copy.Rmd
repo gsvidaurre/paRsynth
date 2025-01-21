@@ -488,7 +488,7 @@ This will output appropriately named spectrograms for the synthetically generate
 
 <table>
   <tr>
-    <td><img src="/Users/gretheljuarez/Desktop/BIRDS/paRsynth_methods_synthetic_dataset_copy/figures/B_Group1_Indiv1_Call1.png" alt="Image 1" width="500"></td>
+    <td><img src="/Users/gretheljuarez/Desktop/BIRDS/paRsynth_methods_synthetic_dataset_copy/figures/A_Group1_Indiv1_Call1.png" alt="Image 1" width="500"></td>
     <td><img src="/Users/gretheljuarez/Desktop/BIRDS/paRsynth_methods_synthetic_dataset_copy/figures/B_Group1_Indiv1_Call1.png" alt="Image 2" width="500"></td>
   </tr>
   <tr>
@@ -496,3 +496,5 @@ This will output appropriately named spectrograms for the synthetically generate
     <td><img src="/Users/gretheljuarez/Desktop/BIRDS/paRsynth_methods_synthetic_dataset_copy/figures/B_Group2_Indiv5_Call2.png" alt="Image 4" width="500"></td>
   </tr>
 </table>
+
+The table below compares two pairs of calls created with different frequency anchors settings. Dataset A was made with section_transition = "continuous_trajectory". Dataset B was made with section_transition = "starting_frequency". Starting from left to right, top to bottom of the spectrograms, A_Group1_Indiv1_Call1 versus B_Group1_Indiv1_Call1 and A_Group2_Indiv5_Call2 versus B_Group2_Indiv5_Call2.
