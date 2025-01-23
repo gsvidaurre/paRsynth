@@ -270,7 +270,7 @@ Now that you have generated your metadata with paRsyth and it has been saved as 
 
 <h2>2nd Example: Individual Information > Group Information</h2>
 
-Let's do a 2nd example where individual information is greater than group information. Run the same steps above, but interchange 'individual_information' and 'group_information in the code. Make sure to reassign group_information to an even integer larger than 8 and reassign factor_ratio to a smaller even integer starting from 2 - 10.
+Let's do a 2nd example where individual information is greater than group information. Run the same steps above, but interchange 'individual_information' and 'group_information in the code. Reassign factor_ratio to a smaller even integer starting from 2 - 10.
 
 ```{r eval = FALSE}
 
@@ -377,4 +377,4 @@ glimpse(synthetic_call_metadatacsv)
 
 ```
  
-After running this code you will have two datasets combined into a single CSV: 1) reflects vocalizations with more group information than individual and 2) vice versa. Navigate to Vignette 03: Bioacoustics Analysis to learn how to analyze these outputs you created with paRsynth.
+After running this code you will have two datasets combined into a single CSV: 1) reflects vocalizations with more group information than individual and 2) vice versa. Navigate to Vignette 03: Bioacoustics Analysis to learn how to analyze these outputs you created with paRsynth. Or if you would like to learn more about how to create vocal identity signals with paRsynth using different frequency anchors setting and understanding how the spectrogram gets affected check out Vignette 02b: Effects of Different Frequency Anchors Settings on Spectrogram.
