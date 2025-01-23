@@ -11,7 +11,7 @@ knitr::opts_chunk$set(echo = TRUE, eval = TRUE)
 
 ```
 
-In this vignette, we will go through how to create vocalization strings, convert them into Parsons code, calculate frequency anchors, and generate synthetic audio files using the paRsynth package for downstream bioacoustics analyses. 
+In this vignette, we will go through how to create vocalization strings, convert them into Parsons code, calculate frequency anchors, and generate synthetic audio files using the paRsynth package for downstream bioacoustics analyses AND emphasizing the effects of the two different setting of 'frequency_anchors' on the spectrograms.
 
 <h1>Set Up Working Environment</h1>
 
@@ -498,3 +498,5 @@ This will output appropriately named spectrograms for the synthetically generate
 </table>
 
 The table below compares two pairs of calls created with different frequency anchors settings. Dataset A was made with section_transition = "continuous_trajectory". Dataset B was made with section_transition = "starting_frequency". Starting from left to right, top to bottom of the spectrograms, A_Group1_Indiv1_Call1 versus B_Group1_Indiv1_Call1 and A_Group2_Indiv5_Call2 versus B_Group2_Indiv5_Call2.
+
+Once you have decided which 'frequency anchor is best for your project. Navigate to Vignette 03: Bioacoustics Analysis to learn how to analyze these outputs you created with paRsynth.
