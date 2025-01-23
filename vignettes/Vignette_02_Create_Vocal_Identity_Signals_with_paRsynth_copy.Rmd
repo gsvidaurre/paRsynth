@@ -1,5 +1,5 @@
 ---
-title: "Vignette 02: Create Vocal Identity Signals with paRsynth"
+title: "Vignette 02b: Effects of Different Frequency Anchors Settings on Spectrogram"
 author: "GAJ"
 date: "2024-12-02"
 output: html_document
