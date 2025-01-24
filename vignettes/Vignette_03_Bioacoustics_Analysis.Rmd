@@ -120,7 +120,7 @@ sel_tbl <- data.table::rbindlist(lapply(1:length(wavs), function(w){
 
   tmp <- tuneR::readWave(file.path(audio_path, wavs[w])) # Read the audio file
 
-  # Read the synthetic call metadata
+  # Return the metadata for the given call using the synthetic metadata generated during audio file generation above
   synthetic_call_metadata <- read.csv("/Users/gretheljuarez/Desktop/BIRDS/paRsynth_methods_synthetic_dataset/synthetic_call_metadata.csv")
 
   # Return the metadata for the given call using the synthetic metadata generated during audio file generation above by filtering the metadata for the audio file  
@@ -224,6 +224,10 @@ neg_values <- length(xc_mat[xc_mat<0])/(dim(xc_mat)[1]*dim(xc_mat)[2])
 if(length(neg_values) > 0){
   stop("Negative values are present in the spectrographic cross-correlation matrix")
 }
+
+# Find the calls that are associated with negative values
+
+# Take out those calls from the dataset
 
 # Update the dimension names of the matrix to include the sound file names from the selection table to keep track of the vocalizations
 dimnames(xc_mat) <- list(GroupMembership_sel_tbl$sound.files, GroupMembership_sel_tbl$sound.files)
