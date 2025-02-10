@@ -1,21 +1,6 @@
-# R. Samman
-# November 15 2024
-# G.A. Juarez
-# 5Dec24 - Grammar check
-# Updated: RS, 2025-01-28
-source("/Users/raneemsamman/Documents/GitHub/paRsynth/R/generate_strings.R")
-source("/Users/raneemsamman/Documents/GitHub/paRsynth/R/parsons_code.R")
-source("/Users/raneemsamman/Documents/GitHub/paRsynth/R/frequency_anchors.R")
-# Avoid library calls and other changes to the virtual environment
-# See https://r-pkgs.org/testing-design.html
-withr::local_package("tidyverse")
-withr::local_package("lubridate")
+# Author: Raneem Samman
+# Date created: November 15, 2024
 
-# Just for code development
-library(tidyverse)
-library(lubridate)
-library(testthat)
-library(dplyr)
 # Helper function to generate test data
 generate_test_data <- function() {
   Global_head <- "AABA"

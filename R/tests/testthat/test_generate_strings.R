@@ -1,15 +1,5 @@
-# G.A. Juarez
-# 4 Dec 2024
-# updated: Raneem Samman, 2025-01-28
-
-rm(list = ls())
-source("/Users/raneemsamman/Documents/GitHub/paRsynth/R/generate_strings.R")
-
-# # Just for code development
-# library(tidyverse)
-# library(lubridate)
-# library(testthat)
-# library(dplyr)
+# Author: G.A. Juarez and Raneem Samman
+# Date created: December 4, 2024
 
 # Define parameters
 group_information <- 8
@@ -132,7 +122,7 @@ test_that("The function generates character-based vocal strings per catergory", 
   }
 })
 
-# 5. Unit test to check that each individual is assigned to only one social group
+# 5. Unit test to check that each individual is assigned to correct number of calls per group
 test_that("The function generates # of calls per individuals per social group correctly", {
   # Ensure each individual appears in the correct number of calls per group
   call_count_per_group <- generated_strings %>%

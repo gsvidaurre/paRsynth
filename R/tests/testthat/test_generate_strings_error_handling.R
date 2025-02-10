@@ -1,13 +1,5 @@
-# R. Samman
-# 2024-12-17
-# Updated: RS, 2025-01-29
-
-rm(list = ls())
-
-if (!require(testthat)) install.packages('testthat')
-library(testthat)
-
-source("/Users/raneemsamman/Documents/GitHub/paRsynth/R/generate_strings.R")
+# Author: Raneem Samman
+# Date created: December 17, 2024
 
 base_parameters <- list(
   n_groups = 2,

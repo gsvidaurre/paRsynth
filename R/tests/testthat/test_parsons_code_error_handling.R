@@ -1,14 +1,5 @@
-# R. Samman
-# 2024-12-17
-# updated: RS, 2025-01-31
-
-rm(list = ls())
-if (!require("testthat")) {
-    install.packages("testthat")
-}
-library(testthat)
-
-source("/Users/raneemsamman/Documents/GitHub/paRsynth/R/parsons_code.R")
+# Author: Raneem Samman
+# Date created: December 17, 2024
 
 # create a data frame for testing
 test_df <- data.frame(

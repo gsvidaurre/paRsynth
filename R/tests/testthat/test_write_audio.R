@@ -1,19 +1,5 @@
-# R. Samman
-# Nov, 18, 2024
-# G.A. Juarez
-# 5Dec24 - Grammar check
-# updated: RS 2025-01-31
-
-source("/Users/raneemsamman/Documents/GitHub/paRsynth/R/write_audio.R")
-
-# Just for code development
-library(tidyverse)
-library(lubridate)
-library(soundgen)
-library(testthat)
-library(dplyr)
-library(pbapply)
-desktop_path <- "~/Desktop"
+# Author: Raneem Samman
+# Date created: November 18, 2024
 
   # helper function to create the data and directory if it doesn't already exist 
 create_test_data <- function(desktop_path) {

@@ -1,19 +1,5 @@
-#R. Samman
-#2024-12-17
-# updated: RS 2025-02-03
-
-rm(list = ls())
-
-if (!require(testthat)) {
-  install.packages("testthat")
-}
-library(testthat)
-library(soundgen)
-library(pbapply)
-
-source("/Users/raneemsamman/Documents/GitHub/paRsynth/R/write_audio.R")
-
-desktop_path <- "~/Desktop"
+# Author: Raneem Samman
+# Date created: December 17, 2024
 
 create_test_data <- function(desktop_path) {
   tmp_dir <- file.path(desktop_path, "R_test_temp")

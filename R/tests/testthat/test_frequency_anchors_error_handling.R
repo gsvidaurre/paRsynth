@@ -1,14 +1,5 @@
-# R. Samman
-# 2024-12-17
-# Updated: RS, 2025-01-27
-rm(list = ls())
-
-if (!require(testthat)) {
-    install.packages("testthat")
-}
-library(testthat)
-
-source("/Users/raneemsamman/Documents/GitHub/paRsynth/R/frequency_anchors.R")
+# Author: Raneem Samman
+# Date created: December 17, 2024
 
 test_that("Error handling for frequency_anchors", {
     test_df <- data.frame(

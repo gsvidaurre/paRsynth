@@ -1,15 +1,5 @@
-# G.A. Juarez
-# 4 Dec 2024
-# updated: RS, 2025-01-30
-
-# Just for code development
-# library(tidyverse)
-# library(lubridate)
-# library(testthat)
-# library(dplyr)
-rm(list = ls())
-source("/Users/raneemsamman/Documents/GitHub/paRsynth/R/generate_strings.R")
-source("/Users/raneemsamman/Documents/GitHub/paRsynth/R/parsons_code.R")
+# Author: G.A. Juarez and Raneem Samman
+# Date created: December 4, 2024
 
 # Define parameters
 n_groups <- 2
