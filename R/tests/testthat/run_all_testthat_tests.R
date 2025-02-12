@@ -1,17 +1,23 @@
-# G.A. Juarez
-# 4 Dec 2024
+# Author: G.A. Juarez
+# Date created: December 4, 2024
 
 rm(list = ls())
 
-if (!require(testthat)) install.packages('testthat')
-library(testthat)
-library(dplyr)
-library(stringr)
-library(rlang)
-library(pbapply)
+# make a list of packages to install
+pkgs <- c("testthat", "soundgen", "dplyr", "stringr", "rlang", "tidyverse", "lubridate", "pbapply")
+
+# check if the packages are installed, if not, install them
+for (pkg in pkgs) {
+    if (!require(pkg, character.only = TRUE)) {
+        install.packages(pkg, dependencies = TRUE)
+    }
+}
+# load the packages (for software development purposes)
+# lapply(pkgs, library, character.only = TRUE)
 
 # Change the path for testing to reflect where the package is installed on your local machine
-testing_path <- "~/Desktop/GitHub_repos/paRsynth/R"
+testing_path <- "/Users/raneemsamman/Documents/GitHub/paRsynth/R" #raneem's
+# testing_path <- "~/Desktop/GitHub_repos/paRsynth/R" #alexandra's 
 
 # Change the desktop path to reflect where temporary directories for testing will be created to save files generated during testing
 desktop_path <- "~/Desktop"
