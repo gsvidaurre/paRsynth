@@ -38,13 +38,13 @@ RStudio displays four panes in your workspace: source, console, environment, and
 
 You can also reconfigure the soft-wrapping lines of text and code. You don't have to scroll horizontally to see long lines of text in your Source pane.
 
-* Go to the menu along the top bar of the RStudio window and select the option "Tools"
+* Go to the top tool bar above the R Studio window and select the option "Tools"
 
 * Select "Global Options" in the  pop-up menu
 
 * Select the option "Code" on the left hand side
 
-* Check the box next to the option "Soft-wrap source files"
+* Check the box next to the option "Soft-wrap R source files"
 
 * Select "Apply" to apply those changes, then "OK" to exit 
 
