@@ -26,7 +26,7 @@ Once you have R and RStudio installed on your computer, you can open RStudio by 
 
 RStudio displays four panes in your workspace: source, console, environment, and files. You can reconfigure the panes so that the source and console panes are horizontally next to one another. This makes it easier to immediately check the output of any code that you run.
 
-* Go to the menu along the top bar of the RStudio window and select the option "Tools"
+* Go to the tool bar above the R Studio window and select the option "Tools"
 
 * Select "Global Options" in the  pop-up menu
 
@@ -38,7 +38,7 @@ RStudio displays four panes in your workspace: source, console, environment, and
 
 You can also reconfigure the soft-wrapping lines of text and code. You don't have to scroll horizontally to see long lines of text in your Source pane.
 
-* Go to the top tool bar above the R Studio window and select the option "Tools"
+* Go to the tool bar above the R Studio window and select the option "Tools"
 
 * Select "Global Options" in the  pop-up menu
 
@@ -50,7 +50,7 @@ You can also reconfigure the soft-wrapping lines of text and code. You don't hav
 
 You can also change the font size, font color, and background color of your RStudio workspace. 
 
-* Go to the menu along the top bar of the RStudio window and select the option "Tools"
+* Go to the tool bar above the R Studio window and select the option "Tools"
 
 * Select "Global Options" in the  pop-up menu
 
