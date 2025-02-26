@@ -230,7 +230,7 @@ synthetic_call_metadata1 <- write_audio(
   sampling_rate = 150000,
   pitch_sampling_rate = 44100,
   smoothing = list(interpol = "loess", loessSpan = 1, discontThres = 0, jumpThres = 0),
-  rolloffExact = c(0.25, 0.25, 0.25, 0.25, 0.25),
+  rolloffExact = c(0.25),
   formants = NA,
   vocalTract = NA,
   temperature = 0,
@@ -286,6 +286,7 @@ n_individuals2 <- 10
 n_calls2 <- 2
 global_strings <- 4
 string_length2 <- (group_information2 + individual_information2) + global_strings
+random_variation2 <- 2
 
 ### Generate the string for each call
 calls2 <- generate_strings(
@@ -295,6 +296,7 @@ calls2 <- generate_strings(
   string_length = string_length2, 
   group_information = group_information2, 
   individual_information = individual_information2
+  random_variation = random_variation2
   )
 
 ### Convert each string to Parsons code
@@ -324,10 +326,19 @@ calls_parsons_frequencies2 <- frequency_anchors(
 
 ### For each call, use the frequency vectors to generate synthetic audio files with the soundgen package
 synthetic_call_metadata2 <- write_audio(
-  df = calls_parsons_frequencies2, 
+  df = calls_parsons_frequencies2,
+  sylLen = 400,
+  sampling_rate = 150000,
+  pitch_sampling_rate = 44100,
   save_path = audio_path, 
-  sampling_rate = 150000, 
-  sylLen = 400, 
+  smoothing = list(interpol = "loess", loessSpan = 1, discontThres = 0, jumpThres = 0),
+  rolloffExact = c(0.25),
+  formants = NA,
+  vocalTract = NA,
+  temperature = 0,
+  vibratoFreq = 1,
+  save_path = audio_path, 
+  invalidArgAction = "ignore"
   prefix = "IndividualIdentity"
   )
 
