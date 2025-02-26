@@ -121,7 +121,10 @@ sel_tbl <- data.table::rbindlist(lapply(1:length(wavs), function(w){
   tmp <- tuneR::readWave(file.path(audio_path, wavs[w])) # Read the audio file
 
   # Return the metadata for the given call using the synthetic metadata generated during audio file generation above
-  synthetic_call_metadata <- read.csv("/Users/gretheljuarez/Desktop/BIRDS/paRsynth_methods_synthetic_dataset/synthetic_call_metadata.csv")
+  synthetic_call_metadata <- read.csv(file.path(analysis_path,"synthetic_call_metadata.csv"))
+  
+cores <- parallel::detectCores() - 4
+cores
 
   # Return the metadata for the given call using the synthetic metadata generated during audio file generation above by filtering the metadata for the audio file  
   metadats_tmp <- synthetic_call_metadata %>%
