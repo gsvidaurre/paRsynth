@@ -13,9 +13,11 @@ In this vignette, we will go through how to analyze the synthetic identity signa
 
 <h1>Set Up Working Environment</h1>
 
-Before analyzing the outputs you generated with paRsynth, there are some preliminary steps we must go through to ensure it will work appropriately and be organized neatly.
+Before using the functions in the paRsynth package, there are some preliminary steps we must go through to create a directory where different types of generated data can be automatically stored (audios and images). This automatic organization of generated data will make it easier to streamline the process of using paRsynth's functions.
 
 **Re-load packages and reset path**
+
+It is good practice to clean your global environment before using functions from open-sourced packages. In order for paRsynth functions to run, they need specific external R packages as well. For example, 'write_audio' generates and saves audio files in .wav format which requires the package `soundgen::soundgen()` to be installed and loaded. 
 
 ```{r message = FALSE, warning = FALSE}
 
@@ -51,7 +53,7 @@ invisible(lapply(X, library, character.only = TRUE))
 
 **Re-initialize working directories for data on your local machine**
 
-It is important to have your files organized, especially when creating many different types of output data. Therefore, initializing working directories throughout will be helpful when analyzing the data you create with paRsynth.
+It is important to have your files organized, especially when creating many different types of output data (audios and images). Therefore, initializing working directories in the beginning will be helpful in understanding the data you create with paRsynth and where they are stored.
 
 ```{r}
 
@@ -96,6 +98,25 @@ if(!dir.exists(images_path)){
 
 ```
 
+**Read in the synthetic call metadata and set cores for parallel processing**
+
+```{r}
+
+synthetic_call_metadatacsv <- read.csv(file.path(analysis_path, "synthetic_call_metadata.csv"))
+glimpse(synthetic_call_metadatacsv)
+
+cores <- parallel::detectCores() - 4
+cores
+
+# Find the maximum frequency anchor value across all vocalizations
+freq_cols <- synthetic_call_metadata[, grepl("Frequency", names(synthetic_call_metadata))]
+glimpse(freq_cols)
+
+max_freq <- max(sapply(freq_cols, max))
+max_freq
+
+```
+
 <h1>Bioacoustics Analysis Steps</h1>
 
 **Step 1: Create a warbleR selection table**
@@ -106,25 +127,18 @@ To organize all the paRsynth generated outputs you created in the previous vigne
 
 # Create a vector of all of the audio files in the analysis path
 wavs <- list.files(path = audio_path, pattern = ".wav$", full.names = FALSE)
+length(wavs)
+head(wavs)
 
-# w <- 25 # testing
 
-# Create a selection table including synthetic call metadata and its corresponding audio file name
-sel_tbl <- data.table::rbindlist(lapply(1:length(wavs), function(w){
-
-  tmp <- tuneR::readWave(file.path(audio_path, wavs[w])) # Read the audio file
-
-  # Return the metadata for the given call using the synthetic metadata generated during audio file generation above
-  synthetic_call_metadata <- read.csv(file.path(analysis_path,"synthetic_call_metadata.csv"))
+# Iterate over the audio files to create one row of the selection table at a time. warbleR selection tables have a very specific format that must be used for downstream analysis.
+sel_tbl <- data.table::rbindlist(pblapply(1:length(wavs), function(w){
   
-cores <- parallel::detectCores() - 4
-cores
-
-  # Return the metadata for the given call using the synthetic metadata generated during audio file generation above by filtering the metadata for the audio file  
+  tmp <- tuneR::readWave(file.path(audio_path, wavs[w]))
+  
+  # Return the metadata for the given call using the synthetic metadata generated during audio file generation above
   metadats_tmp <- synthetic_call_metadata %>%
     dplyr::filter(grepl(wavs[w], audio_file_name))
-  
-  # glimpse(metadats_tmp)
   
   # Create a row for the selection table in warbleR format if the audio file exists and metadata for that file also exists
   if(nrow(metadats_tmp) > 0){
@@ -139,7 +153,9 @@ cores
       sampling_rate = tmp@samp.rate,
       group_ID = metadats_tmp[["Group"]],
       individual_ID = metadats_tmp[["Individual"]],
-      call_ID = metadats_tmp[["Call"]]
+      call = metadats_tmp[["Call"]],
+      call_ID = metadats_tmp[["Call_ID"]],
+      dataset = metadats_tmp[["dataset"]]
     )
     
   } else {
@@ -152,7 +168,9 @@ cores
       sampling_rate = NA,
       group_ID = NA,
       individual_ID = NA,
-      call_ID = NA
+      call = NA,
+      call_ID = NA,
+      dataset = NA
     )
     
   }
@@ -161,11 +179,11 @@ cores
   
 }))
 
+# See the selection table in warbleR format with useful metadata for acoustic space plots
+glimpse(sel_tbl)
+
 # Check the selection table for all the unique sampling rates
 unique(sel_tbl$sampling_rate)
-
-# See the selection table in warbleR format with all useful metadata for the synthetic experiment
-glimpse(sel_tbl)
 
 ```
 
@@ -204,8 +222,15 @@ This will output appropriately named spectrograms for the synthetically generate
 
 Now, we are getting the key analysis step. Using warbleR, a spectrographic cross-correlation (SPCC) can be performed to find acoustic similarities between the spectrograms created. 
 
+If the `temperature` argument used by `soundgen` is set to 0 (for no stochasticity in sound generation), then you will need to filter out any calls that have duplicated strings prior to running cross-correlation. Otherwise you will have values of 1 outside of the diagonal representing comparisons among calls of exactly the same structure or duplicates, and multidimensional scaling will fail.
+
+Here SPCC is performed across both synthetic vocalization datasets, so that the acoustic space shown below will be a universal space across figures.
+
 ```{r}
+
 # Perform SPCC to measure acoustic similarity of all calls in dataset GroupMembership_sel_tbl
+# When generating the synthetic vocalizations, increasing the temperature from 0 to 0.025 reduced the number of ones off of the diagonal to 1. I just increased temperature to 0.05 and there was still a single 1 off of the diagonal
+# (max_freq/1000): The maximum frequency in the bandwidth argument was 7 kHz, add 2 kHz for a buffer
 xc_mat <- warbleR::cross_correlation(GroupMembership_sel_tbl, wl = 512, ovlp = 90, bp = c(0, 20), wn = "hanning", cor.method = "pearson", parallel = 1, na.rm = FALSE, type = "spectrogram", path = audio_path)
 
 # Check the structure of xc_mat
@@ -214,20 +239,40 @@ str(xc_mat)
 # Check the dimensions of xc_mat
 dim(xc_mat)
 
-# Check the percentage of values that are negative
-neg_values <- length(xc_mat[xc_mat<0])/(dim(xc_mat)[1]*dim(xc_mat)[2])
+# Get the percentage of values that are negative
+        neg_values <- ((length(xc_mat[xc_mat < 0])/length(xc_mat))) * 100
 
-# Stop the function if the percentage of negative values is > 0%
-if(length(neg_values) > 0){
-  stop("Negative values are present in the spectrographic cross-correlation matrix")
-}
-
-# Find the calls that are associated with negative values
-
-# Take out those calls from the dataset
+# Set all negative values to the minimum positive value in the SPCC matrix to represent the fact that these calls are very structurally different from one another
+        if(neg_values > 0){
+          
+          xc_mat[xc_mat < 0] <- round(min(xc_mat[xc_mat > 0]), 8)
+          
+        }
+        
+          # Continue with downstream analyses only if there are no 1's off of the diagonal, otherwise MDS will fail. Record NA values if there are 1's off of the diagonal (e.g. two calls of the same structure will present values of 1 as if the same call were compared to itself)
+        
+        # Make sure to calculate the true number of values in the symmetric matrix (multiply the number of unique values that are 1 by 2)
+        ones <- ((length(which(xc_mat[lower.tri(xc_mat)] == 1))*2)/length(xc_mat)) * 100
+        
+        if(ones > 0){
+          
+          # Get the maximum similarity value after 1 in the matrix
+          max_vals <- xc_mat[lower.tri(xc_mat)]
+          
+          # Use a value just under one to catch floating point numbers that are visually represented as 1
+          sec_max_val <- max(max_vals[max_vals < 0.9999999])
+          
+          # Then set the values of 1 off of the diagonal (in both the upper and lower triangle) to the next highest similarity value in this matrix
+          xc_mat[lower.tri(xc_mat)][xc_mat[lower.tri(xc_mat)] == 1] <- round(sec_max_val, 8)
+          xc_mat[upper.tri(xc_mat)][xc_mat[upper.tri(xc_mat)] == 1] <- round(sec_max_val, 8)
+          
+        }
 
 # Update the dimension names of the matrix to include the sound file names from the selection table to keep track of the vocalizations
 dimnames(xc_mat) <- list(GroupMembership_sel_tbl$sound.files, GroupMembership_sel_tbl$sound.files)
+
+# Save this matrix since it can take a long time to generate when there are many vocalizations
+saveRDS(xc_mat, file.path(analysis_path, "xc_mat.RDS"))
 
 ```
 
