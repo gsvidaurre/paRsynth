@@ -153,7 +153,7 @@ n_calls <- 2
 
 # globals refers to the number of characters in the the head and tail shared among all calls in the dataset to bound the variation. Number input here is split in half and those amount of characters are allocated to head and tail of string
 globals <- 8 # 4 characters for the global head, 4 for the global tail
-string_length <- (group_information + individual_information) + global_strings
+string_length <- (group_information + individual_information) + globals
 ```
 
 **Step 2: Create character strings representing vocal signals with more group membership information encoded within the call than individual identity information**
