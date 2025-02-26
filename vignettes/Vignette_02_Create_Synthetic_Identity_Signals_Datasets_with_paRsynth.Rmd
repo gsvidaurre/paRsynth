@@ -1,5 +1,5 @@
 ---
-title: "Vignette 02: Create Vocal Identity Signals with paRsynth"
+title: "Vignette 02: Create Synthetic Identity Signals Datasets with paRsynth"
 author: "GAJ"
 date: "2024-12-02"
 output: html_document
@@ -11,7 +11,7 @@ knitr::opts_chunk$set(echo = TRUE, eval = TRUE)
 
 ```
 
-In this vignette, we will go through how to create vocalization strings, convert them into Parsons code, calculate frequency anchors, and generate synthetic audio files using the paRsynth package for downstream bioacoustics analyses. 
+In this vignette, we will go through how to create synthetic identity signals by generating character strings, converting them into Parsons code, calculating frequency anchors, and creating synthetic audio files using the `paRsynth` package's functions. `soundgen` and `warbleR` packages are used to create synthetic audio files and create spectrograms, respectively. We will create two distinct datasets: 1) more group information than individual and 2) more individual information than group information. This will be useful when conducting downstream bioacoustics analyses.
 
 <h1>Set Up Working Environment</h1>
 
@@ -44,15 +44,9 @@ invisible(lapply(1:length(X), function(x){
 # Add paRsynth to the list of packages to load
 # X <- c(X, "paRsynth")
 
-# Change "Desktop/.../GitHub_repos" based on where paRsynth is stored on your local machine
+# Change "Desktop/.../GitHub_repos" to where paRsynth is stored on your local machine
 # testing_path <- "C://Users/summe/OneDrive/Desktop/github_repo/paRsynth/R/" # Summer's testing path
 testing_path <- "~/Desktop/BIRDS/GitHub_repos/paRsynth/R" # Alexandra's testing path
-
-# Load the paRsynth functions that will be tested below
-source(file.path(testing_path, "generate_strings.R"))
-source(file.path(testing_path, "parsons_code.R"))
-source(file.path(testing_path, "frequency_anchors.R"))
-source(file.path(testing_path, "write_audio.R"))
 
 # Load all of the packages specified above
 invisible(lapply(X, library, character.only = TRUE))
@@ -106,6 +100,18 @@ if(!dir.exists(images_path)){
 
 ```
 
+**Source the paRsynth functions directly from the GitHub repository**
+
+In order to use the paRsynth functions, you will need to source them into your enviornment. 
+
+```{r}
+# Load the paRsynth functions that will be tested below
+source(file.path(testing_path, "generate_strings.R"))
+source(file.path(testing_path, "parsons_code.R"))
+source(file.path(testing_path, "frequency_anchors.R"))
+source(file.path(testing_path, "write_audio.R"))
+```
+
 **Check out documentation for the paRsynth functions. These functions are written below in the order in which they should be used**
 
 Before using the paRsynth package, it would be beneficial for you to go over the description, usage, arguments, extra details, and examples of each function. 
@@ -133,18 +139,20 @@ set.seed(44)
 # Initialize the values of group_information and individual_information, which correspond to the length of the string that will be allocated to encoding group membership or individual identity information
 # Group information can outweigh individual information by a factor of at least 10 or higher
 # Random variation should be at least half or more compared to individual information
-factor_ratio <- 4
+factor_ratio <- 4 
 individual_information <- 2
 group_information <- individual_information * factor_ratio
+
+# Create variation within individuals
 random_variation <- 2
 
-# Initialize the values of the number of groups, individuals, calls, and string length
+# Initialize the values of the number of groups, individuals, and calls
 n_groups <- 2
 n_individuals <- 10
 n_calls <- 2
 
-# The global_strings refers to the number of characters in the the head and tail shared among all calls in the dataset to bound the variation. Number input here is split in half and those amount of characters are allocated to head and tail of string
-global_strings <- 4 
+# globals refers to the number of characters in the the head and tail shared among all calls in the dataset to bound the variation. Number input here is split in half and those amount of characters are allocated to head and tail of string
+globals <- 8 # 4 characters for the global head, 4 for the global tail
 string_length <- (group_information + individual_information) + global_strings
 ```
 
@@ -182,9 +190,9 @@ calls_parsons <- parsons_code(
   global_head_col = "Global_head",
   group_head_col = "Group_head",
   individual_middle_col = "Individual_middle",
-  random_variation_col = "Random_variation",
   group_tail_col = "Group_tail",
   global_tail_col = "Global_tail",
+  random_variation_col = "Random_variation",
   mapping = list("A" = "up", "B" = "down", "C" = "constant")
 )
 
@@ -226,17 +234,17 @@ Now, finally, you are equipped with all the necessary data to generate the audio
 
 synthetic_call_metadata1 <- write_audio(
   df = calls_parsons_frequencies,
-  sylLen = 400,
+  save_path = audio_path, 
   sampling_rate = 150000,
+  sylLen = 200,
+  temperature = 0.025,  # default stochasticity in generating sound
   pitch_sampling_rate = 44100,
   smoothing = list(interpol = "loess", loessSpan = 1, discontThres = 0, jumpThres = 0),
-  rolloffExact = c(0.25),
+  rolloffExact = c(0.25), # specify an amplitude value for the fundamental only, which will silence all harmonics
   formants = NA,
   vocalTract = NA,
-  temperature = 0,
   vibratoFreq = 1,
   prefix = "GroupMembership",
-  save_path = audio_path, 
   invalidArgAction = "ignore"
   )
 
@@ -268,25 +276,32 @@ glimpse(synthetic_call_metadata1csv)
 
 You have generated a metadata with paRsyth and it has been saved as a CSV file!
 
-<h2>2nd Example: Individual Information > Group Information</h2>
+<h2>2nd Dataset: More Individual Information than Group Information</h2>
 
-Let's do a 2nd example where individual information is greater than group information. Run the same steps above, but interchange 'individual_information' and 'group_information in the code. Reassign factor_ratio to a smaller even integer starting from 2 - 10.
+Let's do a 2nd example where individual information is greater than group information. Repeat steps 1 - 6 but interchange 'individual_information' and 'group_information in the code. Reassign factor_ratio to a smaller even integer starting from 2 - 10.
 
-```{r eval = FALSE}
+```{r}
 
 # Set the seed for reproducibility
 set.seed(456)
 
-# Interchange individual_information with group_information
-factor_ratio2 <- 4
+factor_ratio2 <- 2
 group_information2 <- 2
 individual_information2 <- group_information2 * factor_ratio2
+
+# Create variation within individuals
+random_variation2 <- 2
+
 n_groups2 <- 2
 n_individuals2 <- 10
 n_calls2 <- 2
-global_strings <- 4
-string_length2 <- (group_information2 + individual_information2) + global_strings
-random_variation2 <- 2
+
+globals <- 8
+string_length2 <- (group_information2 + individual_information2) + globals
+
+```
+
+```{r}
 
 ### Generate the string for each call
 calls2 <- generate_strings(
@@ -295,9 +310,14 @@ calls2 <- generate_strings(
   n_calls = n_calls2, 
   string_length = string_length2, 
   group_information = group_information2, 
-  individual_information = individual_information2
+  individual_information = individual_information2,
   random_variation = random_variation2
   )
+
+glimpse(calls2)
+```
+
+```{r}
 
 ### Convert each string to Parsons code
 calls_parsons2 <- parsons_code(
@@ -306,11 +326,18 @@ calls_parsons2 <- parsons_code(
   global_head_col = "Global_head",
   group_head_col = "Group_head",
   individual_middle_col = "Individual_middle",
-  random_variation_col = "Random_variation",
   group_tail_col = "Group_tail",
   global_tail_col = "Global_tail",
+  random_variation_col = "Random_variation",
   mapping = list("A" = "up", "B" = "down", "C" = "constant")
 )
+
+glimpse(calls_parsons2)
+
+```
+
+
+```{r}
 
 ### Convert each Parsons code to frequency values
 calls_parsons_frequencies2 <- frequency_anchors(
@@ -321,26 +348,39 @@ calls_parsons_frequencies2 <- frequency_anchors(
   call_id_col = "Call_ID", 
   call_string_col = "Call", 
   starting_frequency = 4000, 
-  frequency_shift = 1000
+  frequency_shift = 1000,
+  section_transition = "continuous_trajectory"
   )
+
+glimpse(calls_parsons_frequencies2)
+
+```
+
+```{r}
 
 ### For each call, use the frequency vectors to generate synthetic audio files with the soundgen package
 synthetic_call_metadata2 <- write_audio(
   df = calls_parsons_frequencies2,
-  sylLen = 400,
-  sampling_rate = 150000,
-  pitch_sampling_rate = 44100,
   save_path = audio_path, 
+  sampling_rate = 150000,
+  sylLen = 200,
+  temperature = 0.025,  # default stochasticity in generating sound
+  pitch_sampling_rate = 44100,
   smoothing = list(interpol = "loess", loessSpan = 1, discontThres = 0, jumpThres = 0),
-  rolloffExact = c(0.25),
+  rolloffExact = c(0.25), # specify an amplitude value for the fundamental only, which will silence all harmonics
   formants = NA,
   vocalTract = NA,
-  temperature = 0,
   vibratoFreq = 1,
-  save_path = audio_path, 
+  prefix = "GroupMembership",
   invalidArgAction = "ignore"
-  prefix = "IndividualIdentity"
   )
+
+glimpse(synthetic_call_metadata2)
+
+
+```
+
+```{r eval = FALSE}
 
 ### Save the metadata for the synthetic audio files to a CSV file
 # Add extra metadata for upcoming image files names and rearrange columns
@@ -388,4 +428,6 @@ glimpse(synthetic_call_metadatacsv)
 
 ```
  
-After running this code you will have two datasets combined into a single CSV: 1) reflects vocalizations with more group information than individual and 2) vice versa. Navigate to Vignette 03: Bioacoustics Analysis to learn how to analyze these outputs you created with paRsynth. Or if you would like to learn more about how to create vocal identity signals with paRsynth using different frequency_anchors settings and understanding how the spectrogram gets affected check out Vignette 02b: Effects of Different Frequency Anchors Settings on Spectrogram.
+After running this code you will have two datasets combined into a single .csv file. The first dataset reflects synthetic identity signals with more group information than individual and the 2nd dataset vice versa. Navigate to Vignette 03: Bioacoustics Analysis to learn how to analyze these outputs you created using the paRsynth functions.
+
+Or if you would like to learn more about how to create synthetic identity signals with paRsynth using different frequency_anchors settings and understand how the spectrogram gets affected, check out Vignette 02b: Effects of Different Frequency Anchors Settings on Spectrogram.
