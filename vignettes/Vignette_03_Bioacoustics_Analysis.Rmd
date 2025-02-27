@@ -113,8 +113,10 @@ if(!dir.exists(figures_path)){
 
 ```{r}
 
-synthetic_call_metadatacsv <- read.csv(file.path(analysis_path, "synthetic_call_metadata.csv"))
-glimpse(synthetic_call_metadatacsv)
+synthetic_call_metadata <- read.csv(file.path(analysis_path, "synthetic_call_metadata.csv"))
+glimpse(synthetic_call_metadata)
+
+synthetic_call_metadata <- na.omit(synthetic_call_metadata)
 
 cores <- parallel::detectCores() - 4
 cores
@@ -140,7 +142,7 @@ To organize all the paRsynth generated outputs you created in the previous vigne
 wavs <- list.files(path = audio_path, pattern = ".wav$", full.names = FALSE)
 length(wavs)
 head(wavs)
-
+tail(wavs)
 
 # Iterate over the audio files to create one row of the selection table at a time. warbleR selection tables have a very specific format that must be used for downstream analysis.
 sel_tbl <- data.table::rbindlist(pblapply(1:length(wavs), function(w){
@@ -148,7 +150,7 @@ sel_tbl <- data.table::rbindlist(pblapply(1:length(wavs), function(w){
   tmp <- tuneR::readWave(file.path(audio_path, wavs[w]))
   
   # Return the metadata for the given call using the synthetic metadata generated during audio file generation above
-  metadats_tmp <- synthetic_call_metadatacsv %>%
+  metadats_tmp <- synthetic_call_metadata %>%
     dplyr::filter(grepl(wavs[w], audio_file_name))
   
   # Create a row for the selection table in warbleR format if the audio file exists and metadata for that file also exists
@@ -227,7 +229,7 @@ invisible(file.rename(file.path(images_path, imgs), file.path(images_path, new_n
 This will output appropriately named spectrograms for the synthetically generated vocalizations in the selection table created previously. Refer to the image below for an example of a spectrogram (GroupMembership_Group1_Ind1_Call1).
 
 <br>
-![Example Spectrogram of GroupMembership_Group1_Ind1_Call1](/Users/gretheljuarez/Desktop/BIRDS/GitHub_repos/paRsynth/vignettes/images/GroupMembership_Group1_Ind1_Call1copy-min.png)
+![Example Spectrogram of GroupMembership_Group1_Ind1_Call1](/Users/gretheljuarez/Desktop/BIRDS/paRsynth_methods_synthetic_dataset/images/GroupMembership_Group1_Indiv1_Call1.jpeg)
 
 **Step 3: Perform spectrogrphic cross-correlation (SPCC) to measure acoustic similarity of all calls in dataset (pairwise similarity matrix)**
 
@@ -342,7 +344,7 @@ hulls <- plyr::ddply(mds_df, "group_ID", function(x){
 })
 
 # Piping the data frame into ggplot to create the acoustic space plot
-mds_df %>%
+GroupMembership <- mds_df %>%
   ggplot(aes(x = X, y = Y, color = group_ID)) + 
   geom_polygon(data = hulls, aes(x = X, y = Y, fill = group_ID, color = group_ID), alpha = 0.2, size = 0.2, show.legend = FALSE) +
   geom_point(aes(fill = group_ID, color = group_ID, shape = individual_ID), size = 2, stroke = 0.5) +
@@ -365,7 +367,9 @@ mds_df %>%
     legend.key.spacing = unit(0.1, "lines"),
     legend.box.spacing = unit(0.1, "lines")
   )
-  
+
+ggsave("GroupMembership.png", plot = GroupMembership, width = 6, height = 4, dpi = 300)
+
 ```
 
 This will output an acoustic space plot to represent the acoustic similarity of the paRsynth generated vocalizations using the spectrograms created in vignette 02. In this case, we generated space plots for the first dataset that has more group information encoded in the vocalizations. It will not look the same as the plot you generated because paRsynth randomly generates vocalizations strings, but the overall trends should be similar
