@@ -379,7 +379,7 @@ glimpse(synthetic_call_metadata_cf_sf_csv)
  
 After running this code you will have two datasets combined into a single CSV: 1) reflects vocalizations created with continuous_trajectory setting and 2) vocalizations created with starting_frequency setting. Now we are ready to do some Bioacoustics Analysis steps to analyze and compare these outputs you created with paRsynth.
 
-<h1>Bioacoustics Analysis Steps</h1>
+<h1>Bioacoustics Analysis Workflow</h1>
 
 **Step 1: Create a warbleR selection table**
 
@@ -391,23 +391,15 @@ To organize all the paRsynth generated outputs you created in the previous vigne
 wavs <- list.files(path = audio_path, pattern = ".wav$", full.names = FALSE)
 length(wavs)
 head(wavs)
-tail(wavs)
 
-# w <- 25 # testing
-
-# Create a selection table including synthetic call metadata and its corresponding audio file name
-sel_tbl <- data.table::rbindlist(lapply(1:length(wavs), function(w){
+# Iterate over the audio files to create one row of the selection table at a time. warbleR selection tables have a very specific format that must be used for downstream analysis.
+sel_tbl <- data.table::rbindlist(pblapply(1:length(wavs), function(w){
   
-  tmp <- tuneR::readWave(file.path(audio_path, wavs[w])) # Read the audio file
+  tmp <- tuneR::readWave(file.path(audio_path, wavs[w]))
   
   # Return the metadata for the given call using the synthetic metadata generated during audio file generation above
-  synthetic_call_metadata <- read.csv("/Users/gretheljuarez/Desktop/BIRDS/paRsynth_methods_synthetic_dataset_copy/synthetic_call_metadata_cf_sf.csv")
-  
-  # Return the metadata for the given call using the synthetic metadata generated during audio file generation above by filtering the metadata for the audio file
-  metadats_tmp <- synthetic_call_metadata %>%
+  metadats_tmp <- synthetic_call_metadata_cf_sf_csv %>%
     dplyr::filter(grepl(wavs[w], audio_file_name))
-  
-  # glimpse(metadats_tmp)
   
   # Create a row for the selection table in warbleR format if the audio file exists and metadata for that file also exists
   if(nrow(metadats_tmp) > 0){
@@ -444,11 +436,11 @@ sel_tbl <- data.table::rbindlist(lapply(1:length(wavs), function(w){
   
 }))
 
+# See the selection table in warbleR format with useful metadata for acoustic space plots
+glimpse(sel_tbl)
+
 # Check the selection table for all the unique sampling rates
 unique(sel_tbl$sampling_rate)
-
-# See the selection table in warbleR format with all useful metadata for the synthetic experiment
-glimpse(sel_tbl)
 
 ```
 
@@ -460,7 +452,7 @@ Using the warbleR package, spectrogram images can be created from each synthetic
 
 In the following example, we are creating spectrograms for the first dataset we created, where more group information is encoded in the vocalization than individual identity information.
 
-**Dataset A**
+**Dataset A**: section_transition = "continuous_trajectory"
 
 ```{r eval=FALSE}
 
@@ -480,7 +472,7 @@ invisible(file.rename(file.path(images_path, imgs), file.path(images_path, new_n
 
 ```
 
-**Dataset B**
+**Dataset B**: section_transition = "starting_frequency"
 
 ```{r eval=FALSE}
 
