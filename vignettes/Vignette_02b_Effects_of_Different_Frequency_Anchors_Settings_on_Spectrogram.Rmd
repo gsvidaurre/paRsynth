@@ -262,7 +262,7 @@ Now, finally, you are equipped with all the necessary data to generate the audio
 
 ```{r eval=FALSE}
 
-synthetic_call_metadata1_cf <- write_audio(
+synthetic_call_metadata_cf <- write_audio(
   df = calls_parsons_frequencies_cf,
   save_path = audio_path, 
   sampling_rate = 150000,
@@ -278,7 +278,7 @@ synthetic_call_metadata1_cf <- write_audio(
   invalidArgAction = "ignore"
   )
 
-glimpse(synthetic_call_metadata1_cf)
+glimpse(synthetic_call_metadata_cf)
 
 ```
 
@@ -286,7 +286,7 @@ glimpse(synthetic_call_metadata1_cf)
 
 ```{r eval=FALSE}
 
-synthetic_call_metadata1_sf <- write_audio(
+synthetic_call_metadata_sf <- write_audio(
   df = calls_parsons_frequencies_sf,
   save_path = audio_path, 
   sampling_rate = 150000,
@@ -302,7 +302,7 @@ synthetic_call_metadata1_sf <- write_audio(
   invalidArgAction = "ignore"
   )
 
-glimpse(synthetic_call_metadata1_sf)
+glimpse(synthetic_call_metadata_sf)
 
 ```
 
@@ -317,16 +317,16 @@ The data frames that you generate in R using paRsynth can be saved as physical f
 ```{r eval = FALSE}
 
 # Add extra metadata for upcoming image files names and rearrange columns
-synthetic_call_metadata1_cf %>%
-  write.csv(., file = file.path(analysis_path, "synthetic_call_metadata1_cf.csv"), row.names = FALSE) 
+synthetic_call_metadata_cf %>%
+  write.csv(., file = file.path(analysis_path, "synthetic_call_metadata_cf.csv"), row.names = FALSE) 
 
 ```
 
 ```{r}
 
-synthetic_call_metadata1_cf_csv <- read.csv(file.path(analysis_path, "synthetic_call_metadata1_cf.csv"))
+synthetic_call_metadata_cf_csv <- read.csv(file.path(analysis_path, "synthetic_call_metadata_cf.csv"))
 
-glimpse(synthetic_call_metadata1_cf_csv)
+glimpse(synthetic_call_metadata_cf_csv)
 
 ```
 
@@ -335,20 +335,41 @@ glimpse(synthetic_call_metadata1_cf_csv)
 ```{r eval = FALSE}
 
 # Add extra metadata for upcoming image files names and rearrange columns
-synthetic_call_metadata1_sf %>%
-  write.csv(., file = file.path(analysis_path, "synthetic_call_metadata1_sf.csv"), row.names = FALSE) 
+synthetic_call_metadata_sf %>%
+  write.csv(., file = file.path(analysis_path, "synthetic_call_metadata_sf.csv"), row.names = FALSE) 
 
 ```
 
 ```{r}
 
-synthetic_call_metadata1_sf_csv <- read.csv(file.path(analysis_path, "synthetic_call_metadata1_sf.csv"))
+synthetic_call_metadata_sf_csv <- read.csv(file.path(analysis_path, "synthetic_call_metadata_sf.csv"))
 
-glimpse(synthetic_call_metadata1_sf_csv)
+glimpse(synthetic_call_metadata_sf_csv)
 
 ```
 
 You have generated two metadatas with paRsyth and it has been saved as a CSV file!
+
+**Step 7: Save the metadata for the synthetic datasets in a CSV file**
+
+It may be beneficial to have a single csv file that combine information from both datasets.
+
+```{r}
+
+# Combine the metdata across datasets and add an extra column to indicate the call dataset generated
+synthetic_call_metadata_cf_csv %>%
+  dplyr::mutate(
+    dataset = "A"
+  ) %>% 
+  bind_rows(
+    synthetic_call_metadata_sf_csv %>% 
+      dplyr::mutate(
+        dataset = "B"
+      )
+  ) %>%
+  write.csv(., file = file.path(analysis_path, "synthetic_call_metadata.csv"), row.names = FALSE) 
+
+```
 
 After running this code you will have two datasets each with a single .csv file that includes all the details of the synthetic identity signals you generated with paRsynth in this vignette. 1) reflects vocalizations created with continuous_trajectory setting and 2) vocalizations created with starting_frequency setting. Now we are ready to do some Bioacoustics Analysis steps to analyze and compare these outputs you created with paRsynth.
 
@@ -367,23 +388,20 @@ length(wavs)
 head(wavs)
 tail(wavs)
 
-```
-
-**Dataset A**: section_transition = "continuous_trajectory"
-
-```{r}
+# Recall .csv file that has information from both datasets
+synthetic_call_metadata <- read.csv(file.path(analysis_path, "synthetic_call_metadata.csv"))
 
 # Iterate over the audio files to create one row of the selection table at a time. warbleR selection tables have a very specific format that must be used for downstream analysis.
-sel_tblA <- data.table::rbindlist(pblapply(1:length(wavs), function(w){
+sel_tbl <- data.table::rbindlist(pblapply(1:length(wavs), function(w){
   
-  tmpA <- tuneR::readWave(file.path(audio_path, wavs[w]))
+  tmp <- tuneR::readWave(file.path(audio_path, wavs[w]))
   
   # Return the metadata for the given call using the synthetic metadata generated during audio file generation above
-  metadats_tmpA <- synthetic_call_metadata1_cf_csv %>%
+  metadats_tmp <- synthetic_call_metadata %>%
     dplyr::filter(grepl(wavs[w], audio_file_name))
   
   # Create a row for the selection table in warbleR format if the audio file exists and metadata for that file also exists
-  if(nrow(metadats_tmpA) > 0){
+  if(nrow(metadats_tmp) > 0){
     
     # Use 0.1s as a margin to indicate where the vocalization starts and ends in the audio file
     # soundgen::soundgen() adds 100ms of silence before and after the synthetic vocalization by default 
@@ -391,11 +409,13 @@ sel_tblA <- data.table::rbindlist(pblapply(1:length(wavs), function(w){
       sound.files = wavs[w], 
       selec = 1,
       start = 0.1, 
-      end = seewave::duration(tmpA) - 0.1,
-      sampling_rate = tmpA@samp.rate,
-      group_ID = metadats_tmpA[["Group"]],
-      individual_ID = metadats_tmpA[["Individual"]],
-      call_ID = metadats_tmpA[["Call"]]
+      end = seewave::duration(tmp) - 0.1,
+      sampling_rate = tmp@samp.rate,
+      group_ID = metadats_tmp[["Group"]],
+      individual_ID = metadats_tmp[["Individual"]],
+      call = metadats_tmp[["Call"]],
+      call_ID = metadats_tmp[["Call_ID"]],
+      dataset = metadats_tmp[["dataset"]]
     )
     
   } else {
@@ -404,11 +424,13 @@ sel_tblA <- data.table::rbindlist(pblapply(1:length(wavs), function(w){
       sound.files = wavs[w], 
       selec = 1, 
       start = 0.1, 
-      end = seewave::duration(tmpA) + 0.1,
+      end = seewave::duration(tmp) + 0.1,
       sampling_rate = NA,
       group_ID = NA,
       individual_ID = NA,
-      call_ID = NA
+      call = NA,
+      call_ID = NA,
+      dataset = NA
     )
     
   }
@@ -418,66 +440,10 @@ sel_tblA <- data.table::rbindlist(pblapply(1:length(wavs), function(w){
 }))
 
 # See the selection table in warbleR format with useful metadata for acoustic space plots
-glimpse(sel_tblA)
+glimpse(sel_tbl)
 
 # Check the selection table for all the unique sampling rates
-unique(sel_tblA$sampling_rate)
-
-```
-
-**Dataset B**: section_transition = "starting_frequency"
-
-```{r}
-
-# Iterate over the audio files to create one row of the selection table at a time. warbleR selection tables have a very specific format that must be used for downstream analysis.
-sel_tblB <- data.table::rbindlist(pblapply(1:length(wavs), function(w){
-  
-  tmpB <- tuneR::readWave(file.path(audio_path, wavs[w]))
-  
-  # Return the metadata for the given call using the synthetic metadata generated during audio file generation above
-  metadats_tmpB <- synthetic_call_metadata1_sf_csv %>%
-    dplyr::filter(grepl(wavs[w], audio_file_name))
-  
-  # Create a row for the selection table in warbleR format if the audio file exists and metadata for that file also exists
-  if(nrow(metadats_tmpB) > 0){
-    
-    # Use 0.1s as a margin to indicate where the vocalization starts and ends in the audio file
-    # soundgen::soundgen() adds 100ms of silence before and after the synthetic vocalization by default 
-    res <- data.frame(
-      sound.files = wavs[w], 
-      selec = 1,
-      start = 0.1, 
-      end = seewave::duration(tmpB) - 0.1,
-      sampling_rate = tmpB@samp.rate,
-      group_ID = metadats_tmpB[["Group"]],
-      individual_ID = metadats_tmpB[["Individual"]],
-      call_ID = metadats_tmpB[["Call"]]
-    )
-    
-  } else {
-    
-    res <- data.frame(
-      sound.files = wavs[w], 
-      selec = 1, 
-      start = 0.1, 
-      end = seewave::duration(tmpB) + 0.1,
-      sampling_rate = NA,
-      group_ID = NA,
-      individual_ID = NA,
-      call_ID = NA
-    )
-    
-  }
-  
-  return(res)
-  
-}))
-
-# See the selection table in warbleR format with useful metadata for acoustic space plots
-glimpse(sel_tblB)
-
-# Check the selection table for all the unique sampling rates
-unique(sel_tblB$sampling_rate)
+unique(sel_tbl$sampling_rate)
 
 ```
 
@@ -494,7 +460,7 @@ In the following example, we are creating spectrograms for the first dataset we 
 ```{r eval=FALSE}
 
 # To make spectrograms of dataset A (continuous_trajectory), you will need to filter it out from the selection table you made above.
-A_sel_tbl <- sel_tblA %>%
+A_sel_tbl <- sel_tbl %>%
     dplyr::filter(grepl("A", sound.files))
 
 # Create spectrograms for filtered calls
@@ -514,7 +480,7 @@ invisible(file.rename(file.path(images_path, imgs), file.path(images_path, new_n
 ```{r eval=FALSE}
 
 # To make spectrograms of dataset B (starting_frequency), you will need to filter it out from the selection table you made above.
-B_sel_tbl <- sel_tblB %>%
+B_sel_tbl <- sel_tbl %>%
     dplyr::filter(grepl("B", sound.files))
 
 # Create spectrograms for filtered calls
