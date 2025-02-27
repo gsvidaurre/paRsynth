@@ -66,7 +66,7 @@ path <- "/Users/gretheljuarez/Desktop/BIRDS/" # Alexandra's path
 # path <- "/Users/summe/OneDrive/Desktop/" # Summer's path
 
 # Initialize the directory for analysis on your local computer
-analysis_dir <- "paRsynth_methods_synthetic_dataset_copy"
+analysis_dir <- "paRsynth_frequency_anchors_settings_comparison"
 
 # Combine the base path and the newly created data directory into a single path
 analysis_path <- file.path(path, analysis_dir)
@@ -274,7 +274,7 @@ synthetic_call_metadata1_cf <- write_audio(
   formants = NA,
   vocalTract = NA,
   vibratoFreq = 1,
-  prefix = "GroupMembership",
+  prefix = "A",
   invalidArgAction = "ignore"
   )
 
@@ -298,7 +298,7 @@ synthetic_call_metadata1_sf <- write_audio(
   formants = NA,
   vocalTract = NA,
   vibratoFreq = 1,
-  prefix = "GroupMembership",
+  prefix = "B",
   invalidArgAction = "ignore"
   )
 
@@ -350,34 +350,7 @@ glimpse(synthetic_call_metadata1_sf_csv)
 
 You have generated two metadatas with paRsyth and it has been saved as a CSV file!
 
-**Additional Step 7: Combine datasets into one single CSV file**
-
-It may be helpful for downstream bioacoustic analysis to create a CSV file including both datasets.
-
-```{r eval = FALSE}
-
-# Read the .csv file of each dataset
-Dataset_A <- read.csv("/Users/gretheljuarez/Desktop/BIRDS/paRsynth_methods_synthetic_dataset_copy/synthetic_call_metadata1_cf.csv")
-Dataset_B <- read.csv("/Users/gretheljuarez/Desktop/BIRDS/paRsynth_methods_synthetic_dataset_copy/synthetic_call_metadata1_sf.csv")
-
-# Combine the CSV files of each dataset
-synthetic_call_metadata_cf_sf <- rbind(Dataset_A, Dataset_B)
-
-# Write out the CSV file containing both datasets
-synthetic_call_metadata_cf_sf %>%
-  write.csv(., file = file.path(analysis_path, "synthetic_call_metadata_cf_sf.csv"), row.names = FALSE)
-
-```
-
-```{r}
-
-synthetic_call_metadata_cf_sf_csv <- read.csv(file.path(analysis_path, "synthetic_call_metadata_cf_sf.csv"))
-
-glimpse(synthetic_call_metadata_cf_sf_csv)
-
-```
- 
-After running this code you will have two datasets combined into a single CSV: 1) reflects vocalizations created with continuous_trajectory setting and 2) vocalizations created with starting_frequency setting. Now we are ready to do some Bioacoustics Analysis steps to analyze and compare these outputs you created with paRsynth.
+After running this code you will have two datasets each with a single .csv file that includes all the details of the synthetic identity signals you generated with paRsynth in this vignette. 1) reflects vocalizations created with continuous_trajectory setting and 2) vocalizations created with starting_frequency setting. Now we are ready to do some Bioacoustics Analysis steps to analyze and compare these outputs you created with paRsynth.
 
 <h1>Bioacoustics Analysis Workflow</h1>
 
@@ -385,24 +358,32 @@ After running this code you will have two datasets combined into a single CSV: 1
 
 To organize all the paRsynth generated outputs you created in the previous vignettes, you will have to create a warbleR selection table. The warbleR package is very useful to streamline bioacustics analysis. First you will list all the .wav files and then organize them in a selection table.
 
+
 ```{r}
 
 # Create a vector of all of the audio files in the analysis path
 wavs <- list.files(path = audio_path, pattern = ".wav$", full.names = FALSE)
 length(wavs)
 head(wavs)
+tail(wavs)
+
+```
+
+**Dataset A**: section_transition = "continuous_trajectory"
+
+```{r}
 
 # Iterate over the audio files to create one row of the selection table at a time. warbleR selection tables have a very specific format that must be used for downstream analysis.
-sel_tbl <- data.table::rbindlist(pblapply(1:length(wavs), function(w){
+sel_tblA <- data.table::rbindlist(pblapply(1:length(wavs), function(w){
   
-  tmp <- tuneR::readWave(file.path(audio_path, wavs[w]))
+  tmpA <- tuneR::readWave(file.path(audio_path, wavs[w]))
   
   # Return the metadata for the given call using the synthetic metadata generated during audio file generation above
-  metadats_tmp <- synthetic_call_metadata_cf_sf_csv %>%
+  metadats_tmpA <- synthetic_call_metadata1_cf_csv %>%
     dplyr::filter(grepl(wavs[w], audio_file_name))
   
   # Create a row for the selection table in warbleR format if the audio file exists and metadata for that file also exists
-  if(nrow(metadats_tmp) > 0){
+  if(nrow(metadats_tmpA) > 0){
     
     # Use 0.1s as a margin to indicate where the vocalization starts and ends in the audio file
     # soundgen::soundgen() adds 100ms of silence before and after the synthetic vocalization by default 
@@ -410,11 +391,11 @@ sel_tbl <- data.table::rbindlist(pblapply(1:length(wavs), function(w){
       sound.files = wavs[w], 
       selec = 1,
       start = 0.1, 
-      end = seewave::duration(tmp) - 0.1,
-      sampling_rate = tmp@samp.rate,
-      group_ID = metadats_tmp[["Group"]],
-      individual_ID = metadats_tmp[["Individual"]],
-      call_ID = metadats_tmp[["Call"]]
+      end = seewave::duration(tmpA) - 0.1,
+      sampling_rate = tmpA@samp.rate,
+      group_ID = metadats_tmpA[["Group"]],
+      individual_ID = metadats_tmpA[["Individual"]],
+      call_ID = metadats_tmpA[["Call"]]
     )
     
   } else {
@@ -423,7 +404,7 @@ sel_tbl <- data.table::rbindlist(pblapply(1:length(wavs), function(w){
       sound.files = wavs[w], 
       selec = 1, 
       start = 0.1, 
-      end = seewave::duration(tmp) + 0.1,
+      end = seewave::duration(tmpA) + 0.1,
       sampling_rate = NA,
       group_ID = NA,
       individual_ID = NA,
@@ -437,10 +418,66 @@ sel_tbl <- data.table::rbindlist(pblapply(1:length(wavs), function(w){
 }))
 
 # See the selection table in warbleR format with useful metadata for acoustic space plots
-glimpse(sel_tbl)
+glimpse(sel_tblA)
 
 # Check the selection table for all the unique sampling rates
-unique(sel_tbl$sampling_rate)
+unique(sel_tblA$sampling_rate)
+
+```
+
+**Dataset B**: section_transition = "starting_frequency"
+
+```{r}
+
+# Iterate over the audio files to create one row of the selection table at a time. warbleR selection tables have a very specific format that must be used for downstream analysis.
+sel_tblB <- data.table::rbindlist(pblapply(1:length(wavs), function(w){
+  
+  tmpB <- tuneR::readWave(file.path(audio_path, wavs[w]))
+  
+  # Return the metadata for the given call using the synthetic metadata generated during audio file generation above
+  metadats_tmpB <- synthetic_call_metadata1_sf_csv %>%
+    dplyr::filter(grepl(wavs[w], audio_file_name))
+  
+  # Create a row for the selection table in warbleR format if the audio file exists and metadata for that file also exists
+  if(nrow(metadats_tmpB) > 0){
+    
+    # Use 0.1s as a margin to indicate where the vocalization starts and ends in the audio file
+    # soundgen::soundgen() adds 100ms of silence before and after the synthetic vocalization by default 
+    res <- data.frame(
+      sound.files = wavs[w], 
+      selec = 1,
+      start = 0.1, 
+      end = seewave::duration(tmpB) - 0.1,
+      sampling_rate = tmpB@samp.rate,
+      group_ID = metadats_tmpB[["Group"]],
+      individual_ID = metadats_tmpB[["Individual"]],
+      call_ID = metadats_tmpB[["Call"]]
+    )
+    
+  } else {
+    
+    res <- data.frame(
+      sound.files = wavs[w], 
+      selec = 1, 
+      start = 0.1, 
+      end = seewave::duration(tmpB) + 0.1,
+      sampling_rate = NA,
+      group_ID = NA,
+      individual_ID = NA,
+      call_ID = NA
+    )
+    
+  }
+  
+  return(res)
+  
+}))
+
+# See the selection table in warbleR format with useful metadata for acoustic space plots
+glimpse(sel_tblB)
+
+# Check the selection table for all the unique sampling rates
+unique(sel_tblB$sampling_rate)
 
 ```
 
@@ -457,7 +494,7 @@ In the following example, we are creating spectrograms for the first dataset we 
 ```{r eval=FALSE}
 
 # To make spectrograms of dataset A (continuous_trajectory), you will need to filter it out from the selection table you made above.
-A_sel_tbl <- sel_tbl %>%
+A_sel_tbl <- sel_tblA %>%
     dplyr::filter(grepl("A", sound.files))
 
 # Create spectrograms for filtered calls
@@ -477,7 +514,7 @@ invisible(file.rename(file.path(images_path, imgs), file.path(images_path, new_n
 ```{r eval=FALSE}
 
 # To make spectrograms of dataset B (starting_frequency), you will need to filter it out from the selection table you made above.
-B_sel_tbl <- sel_tbl %>%
+B_sel_tbl <- sel_tblB %>%
     dplyr::filter(grepl("B", sound.files))
 
 # Create spectrograms for filtered calls
@@ -496,24 +533,26 @@ This will output appropriately named spectrograms for the synthetically generate
 
 <h1>Comparing spectrograms of calls made with different frequency_anchors setting (continuous_trajectory versus starting_frequency)</h1>
 
+Change the image path to reflect the spectrograms you have generated
+
 <div style="display: flex;">
   <figure>
-  <img src="/Users/gretheljuarez/Desktop/BIRDS/paRsynth_methods_synthetic_dataset_copy/figures/A_Group1_Indiv1_Call1.png" alt="Image 1" style="width: 400; margin-right: 10px;">
+  <img src="/Users/gretheljuarez/Desktop/BIRDS/paRsynth_frequency_anchors_settings_comparison/images/A_Group1_Indiv1_Call1.jpeg" alt="Image 1" style="width: 400; margin-right: 10px;">
   <figcaption><b>continuous_trajectory</b>_Group1_Individual1_Call1</figcaption>
   </figure>
   <figure>
-  <img src="/Users/gretheljuarez/Desktop/BIRDS/paRsynth_methods_synthetic_dataset_copy/figures/B_Group1_Indiv1_Call1.png" alt="Image 2" style="width: 400;">
+  <img src="/Users/gretheljuarez/Desktop/BIRDS/paRsynth_frequency_anchors_settings_comparison/images/B_Group1_Indiv1_Call1.jpeg" alt="Image 2" style="width: 400;">
   <figcaption><b>starting_frequency</b>_Group1_Individual1_Call1</figcaption>
   </figure>
 </div>
 
 <div style="display: flex;">
   <figure>
-  <img src="/Users/gretheljuarez/Desktop/BIRDS/paRsynth_methods_synthetic_dataset_copy/figures/A_Group2_Indiv5_Call2.png" alt="Image 1" style="width: 400; margin-right: 10px;">
+  <img src="/Users/gretheljuarez/Desktop/BIRDS/paRsynth_frequency_anchors_settings_comparison/images/A_Group2_Indiv5_Call2.jpeg" alt="Image 1" style="width: 400; margin-right: 10px;">
   <figcaption><b>continuous_trajectory</b>_Group2_Individual5_Call2</figcaption>
   </figure>
   <figure>
-  <img src="/Users/gretheljuarez/Desktop/BIRDS/paRsynth_methods_synthetic_dataset_copy/figures/B_Group2_Indiv5_Call2.png" alt="Image 2" style="width: 400;">
+  <img src="/Users/gretheljuarez/Desktop/BIRDS/paRsynth_frequency_anchors_settings_comparison/images/B_Group2_Indiv5_Call2.jpeg" alt="Image 2" style="width: 400;">
   <figcaption><b>starting_frequency</b>_Group2_Individual5_Call2</figcaption>
   </figure>
 </div>
