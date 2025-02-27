@@ -9,7 +9,7 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-In this vignette, we will go through how to analyze the synthetic identity signals we generated using the paRsynth package by creating spectrograms and acoustic plots comparing their acoustic similarities.
+In this vignette, we will go through how to analyze the synthetic identity signals you generated using the paRsynth package in vignette 02 by creating spectrograms and acoustic plots to analyze their acoustic similarities.
 
 <h1>Set Up Working Environment</h1>
 
@@ -96,6 +96,17 @@ if(!dir.exists(images_path)){
   dir.create(images_path)
 }
 
+# Specify a folder inside the analysis directory where images for figures will be written out/read in
+figures_dir <- "figures"
+
+# Combine the base path, the analysis directory, and the data directory into a single path
+figures_path <- file.path(path, analysis_dir, figures_dir)
+
+# Create the data directory if it doesn't already exist on your computer
+if(!dir.exists(figures_path)){ 
+  dir.create(figures_path)
+}
+
 ```
 
 **Read in the synthetic call metadata and set cores for parallel processing**
@@ -117,7 +128,7 @@ max_freq
 
 ```
 
-<h1>Bioacoustics Analysis Steps</h1>
+<h1>Bioacoustics Analysis Workflow</h1>
 
 **Step 1: Create a warbleR selection table**
 
@@ -137,7 +148,7 @@ sel_tbl <- data.table::rbindlist(pblapply(1:length(wavs), function(w){
   tmp <- tuneR::readWave(file.path(audio_path, wavs[w]))
   
   # Return the metadata for the given call using the synthetic metadata generated during audio file generation above
-  metadats_tmp <- synthetic_call_metadata %>%
+  metadats_tmp <- synthetic_call_metadatacsv %>%
     dplyr::filter(grepl(wavs[w], audio_file_name))
   
   # Create a row for the selection table in warbleR format if the audio file exists and metadata for that file also exists
@@ -191,9 +202,9 @@ This will output a neatly organized selection table of the uniquely generated vo
 
 **Step 2: Create spectrogram image files of each audio file**
 
-Using the warbleR package, spectrogram images can be created from each synthetic vocalization you generated with paRsynth. Using a spectrogram is beneficial to analyze vocalizations because it provides precise information on frequency over time. First, you will use warbleR to create spectrograms of the generated vocalization in the selection table. Then you will rename the spectrogram image files saved in your images_path. 
+Using the warbleR package, spectrogram images can be created from each synthetic identity signals you generated with paRsynth. Using a spectrogram is beneficial to analyze vocalizations because it provides precise information on frequency over time. First, you will use warbleR to create spectrograms of the generated vocalization in the selection table. Then you will rename the spectrogram image files saved in your images_path. 
 
-In the following example, we are creating spectrograms for the first dataset we created, where more group information is encoded in the vocalization than individual identity information.
+In the following example, we are creating spectrograms from the first dataset we created, where more group information is encoded in the vocalization than individual identity information.
 
 ```{r}
 
@@ -220,11 +231,10 @@ This will output appropriately named spectrograms for the synthetically generate
 
 **Step 3: Perform spectrogrphic cross-correlation (SPCC) to measure acoustic similarity of all calls in dataset (pairwise similarity matrix)**
 
-Now, we are getting the key analysis step. Using warbleR, a spectrographic cross-correlation (SPCC) can be performed to find acoustic similarities between the spectrograms created. 
+Now, we are getting to the key analysis step. Using warbleR, a spectrographic cross-correlation (SPCC) can be performed to find acoustic similarities between the spectrograms created. 
 
 If the `temperature` argument used by `soundgen` is set to 0 (for no stochasticity in sound generation), then you will need to filter out any calls that have duplicated strings prior to running cross-correlation. Otherwise you will have values of 1 outside of the diagonal representing comparisons among calls of exactly the same structure or duplicates, and multidimensional scaling will fail.
 
-Here SPCC is performed across both synthetic vocalization datasets, so that the acoustic space shown below will be a universal space across figures.
 
 ```{r}
 
@@ -314,6 +324,7 @@ mds_df <- data.frame(
     individual_ID = factor(individual_ID), # convert the individual ID to a factor
     unique_individuals = factor(unique_individuals) # convert the unique individual ID to a factor
   )
+
 # 'levels' provides the unique values of a factor. This is useful for checking the unique values of the group and individual IDs.
 levels(mds_df$group_ID) 
 levels(mds_df$individual_ID)
@@ -325,12 +336,12 @@ cols <- scales::alpha(c("navy", "orange"), 0.65)
 # Shapes by individual within groups
 shps <- c(0, 1, 2, 5, 6, 15, 19, 17, 18, 14)
 
-# creates a data frame which has calculation of the convex hull for each group (aka the smallest polygon that can enclose all the points in a group). This is useful for visualizing the spread of the data in the acoustic space plot (like the data istribution, boundaries in a scatter plot)
+# Create a data frame which has calculation of the convex hull for each group (aka the smallest polygon that can enclose all the points in a group). This is useful for visualizing the spread of the data in the acoustic space plot (like the data istribution, boundaries in a scatter plot)
 hulls <- plyr::ddply(mds_df, "group_ID", function(x){
   x[chull(x$X, x$Y), ]
 })
 
-# piping the data frame into ggplot to create the acoustic space plot
+# Piping the data frame into ggplot to create the acoustic space plot
 mds_df %>%
   ggplot(aes(x = X, y = Y, color = group_ID)) + 
   geom_polygon(data = hulls, aes(x = X, y = Y, fill = group_ID, color = group_ID), alpha = 0.2, size = 0.2, show.legend = FALSE) +
@@ -389,29 +400,57 @@ invisible(file.rename(file.path(images_path, imgs), file.path(images_path, new_n
 # Perform SPCC to measure acoustic similarity of all calls in dataset IndividualIdentity_sel_tbl
 xc_mat2 <- warbleR::cross_correlation(IndividualIdentity_sel_tbl, wl = 512, ovlp = 90, bp = c(0, 20), wn = "hanning", cor.method = "pearson", parallel = 1, na.rm = FALSE, type = "spectrogram", path = audio_path)
 
+# Check the structure of xc_mat
 str(xc_mat2)
 
+# Check the dimensions of xc_mat
 dim(xc_mat2)
 
-neg_values2 <- length(xc_mat2[xc_mat2<0])/(dim(xc_mat2)[1]*dim(xc_mat2)[2])
+# Get the percentage of values that are negative
+        neg_values2 <- ((length(xc_mat2[xc_mat2 < 0])/length(xc_mat2))) * 100
 
-if(length(neg_values2) > 0){
-  stop("Negative values are present in the spectrographic cross-correlation matrix")
-}
+# Set all negative values to the minimum positive value in the SPCC matrix to represent the fact that these calls are very structurally different from one another
+        if(neg_values2 > 0){
+          
+          xc_mat2[xc_mat2 < 0] <- round(min(xc_mat2[xc_mat2 > 0]), 8)
+          
+        }
 
+# Make sure to calculate the true number of values in the symmetric matrix (multiply the number of unique values that are 1 by 2)
+        ones2 <- ((length(which(xc_mat2[lower.tri(xc_mat2)] == 1))*2)/length(xc_mat2)) * 100
+        
+        if(ones2 > 0){
+          
+          # Get the maximum similarity value after 1 in the matrix
+          max_vals2 <- xc_mat2[lower.tri(xc_mat2)]
+          
+          # Use a value just under one to catch floating point numbers that are visually represented as 1
+          sec_max_val2 <- max(max_vals2[max_vals2 < 0.9999999])
+          
+          # Then set the values of 1 off of the diagonal (in both the upper and lower triangle) to the next highest similarity value in this matrix
+          xc_mat2[lower.tri(xc_mat2)][xc_mat2[lower.tri(xc_mat2)] == 1] <- round(sec_max_val2, 8)
+          xc_mat2[upper.tri(xc_mat2)][xc_mat2[upper.tri(xc_mat2)] == 1] <- round(sec_max_val2, 8)
+          
+        }
+
+# Update the dimension names of the matrix to include the sound file names from the selection table to keep track of the vocalizations
 dimnames(xc_mat2) <- list(IndividualIdentity_sel_tbl$sound.files, IndividualIdentity_sel_tbl$sound.files)
+
+# Save this matrix since it can take a long time to generate when there are many vocalizations
+saveRDS(xc_mat, file.path(analysis_path, "xc_mat2.RDS"))
 
 ```
 
 ```{r}
 
+# Convert to a distance matrix and dist object for isoMDS (helps visualize the data in a simplified way)
 dist_mat2 <- stats::as.dist(1 - xc_mat2, diag = TRUE, upper = TRUE)
 
 # Perform isoMDS to reduce the dimensionality of the data to 2 dimensions
 iso2 <- invisible(MASS::isoMDS(dist_mat2, k = 2, maxit = 1000, trace = FALSE))
 str(iso2)
 
-# create a data frame with the MDS coordinates and the group and individual IDs
+# Create a data frame with the MDS coordinates and the group and individual IDs
 mds_df2 <- data.frame(
   sound.files = dimnames(xc_mat2)[[1]],
   X = as.vector(iso2$points[, 1]), 
