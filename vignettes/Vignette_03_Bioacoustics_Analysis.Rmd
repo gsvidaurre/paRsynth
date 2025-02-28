@@ -363,15 +363,13 @@ GroupMembership <- mds_df %>%
     panel.grid.major = element_blank(),
     panel.grid.minor = element_blank(),
     axis.ticks = element_line(size = 0.25),
-    plot.margin = margin(0, 3, -3, -3),
+    plot.margin = margin(10, 10, 10, 10),
     legend.position = "top",
     legend.key.spacing = unit(0.1, "lines"),
     legend.box.spacing = unit(0.1, "lines")
   )
 
 ggsave("GroupMembership.png", plot = GroupMembership, path = figures_path)
-
-
 
 ```
 
@@ -512,7 +510,7 @@ IndividualIdentity <- mds_df2 %>%
     panel.grid.major = element_blank(),
     panel.grid.minor = element_blank(),
     axis.ticks = element_line(size = 0.25),
-    plot.margin = margin(0, 3, -3, -3),
+    plot.margin = margin(10, 10, 10, 10),
     legend.position = "top",
     legend.key.spacing = unit(0.1, "lines"),
     legend.box.spacing = unit(0.1, "lines")
