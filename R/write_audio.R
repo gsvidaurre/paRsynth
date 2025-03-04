@@ -72,23 +72,64 @@ write_audio <- function(df, sylLen = 200, sampling_rate = 44100, pitch_sampling_
   if (missing(save_path) || is.null(save_path) || save_path == "") {
     stop("The 'save_path' argument must be provided and cannot be empty.")
   }
-  if (sampling_rate <= 0) {
-    stop("sampling_rate must be a positive value")
+  if (!is.numeric(sampling_rate) || sampling_rate <= 0) {
+    stop("The 'sampling_rate' must be a positive numeric value.")
   }
-  if (sylLen <= 0) {
-    stop("sylLen must be a positive value")
+  if (!is.numeric(pitch_sampling_rate) || pitch_sampling_rate <= 0) {
+    stop("The 'pitch_sampling_rate' must be a positive numeric value.")
   }
-  if (!is.numeric(sampling_rate)) {
-    stop("The 'sampling_rate' argument must be a numeric value.")
+  if (!is.numeric(sylLen) || sylLen <= 0) {
+    stop("The 'sylLen' argument must be a positive numeric value.")
   }
-  if (!is.numeric(sylLen)) {
-    stop("The 'sylLen' argument must be a numeric value.")
+  if (!is.numeric(temperature)) {
+    stop("The 'temperature' argument must be a numeric value.")
   }
+  if (!is.numeric(subratio) || subratio <= 0) {
+    stop("The 'subratio' argument must be a positive numeric value.")
+  }
+  if (!is.numeric(shortestEpoch) || shortestEpoch <= 0) {
+    stop("The 'shortestEpoch' argument must be a positive numeric value.")
+  }
+  if (!is.numeric(vibratoFreq) || vibratoFreq <= 0) {
+    stop("The 'vibratoFreq' argument must be a positive numeric value.")
+  }
+
+  if (!is.numeric(rolloffExact) || 
+    (!is.vector(rolloffExact) && !is.matrix(rolloffExact))) {
+     stop("The 'rolloffExact' argument must be a numeric vector or matrix.")
+  }
+
+  # Check for valid range of values (0 to 1)
+  if (is.vector(rolloffExact) && any(rolloffExact < 0 | rolloffExact > 1)) {
+    stop("When 'rolloffExact' is a vector, all values must be between 0 and 1.")
+  }
+
+  # If it's a matrix, check each value
+  if (is.matrix(rolloffExact)) {
+    if (any(rolloffExact < 0 | rolloffExact > 1)) {
+      stop("When 'rolloffExact' is a matrix, all values must be between 0 and 1.")
+    }
+  }
+
+# TODO testing for formants and vocalTract
+
   if (!is.character(prefix)) {
     stop("The 'prefix' argument must be a character string.")
   }
 
-    # Ensure the save path exists
+  if (!is.character(invalidArgAction) || 
+      !invalidArgAction %in% c("ignore", "adjust", "abort")) {
+    stop("The 'invalidArgAction' argument must be a character string and be one of 'ignore', 'adjust', or 'abort'.")
+  }
+
+  if (!is.list(smoothing)) {
+    stop("The 'smoothing' argument must be a list.")
+  }
+  if (!all(c("interpol", "loessSpan", "discontThres", "jumpThres") %in% names(smoothing))) {
+    stop("The 'smoothing' argument must contain the following elements: interpol, loessSpan, discontThres, jumpThres.")
+  }
+
+  # Ensure the save path exists
   if (!dir.exists(save_path)) {
     dir.create(save_path, recursive = TRUE)
   }
