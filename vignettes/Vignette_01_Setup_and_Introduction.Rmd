@@ -100,9 +100,7 @@ paRsynth provides four functions for the simulation of vocalizations with repres
 
 4. write_audio(): uses frequency anchors and the 'soundgen' package to generate and save synthetic audio files.
 
-<br>
-
-![paRsynth Functions Workflow](/Users/gretheljuarez/Desktop/BIRDS/GitHub_repos/paRsynth/vignettes/images/paRsynth_methods_workflow_horizontal_vignette_pic-1-min.png)
+![paRsynth Functions Workflow](./images/paRsynth_methods_workflow_horizontal_vignette.png)
 
 <br>
 

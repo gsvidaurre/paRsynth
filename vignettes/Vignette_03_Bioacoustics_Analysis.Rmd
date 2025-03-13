@@ -229,8 +229,9 @@ invisible(file.rename(file.path(images_path, imgs), file.path(images_path, new_n
 
 This will output appropriately named spectrograms for the synthetically generated vocalizations in the selection table created previously. Refer to the image below for an example of a spectrogram (GroupMembership_Group1_Ind1_Call1).
 
+![Example Spectrogram of GroupMembership_Group1_Ind1_Call1](./images/GroupMembership_Group1_Indiv1_Call1_vignettes.png)
+
 <br>
-![Example Spectrogram of GroupMembership_Group1_Ind1_Call1](/Users/gretheljuarez/Desktop/BIRDS/paRsynth_methods_synthetic_dataset/images/GroupMembership_Group1_Indiv1_Call1.jpeg)
 
 **Step 3: Perform spectrogrphic cross-correlation (SPCC) to measure acoustic similarity of all calls in dataset (pairwise similarity matrix)**
 
@@ -373,8 +374,9 @@ ggsave("GroupMembership.png", plot = GroupMembership, path = figures_path)
 
 ```
 
+![Example Acoustic Space Plot: Group Membership ](./images/GroupMembership_vignettes.png)
+
 <br>
-![Acoustic Space Plot: Group Membership ](/Users/gretheljuarez/Desktop/BIRDS/paRsynth_methods_synthetic_dataset/figures/GroupMembership.png)
 
 This will output an acoustic space plot to represent the acoustic similarity of the paRsynth generated vocalizations using the spectrograms created in vignette 02. In this case, we generated space plots for the first dataset that has more group information encoded in the vocalizations. It will not look the same as the plot you generated because paRsynth randomly generates vocalizations strings, but the overall trends should be similar
 
@@ -520,7 +522,10 @@ ggsave("IndividualIdentity.png", plot = IndividualIdentity, path = figures_path)
 
 ```
 
-![Acoustic Space Plot: Individual Identity ](/Users/gretheljuarez/Desktop/BIRDS/paRsynth_methods_synthetic_dataset/figures/IndividualIdentity.png)
+![Example Acoustic Space Plot: Individual Identity ](./images/IndividualIdentity_vignettes.png)
+
+<br>
+
 This will output an acoustic space plot to represent the acoustic similarity of the paRsynth generated vocalizations using the spectrograms created in vignette 02 for the second data set that has more individual information.
 
 This last vignette has showed you how to conduct downstream bioacoustics analysis on two datasets: 1) more group information than individual information and 2) vice versa. You created acoustic space plots for each data sets. You have completed the final vignette of the paRsynth package, well done!:smile:
@@ -529,6 +534,8 @@ This last vignette has showed you how to conduct downstream bioacoustics analysi
 
 You may create vocalization that have much greater group information than individual information to the point when you make the acoustic space plot it result in all the individuals of one group to be clustered on top of each other and each group are a outstandingly great distance from each other. 
 
-![Acoustic Space Plot: Extreme Group-level Variation ](/Users/gretheljuarez/Desktop/BIRDS/GitHub_repos/paRsynth/vignettes/images/Acoustic_Space_Plot_EE.png)
+![Acoustic Space Plot: Extreme Group-level Variation ](./images/ExtraExample_vignettes.png)
+
+<br>
 
 This is an example of an acoustic plot of a dataset that has too much group information compared to individual information. Two unique dots can be seen at opposite ends of the plot - meaning there is not a lot of relevant information here to conduct acoustic analyses. To solve this, try changing the parameters so that the difference between them are not as striking.
