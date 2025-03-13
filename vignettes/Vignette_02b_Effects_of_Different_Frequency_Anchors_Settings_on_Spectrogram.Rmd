@@ -499,31 +499,14 @@ This will output appropriately named spectrograms for the synthetically generate
 
 <h1>Comparing spectrograms of calls made with different frequency_anchors setting (continuous_trajectory versus starting_frequency)</h1>
 
-Change the image path to reflect the spectrograms you have generated
 
-<div style="display: flex;">
-  <figure>
-  <img src="/Users/gretheljuarez/Desktop/BIRDS/paRsynth_frequency_anchors_settings_comparison/images/A_Group1_Indiv1_Call1.jpeg" alt="Image 1" style="width: 400; margin-right: 10px;">
-  <figcaption><b>continuous_trajectory</b>_Group1_Individual1_Call1</figcaption>
-  </figure>
-  <figure>
-  <img src="/Users/gretheljuarez/Desktop/BIRDS/paRsynth_frequency_anchors_settings_comparison/images/B_Group1_Indiv1_Call1.jpeg" alt="Image 2" style="width: 400;">
-  <figcaption><b>starting_frequency</b>_Group1_Individual1_Call1</figcaption>
-  </figure>
-</div>
+| ![Image](./images/A_Group1_Indiv1_Call1_vignettes.png)  ![Image](./images/B_Group1_Indiv1_Call1_vignettes.png)
+| <b><i>continuous_trajectory</i>_Group1_Individual1_Call1</b> side by side comparison to <b><i>starting_frequency</i>_Group1_Individual1_Call1 </b>
 
-<div style="display: flex;">
-  <figure>
-  <img src="/Users/gretheljuarez/Desktop/BIRDS/paRsynth_frequency_anchors_settings_comparison/images/A_Group2_Indiv5_Call2.jpeg" alt="Image 1" style="width: 400; margin-right: 10px;">
-  <figcaption><b>continuous_trajectory</b>_Group2_Individual5_Call2</figcaption>
-  </figure>
-  <figure>
-  <img src="/Users/gretheljuarez/Desktop/BIRDS/paRsynth_frequency_anchors_settings_comparison/images/B_Group2_Indiv5_Call2.jpeg" alt="Image 2" style="width: 400;">
-  <figcaption><b>starting_frequency</b>_Group2_Individual5_Call2</figcaption>
-  </figure>
-</div>
+| ![Image](./images/A_Group2_Indiv5_Call2_vignettes.png) ![Image](./images/B_Group2_Indiv5_Call2_vignettes.png)
+| <b><i>continuous_trajectory</i>_Group2_Individual5_Call2</b> side by side comparison to <b><i>starting_frequency</i>_Group2_Individual5_Call2<b> 
+
 <br>
-</br>
 The figure above compares two pairs of calls created with different frequency anchors settings. Dataset A was made with section_transition = "continuous_trajectory". Dataset B was made with section_transition = "starting_frequency". Starting from left to right, top to bottom of the spectrograms, A_Group1_Indiv1_Call1 versus B_Group1_Indiv1_Call1 and A_Group2_Indiv5_Call2 versus B_Group2_Indiv5_Call2.
 
 Once you have decided which frequency anchor setting is best for your project, navigate to Vignette 03: Bioacoustics Analysis to learn how to analyze these outputs you created with paRsynth.
