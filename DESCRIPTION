@@ -5,6 +5,8 @@ Authors@R: c(
     person("Arlena (Ari)", "Cross", , "across@smith.edu", role = c("aut")),
     person("Vanessa", "Ferdinand", , "vanessa.ferdinand@unimelb.edu.au", role = c("aut")),
     person("Grace", "Smith-Vidaurre", , "smithvid@msu.edu", role = c("cre", "aut"))
+    person("Raneem", "Samman", , "Sammanr2@msu.edu", role = c("aut"))
+    person("G. Alexandra", "Juarez", , "juarezgr@msu.edu", role = c("aut"))
   )
 Description: This package uses Parsons code to convert character strings to frequency modulated vocalizations. 
     These synthetic vocalizations contain different amounts of individual identity and group membership information. 
@@ -22,3 +24,4 @@ Imports:
     soundgen
 Suggests: 
     rlang
+    testthat
