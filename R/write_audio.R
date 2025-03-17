@@ -10,7 +10,7 @@
 #' @param pitch_sampling_rate Numeric value. The sampling rate for the pitch contour of the audio file, in Hz. The default is 44100 Hz or 44.1 kHz. This is an argument used directly by `soundgen::soundgen()`, and it is recommended to set this argument to be the same as the audio sampling rate for quantitative analyses.
 #' @param smoothing A list with the named elements `interpol`, `loessSpan`, `discontThres`, and `jumpThres` to control how smoothing of frequency contours is performed by `soundgen` when audio files are generated using frequency anchors. The default list provided to this argument is `list(interpol = "loess", loessSpan = 1, discontThres = 0, jumpThres = 0)` to perform strong Loess smoothing (local polynomial regression).
 #' @param rolloffExact A numeric object encoding static amplitude values across the fundamental and harmonics (a vector) or encoding dynamic changes in amplitude across the fundamental and harmonics (a matrix). Numeric values representing amplitudes in this object should be scaled from 0 to 1. The default list provided to this argument is `c(0.25, 0.25, 0.25, 0.25, 0.25)`, which assigns amplitude values of 0.25 to the fundamental and each of 4 harmomics (or overtones). Since there is one numeric value assigned to the fundamental and each harmonic, the amplitude values will not change over time. To encode dynamic changes in amplitude across the fundamental and harmonics, create a matrix of amplitude values in which each row corresponds to a timepoint and each column corresponds to the fundamental or a harmonic, such as: "matrix(c(0.5, 0.2, 1, 0.02, 0.22,  0.1, 0.4, .01, 0.05, 0.2), ncol = 2)" in which the first 5 values (row 1) are the strength of F0 to H4 at time 0 and the second 5 values (row 2) are the strength of F0 to H4 at time 200 (when "sylLen" is 200).
-#' @param formants A vector of formant frequencies or a list of manually specified formant times, frequencies, amplitudes, and bandwidths. If you want to automatically generate formant times, amplitudes, and bandwidths, then specify only a vector of numeric values to indicate the frequencies for a given number of formants, although this will result in `soundgen` generating formants using knowledge about formants from human vocal production. The best practice for including formants in synthetic audio files meant to simulate non-human animal vocalizations will be to manually specify a biologically relevant number of stationary or dynamic formants, and the frequency, amplitude, and bandwidth of each formant (see section 2.9.2 of the `soundgen` sound generation vignette for more info, link below). The default value is `NA`, which will not generate formants.
+#' @param formants A vector of formant frequencies or a list of manually specified formant times, frequencies, amplitudes, and bandwidths. If you want to automatically generate formant times, amplitudes, and bandwidths, then specify only a vector of numeric values to indicate the frequencies for a given number of formants, although this will result in `soundgen` generating formants using knowledge about formants from human vocal production. The best practice for including formants in synthetic audio files meant to simulate non-human animal vocalizations will be to manually specify a biologically relevant number of stationary or dynamic formants, and the frequency, amplitude, and bandwidth of each formant (see section 2.9.2 of the `soundgen` sound generation vignette for more info, link below). The default value is `NA`, which will not generate formants. The current version of paRsynth only tests for NULL values of formants, so please ensure that you follow 'soundgen' guidelines for specifying formants.
 #' @param vocalTract A numeric value indicating the vocal tract length of the organism that "produced" the synthetic vocalization. This argument is used only if `formants` is not `NA`. The default value of this argument here is `NA`.
 #' @param temperature A numeric argument controlling stochastic sound generation. The default value here is 0.
 #' @param subratio An integer that indicates the ratio of the fundamental frequency (F0) to the first harmonic or overtone (G0). Here the default value is 2, or period doubling, such that G0 = F0 * 2.
@@ -111,7 +111,19 @@ write_audio <- function(df, sylLen = 200, sampling_rate = 44100, pitch_sampling_
     }
   }
 
-# TODO testing for formants and vocalTract
+  # Check formants is null
+  if (is.null(formants)) {
+      stop("The formants can be NA, a numeric vector, or a list that contains the following elements: times, freqs, amps, bwds.")
+  }
+
+  # if formants is not NA, then vocalTract is allowed to not be NA. But if the vocalTract is not NA, it must be a numeric value
+  if (!is.null(formants) && is.na(formants) && !is.na(vocalTract)) {
+      stop("The 'vocalTract' can only be specified when formants is also specified.")
+  }
+  
+  if (!is.null(formants) && !is.na(formants) && !is.na(vocalTract) && !is.numeric(vocalTract)) {
+    stop("When 'vocalTract' is provided, it must be a numeric value.")
+  }
 
   if (!is.character(prefix)) {
     stop("The 'prefix' argument must be a character string.")

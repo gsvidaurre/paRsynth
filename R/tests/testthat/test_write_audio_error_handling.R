@@ -260,6 +260,47 @@ expect_error(
   ),
   "The 'rolloffExact' argument must be a numeric vector or matrix."
 )
+# Test when formants is a list but missing required elements
+expect_error(
+  write_audio(
+    df_test,
+    sampling_rate = 150000,
+    sylLen = 200,
+    prefix = "TestPrefix",
+    save_path = tmp_dir,
+    formants = NULL, # missing
+    vocalTract = NA
+  ),
+  "The formants can be NA, a numeric vector, or a list that contains the following elements: times, freqs, amps, bwds."
+)
+
+  # test error handling for vocalTract parameter
+  expect_error(
+    write_audio(
+      df_test,
+      sampling_rate = 150000,
+      sylLen = 200,
+      prefix = "TestPrefix",
+      save_path = tmp_dir,
+      formants = NA,
+      vocalTract = "3" # not a numeric value
+    ),
+    "The 'vocalTract' can only be specified when formants is also specified."
+  )
+  # test the error handlng for vocalTract parameter
+  expect_error(
+    write_audio(
+      df_test,
+      sampling_rate = 150000,
+      sylLen = 200,
+      prefix = "TestPrefix",
+      save_path = tmp_dir,
+      formants =1,
+      vocalTract = "3" # not a numeric value
+    ),
+    "When 'vocalTract' is provided, it must be a numeric value."
+  )
+
   # test that prefix is not a character string
   expect_error(
     write_audio(
