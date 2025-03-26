@@ -1,6 +1,6 @@
 #' Generate strings with group membership and individual identity information
 #'
-#'@author Ari Cross, Grace Smith-Vidaurre
+#'@author Ari Cross, Grace Smith-Vidaurre, Raneem Samman
 #'
 #'@description `generate_strings()` creates character strings representing vocalizations with varying amounts of group membership and individual identity information. It allows users to specify the length of string components allocated to encoding individual identity (characters emphasizing differentiation among individuals) versus group membership (characters shared among group members but not across groups). Currently, the function generates strings using 3 unique characters: "A", "B", and "C".
 #'
@@ -27,7 +27,7 @@
 #' seed <- 8
 #' set.seed(seed) # For reproducibility
 #' library(tidyverse)
-#' example_calls <- generate_strings(n_groups = 2, n_individuals = 5, n_calls = 10, string_length = 16, group_information = 8, individual_information = 2)
+#' example_calls <- generate_strings(n_groups = 2, n_individuals = 5, n_calls = 10, string_length = 16, group_information = 8, individual_information = 2, random_variation = 2)
 #' glimpse(example_calls)
 #'
 #' @export generate_strings

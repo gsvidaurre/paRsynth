@@ -31,7 +31,7 @@
 #' set.seed(seed) # For reproducibility
 #' library(tidyverse)
 #'
-#' example_calls <- generate_strings(n_groups = 2, n_individuals = 5, n_calls = 10, string_length = 16, group_information = 8, individual_information = 2)
+#' example_calls <- generate_strings(n_groups = 2, n_individuals = 5, n_calls = 10, string_length = 16, group_information = 8, individual_information = 2, random_variation = 6)
 #'
 #' example_calls_parsons <- parsons_code(example_calls, "Call", list("A" = "up", "B" = "down", "C" = "constant"))
 #'
