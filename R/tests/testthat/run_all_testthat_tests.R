@@ -1,4 +1,4 @@
-# Author: G.A. Juarez
+# Author: G.A. Juarez and Raneem Samman
 # Date created: December 4, 2024
 
 rm(list = ls())
@@ -36,3 +36,8 @@ test_file(file.path(testing_path, "tests/testthat", "test_parsons_code.R"))
 test_file(file.path(testing_path, "tests/testthat", "test_frequency_anchors.R"))
 
 test_file(file.path(testing_path, "tests/testthat", "test_write_audio.R"))
+
+test_file(file.path(testing_path, "tests/testthat", "test_generate_strings_error_handling.R"))
+test_file(file.path(testing_path, "tests/testthat", "test_parsons_code_error_handling.R"))
+test_file(file.path(testing_path, "tests/testthat", "test_frequency_anchors_error_handling.R"))
+test_file(file.path(testing_path, "tests/testthat", "test_write_audio_error_handling.R"))
