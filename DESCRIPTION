@@ -21,7 +21,8 @@ BugReports: https://github.com/gsvidaurre/paRsynth/issues
 Imports: 
     data.table,
     dplyr,
-    soundgen
+    soundgen,
+    pbapply
 Suggests: 
     rlang
     testthat
