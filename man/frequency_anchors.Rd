@@ -12,7 +12,8 @@ frequency_anchors(
   call_id_col,
   call_string_col,
   starting_frequency = 4000,
-  frequency_shift = 1000
+  frequency_shift = 1000,
+  section_transition = "starting_frequency"
 )
 }
 \arguments{
@@ -30,31 +31,33 @@ frequency_anchors(
 
 \item{starting_frequency}{Numeric value. A numeric value in Hz that specifies the frequency value that will be used as a baseline for creating frequency anchors with Parsons code. For instance, if this value is 4000 Hz and the first Parsons code value is "constant", then the first frequency anchor will be 4000 Hz. The default value is 4000 Hz.}
 
-\item{frequency_shift}{Numeric value. A numeric value in Hz that specifies the frequency value that will be used to shift direction (or not) from the previous frequency anchor based on the Parsons code. For instance, if \code{frequency_shift} is 1000 Hz and the first Parsons code value is "up", then the first frequency anchor will be 5000 Hz. The default value is 1000 Hz, but we have found that when the total string length is over 60 characters, it is better to use a smaller value (100 Hz), which avoids generating negative or zero values.}
+\item{frequency_shift}{Numeric value. A numeric value in Hz that specifies the frequency value that will be used to shift direction (or not). This is from the previous frequency anchor based on the Parsons code. For instance, if \code{frequency_shift} is 1000 Hz and the first Parsons code value is "up", then the first frequency anchor will be 5000 Hz. The default value is 1000 Hz. We have found that for total string lengths over 60 characters, it is better to use a smaller value (100 Hz). This avoids generating negative or zero values.}
+
+\item{section_transition}{Character string. The transition between sections in the Parsons code. The default value is "starting_frequency". The other option is "continuous_trajectory". In "starting_frequency" mode, the frequency value is reset to the \code{starting_frequency} value after each section. In "continuous_trajectory" mode, the frequency value is retained from the previous section. This can be useful for creating continuous frequency trajectories across vocalizations.}
 }
 \value{
-A data frame containing the string of the vocalization, the original Parsons code string, and one column per frequency anchor value. This data structure facilitates calculating the minimum and maximum frequency anchors across vocalizations, which can in turn facilitate writing synthetic audio files with \code{soundgen} and making spectrogram image files.
+This function returns a data frame containing the string of the vocalization, the original Parsons code string, and one column per frequency anchor value. This data structure facilitates calculating the minimum and maximum frequency anchors across vocalizations. This can facilitate writing synthetic audio files with \code{soundgen} and making spectrogram image files.
 }
 \description{
 This function converts Parsons code strings to frequency anchors for later guiding frequency modulation patterns in \code{soundgen} audio files.
 }
 \details{
-\code{frequency_anchors()} returns the same data frame that was used as input, and with additional columns that hold frequency values in Hz. These columns will be used as anchors to guide frequency modulation patterns when creating syntheic audio files with the \code{soundgen} package. The starting frequency value is also used to end the frequency anchors. The number of frequency anchor columns in the data frame returned by the function will depend on the length of each string. Currently, this function does not internally correct frequency anchors that are negative or zero, and so the output of this function should be carefully checked prior to creating synthetic files in \code{soundgen}. While testing this function, we found that setting negative or zero values in the resulting data frame to 1000 Hz worked well, but this change has not been thoroughly tested.
+\code{frequency_anchors()} returns the same data frame that was used as input with additional columns that hold frequency values in Hz. These columns will be used as anchors to guide frequency modulation patterns when creating synthetic audio files with the \code{soundgen} package. The starting frequency value is also used to end the frequency anchors. The number of frequency anchor columns in the data frame returned by the function depends on the length of each string. Currently, this function internally corrects frequency anchors that are negative or zero. It sets those values to the same value as the frequency shift (default of 1 kHz). While testing this function, we found that setting negative or zero values in the resulting data frame to 1000 Hz worked well. However, this change has not been thoroughly tested.
 }
 \examples{
 seed <- 8
 set.seed(seed) # For reproducibility
 library(tidyverse)
 
-example_calls <- generate_strings(n_groups = 2, n_individuals = 5, n_calls = 10, string_length = 16, group_information = 8, individual_information = 2)
+example_calls <- generate_strings(n_groups = 2, n_individuals = 5, n_calls = 10, string_length = 16, group_information = 8, individual_information = 2, random_variation = 4)
 
-example_calls_parsons <- parsons_code(example_calls, "Call", list("A" = "up", "B" = "down", "C" = "constant"))
+example_calls_parsons <- parsons_code(example_calls, "Call", "Global_head", "Group_head", "Individual_middle", "Random_variation", "Group_tail", "Global_tail", list("A" = "up", "B" = "down", "C" = "constant"))
 
-anchors <- frequency_anchors(example_calls_parsons, "Parsons_Code", "Group", "Individual", "Call_ID", "Call", starting_frequency = 4000, frequency_shift = 1000)
+anchors <- frequency_anchors(example_calls_parsons, "Parsons_Code", "Group", "Individual", "Call_ID", "Call", starting_frequency = 4000, frequency_shift = 1000, section_transition = "starting_frequency")
 
 glimpse(anchors)
 
 }
 \author{
-Ari Cross, Grace Smith-Vidaurre
+Ari Cross, Grace Smith-Vidaurre, Raneem Samman
 }
