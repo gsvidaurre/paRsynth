@@ -14,7 +14,7 @@
 #' @param group_information Integer. The number of characters that vary in the middle of the string across groups. The default is 8 characters. The user must provide an even value; negative values will result in unexpected behavior.
 #' @param individual_information Integer. The number of characters that vary in the middle of the string within groups. The default is 2 characters. The user must provide an even value; negative values will result in unexpected behavior.
 #' @param random_variation Integer. The number of characters that will vary randomly and will be appended after the individual information. The default is 2 characters. The user must provide an even value; negative values will result in unexpected behavior.
-#'
+#' @importFrom rlang
 #' @details The individual-specific and group-specific string components are combined to form the middle of a longer string. The individual-specific component of the string may not be unique to a single individual within a group, as individual distinctiveness  depends on the total number of individuals in the group, the length of the individually-specific string component, and the number of unique characters or symbols available for creating strings (which may vary depending on how users modify the function). For example, if the length of the individual-specific string component is 2 characters long and 3 unique characters are used, there will be 3^2 (or 9) possible unique individual signatures.
 #'
 #' The final string is composed of a global head (a short string of characters shared across all individuals), the group membership information, individual identity information, random variation, and a global tail (a short string of characters shared across all individuals). The global heads and tails are used to guide the start and end of frequency modulation patterns created after converting the character strings to Parsons code in later functions. The relative amount of group versus individual information across calls can be controlled by setting the length of `group_information` and `individual_information`, respectively. For example, when `group_information` is longer than `individual_information`, there will be more group membership information encoded in strings, and vice versa. The current version of the function does not facilitate varying string length within or across individuals. The random variation added to each string simulates the stochasticity in vocal production to facilitate variation within an individual.
@@ -27,12 +27,21 @@
 #' seed <- 8
 #' set.seed(seed) # For reproducibility
 #' library(tidyverse)
-#' example_calls <- generate_strings(n_groups = 2, n_individuals = 5, n_calls = 10, string_length = 16, group_information = 8, individual_information = 2, random_variation = 2)
+#' example_calls <- generate_strings(n_groups = 2,
+#'                                    n_individuals = 5,
+#'                                    n_calls = 10,
+#'                                    string_length = 16,
+#'                                    group_information = 8,
+#'                                    individual_information = 2,
+#'                                    random_variation = 4
+#'                                  )
 #' glimpse(example_calls)
 #'
 #' @export generate_strings
 
-generate_strings <- function(n_groups = 2, n_individuals = 5, n_calls = 10, string_length = 16, group_information = 8, individual_information = 2, random_variation = 2) {
+generate_strings <- function(n_groups = 2, n_individuals = 5, n_calls = 10,
+                             string_length = 16, group_information = 8,
+                             individual_information = 2, random_variation = 2) {
   
   if (string_length < 6 || string_length > 200) {
     stop("string_length must be between 6 and 200")
