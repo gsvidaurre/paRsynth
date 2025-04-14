@@ -39,10 +39,10 @@ invisible(lapply(1:length(X), function(x){
 }))
 
 # Install the paRsynth package from GitHub if you haven't installed it already
-# devtools::install_github("gsvidaurre/paRsynth")
+devtools::install_github("gsvidaurre/paRsynth")
 
 # Add paRsynth to the list of packages to load
-# X <- c(X, "paRsynth")
+X <- c(X, "paRsynth")
 
 # Change "Desktop/.../GitHub_repos" to where paRsynth is stored on your local machine
 # testing_path <- "C://Users/summe/OneDrive/Desktop/github_repo/paRsynth/R/" # Summer's testing path
