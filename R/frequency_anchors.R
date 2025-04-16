@@ -83,6 +83,7 @@ frequency_anchors <- function(df, parsons_col, group_id_col, individual_id_col, 
     individual_id <- df[[individual_id_col]][i]
     call_id <- df[[call_id_col]][i]
     call_string <- df[[call_string_col]][i] # Fix: Added [i] to access specific row
+    parsons_code <- df[[parsons_col]][i] # Extract the full Parsons code for each call 
     
     frequencies <- numeric(0) #initiating an empty vector to store the frequencies later
     previous_value <- starting_frequency 
@@ -137,7 +138,7 @@ frequency_anchors <- function(df, parsons_col, group_id_col, individual_id_col, 
       Individual = individual_id,
       Call_ID = call_id,
       Call = call_string,
-      Parsons_Code = section_code,
+      Parsons_Code = parsons_code,
       stringsAsFactors = FALSE
     )
     
