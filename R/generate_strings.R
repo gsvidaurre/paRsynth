@@ -69,6 +69,9 @@ generate_strings <- function(n_groups = 2, n_individuals = 5, n_calls = 10,
   if (group_information %% 2 != 0 || individual_information %% 2 != 0) {
     stop("group_information and individual_information must be even numbers")
   }
+  if (random_variation %% 2 != 0) {
+    stop("random_variation must be an even number")
+  }
   
   # Create global header and tail strings. The length of these strings will vary depending on the length of the group-specific information (group_information) and the individual-specific information (individual_information)
   head_tail_length <- floor((string_length - group_information - individual_information - random_variation) / 2)

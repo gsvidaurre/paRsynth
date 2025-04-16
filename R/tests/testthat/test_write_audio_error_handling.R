@@ -97,7 +97,7 @@ test_that("Error handling for write_audio", {
       prefix = "TestPrefix",
       save_path = tmp_dir
     ),
-    "sampling_rate must be a positive value"
+    "The 'sampling_rate' must be a positive numeric value."
   )
   expect_error(
     write_audio(
@@ -107,7 +107,7 @@ test_that("Error handling for write_audio", {
       prefix = "TestPrefix",
       save_path = tmp_dir
     ),
-    "sampling_rate must be a positive value"
+    "The 'sampling_rate' must be a positive numeric value."
   )
   # test that the sylLen is not a positive value
   expect_error(
@@ -118,7 +118,7 @@ test_that("Error handling for write_audio", {
       prefix = "TestPrefix",
       save_path = tmp_dir
     ),
-    "sylLen must be a positive value"
+    "The 'sylLen' argument must be a positive numeric value."
   )
   expect_error(
     write_audio(
@@ -128,7 +128,7 @@ test_that("Error handling for write_audio", {
       prefix = "TestPrefix",
       save_path = tmp_dir
     ),
-    "sylLen must be a positive value"
+    "The 'sylLen' argument must be a positive numeric value."
   )
   # test that the sampling_rate is not a numeric value
   expect_error(
@@ -139,7 +139,7 @@ test_that("Error handling for write_audio", {
       prefix = "TestPrefix",
       save_path = tmp_dir
     ),
-    "The 'sampling_rate' argument must be a numeric value."
+    "The 'sampling_rate' must be a positive numeric value."
   )
   # test that the sylLen is not a numeric value
   expect_error(
@@ -150,7 +150,7 @@ test_that("Error handling for write_audio", {
       prefix = "TestPrefix",
       save_path = tmp_dir
     ),
-    "The 'sylLen' argument must be a numeric value."
+    "The 'sylLen' argument must be a positive numeric value."
   )
   # test that the prefix is not a character string
   expect_error(
@@ -162,6 +162,191 @@ test_that("Error handling for write_audio", {
       save_path = tmp_dir
     ),
     "The 'prefix' argument must be a character string."
+  )
+  # test that the pitch_sampling_rate is not a positive numeric value
+  expect_error(
+    write_audio(
+      df_test,
+      sampling_rate = 150000,
+      sylLen = 200,
+      pitch_sampling_rate = -2, # not a positive value
+      save_path = tmp_dir
+    ),
+      "The 'pitch_sampling_rate' must be a positive numeric value."
+  )
+  # test that temperature is not a numeric value
+  expect_error(
+    write_audio(
+      df_test,
+      sampling_rate = 150000,
+      sylLen = 200,
+      temperature = "0", # not a numeric value
+      prefix = "TestPrefix",
+      save_path = tmp_dir
+    ),
+    "The 'temperature' argument must be a numeric value."
+  )
+  # test that the subratio is not a numeric value
+  expect_error(
+    write_audio(
+      df_test,
+      sampling_rate = 150000,
+      sylLen = 200,
+      subratio = "2", # not a numeric value
+      prefix = "TestPrefix",
+      save_path = tmp_dir
+    ),
+    "The 'subratio' argument must be a positive numeric value."
+  )
+  # test that the shortestEpoch is not a numeric value
+  expect_error(
+    write_audio(
+      df_test,
+      sampling_rate = 150000,
+      sylLen = 200,
+      shortestEpoch = "300", # not a numeric value
+      prefix = "TestPrefix",
+      save_path = tmp_dir
+    ),
+    "The 'shortestEpoch' argument must be a positive numeric value."
+  )
+  # test that the vibratoFreq is not a numeric value
+  expect_error(
+    write_audio(
+      df_test,
+      sampling_rate = 150000,
+      sylLen = 200,
+      vibratoFreq = "1", # not a numeric value
+      prefix = "TestPrefix",
+      save_path = tmp_dir
+    ),
+    "The 'vibratoFreq' argument must be a positive numeric value."
+  )
+  # test that the rolloffExact is not a numeric vector
+expect_error(
+  write_audio(
+    df_test,
+    sampling_rate = 150000,
+    sylLen = 200,
+    prefix = "TestPrefix",
+    save_path = tmp_dir,
+    rolloffExact = c(0.5, 1.5, 0.25) # Contains value > 1
+  ),
+  "When 'rolloffExact' is a vector, all values must be between 0 and 1."
+)
+
+# Test matrix input with invalid values for rolloffExact
+expect_error(
+  write_audio(
+    df_test,
+    sampling_rate = 150000,
+    sylLen = 200,
+    prefix = "TestPrefix",
+    save_path = tmp_dir,
+    rolloffExact = matrix(c(0.5, 1.5, 0.25, 0.1), ncol=2) # Contains value > 1
+  ),
+  "When 'rolloffExact' is a matrix, all values must be between 0 and 1."
+)
+
+# Test non-numeric input for rolloffExact
+expect_error(
+  write_audio(
+    df_test,
+    sampling_rate = 150000,
+    sylLen = 200,
+    prefix = "TestPrefix",
+    save_path = tmp_dir,
+    rolloffExact = c("0.5", "0.25") # Character vector
+  ),
+  "The 'rolloffExact' argument must be a numeric vector or matrix."
+)
+# Test when formants is a list but missing required elements
+expect_error(
+  write_audio(
+    df_test,
+    sampling_rate = 150000,
+    sylLen = 200,
+    prefix = "TestPrefix",
+    save_path = tmp_dir,
+    formants = NULL, # missing
+    vocalTract = NA
+  ),
+  "The formants can be NA, a numeric vector, or a list that contains the following elements: times, freqs, amps, bwds."
+)
+
+  # test error handling for vocalTract parameter
+  expect_error(
+    write_audio(
+      df_test,
+      sampling_rate = 150000,
+      sylLen = 200,
+      prefix = "TestPrefix",
+      save_path = tmp_dir,
+      formants = NA,
+      vocalTract = "3" # not a numeric value
+    ),
+    "The 'vocalTract' can only be specified when formants is also specified."
+  )
+  # test the error handlng for vocalTract parameter
+  expect_error(
+    write_audio(
+      df_test,
+      sampling_rate = 150000,
+      sylLen = 200,
+      prefix = "TestPrefix",
+      save_path = tmp_dir,
+      formants =1,
+      vocalTract = "3" # not a numeric value
+    ),
+    "When 'vocalTract' is provided, it must be a numeric value."
+  )
+
+  # test that prefix is not a character string
+  expect_error(
+    write_audio(
+      df_test,
+      sampling_rate = 150000,
+      sylLen = 200,
+      prefix = 1, # not a character string
+      save_path = tmp_dir
+    ),
+    "The 'prefix' argument must be a character string."
+  )
+  # test that the invalidArgAction is not a character string or one of the three valid options
+  expect_error(
+    write_audio(
+     df_test,
+     sampling_rate = 150000,
+     sylLen = 200,
+     prefix = "TestPrefix",
+     save_path = tmp_dir,
+     invalidArgAction = "wrong_value" # This should trigger an error
+  ),
+  "The 'invalidArgAction' argument must be a character string and be one of 'ignore', 'adjust', or 'abort'."
+)
+  # test that the smoothing is not a list
+  expect_error(
+    write_audio(
+      df_test,
+      sampling_rate = 150000,
+      sylLen = 200,
+      prefix = "TestPrefix",
+      save_path = tmp_dir,
+      smoothing = "loess" # not a list
+    ),
+    "The 'smoothing' argument must be a list."
+  )
+  # test that the smoothing list does not contain the required elements
+  expect_error(
+    write_audio(
+      df_test,
+      sampling_rate = 150000,
+      sylLen = 200,
+      prefix = "TestPrefix",
+      save_path = tmp_dir,
+      smoothing = list(interpol = "loess", loessSpan = 1) # missing required element
+    ),
+    "The 'smoothing' argument must contain the following elements: interpol, loessSpan, discontThres, jumpThres."
   )
 
   unlink(tmp_dir, recursive = TRUE)

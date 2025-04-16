@@ -10,7 +10,7 @@
 #' @param pitch_sampling_rate Numeric value. The sampling rate for the pitch contour of the audio file, in Hz. The default is 44100 Hz or 44.1 kHz. This is an argument used directly by `soundgen::soundgen()`, and it is recommended to set this argument to be the same as the audio sampling rate for quantitative analyses.
 #' @param smoothing A list with the named elements `interpol`, `loessSpan`, `discontThres`, and `jumpThres` to control how smoothing of frequency contours is performed by `soundgen` when audio files are generated using frequency anchors. The default list provided to this argument is `list(interpol = "loess", loessSpan = 1, discontThres = 0, jumpThres = 0)` to perform strong Loess smoothing (local polynomial regression).
 #' @param rolloffExact A numeric object encoding static amplitude values across the fundamental and harmonics (a vector) or encoding dynamic changes in amplitude across the fundamental and harmonics (a matrix). Numeric values representing amplitudes in this object should be scaled from 0 to 1. The default list provided to this argument is `c(0.25, 0.25, 0.25, 0.25, 0.25)`, which assigns amplitude values of 0.25 to the fundamental and each of 4 harmomics (or overtones). Since there is one numeric value assigned to the fundamental and each harmonic, the amplitude values will not change over time. To encode dynamic changes in amplitude across the fundamental and harmonics, create a matrix of amplitude values in which each row corresponds to a timepoint and each column corresponds to the fundamental or a harmonic, such as: "matrix(c(0.5, 0.2, 1, 0.02, 0.22,  0.1, 0.4, .01, 0.05, 0.2), ncol = 2)" in which the first 5 values (row 1) are the strength of F0 to H4 at time 0 and the second 5 values (row 2) are the strength of F0 to H4 at time 200 (when "sylLen" is 200).
-#' @param formants A vector of formant frequencies or a list of manually specified formant times, frequencies, amplitudes, and bandwidths. If you want to automatically generate formant times, amplitudes, and bandwidths, then specify only a vector of numeric values to indicate the frequencies for a given number of formants, although this will result in `soundgen` generating formants using knowledge about formants from human vocal production. The best practice for including formants in synthetic audio files meant to simulate non-human animal vocalizations will be to manually specify a biologically relevant number of stationary or dynamic formants, and the frequency, amplitude, and bandwidth of each formant (see section 2.9.2 of the `soundgen` sound generation vignette for more info, link below). The default value is `NA`, which will not generate formants.
+#' @param formants A vector of formant frequencies or a list of manually specified formant times, frequencies, amplitudes, and bandwidths. If you want to automatically generate formant times, amplitudes, and bandwidths, then specify only a vector of numeric values to indicate the frequencies for a given number of formants, although this will result in `soundgen` generating formants using knowledge about formants from human vocal production. The best practice for including formants in synthetic audio files meant to simulate non-human animal vocalizations will be to manually specify a biologically relevant number of stationary or dynamic formants, and the frequency, amplitude, and bandwidth of each formant (see section 2.9.2 of the `soundgen` sound generation vignette for more info, link below). The default value is `NA`, which will not generate formants. The current version of paRsynth only tests for NULL values of formants, so please ensure that you follow 'soundgen' guidelines for specifying formants.
 #' @param vocalTract A numeric value indicating the vocal tract length of the organism that "produced" the synthetic vocalization. This argument is used only if `formants` is not `NA`. The default value of this argument here is `NA`.
 #' @param temperature A numeric argument controlling stochastic sound generation. The default value here is 0.
 #' @param subratio An integer that indicates the ratio of the fundamental frequency (F0) to the first harmonic or overtone (G0). Here the default value is 2, or period doubling, such that G0 = F0 * 2.
@@ -119,23 +119,76 @@ write_audio <- function(df, sylLen = 200, sampling_rate = 44100,
   if (missing(save_path) || is.null(save_path) || save_path == "") {
     stop("The 'save_path' argument must be provided and cannot be empty.")
   }
-  if (sampling_rate <= 0) {
-    stop("sampling_rate must be a positive value")
+  if (!is.numeric(sampling_rate) || sampling_rate <= 0) {
+    stop("The 'sampling_rate' must be a positive numeric value.")
   }
-  if (sylLen <= 0) {
-    stop("sylLen must be a positive value")
+  if (!is.numeric(pitch_sampling_rate) || pitch_sampling_rate <= 0) {
+    stop("The 'pitch_sampling_rate' must be a positive numeric value.")
   }
-  if (!is.numeric(sampling_rate)) {
-    stop("The 'sampling_rate' argument must be a numeric value.")
+  if (!is.numeric(sylLen) || sylLen <= 0) {
+    stop("The 'sylLen' argument must be a positive numeric value.")
   }
-  if (!is.numeric(sylLen)) {
-    stop("The 'sylLen' argument must be a numeric value.")
+  if (!is.numeric(temperature)) {
+    stop("The 'temperature' argument must be a numeric value.")
   }
+  if (!is.numeric(subratio) || subratio <= 0) {
+    stop("The 'subratio' argument must be a positive numeric value.")
+  }
+  if (!is.numeric(shortestEpoch) || shortestEpoch <= 0) {
+    stop("The 'shortestEpoch' argument must be a positive numeric value.")
+  }
+  if (!is.numeric(vibratoFreq) || vibratoFreq <= 0) {
+    stop("The 'vibratoFreq' argument must be a positive numeric value.")
+  }
+
+  if (!is.numeric(rolloffExact) || 
+    (!is.vector(rolloffExact) && !is.matrix(rolloffExact))) {
+     stop("The 'rolloffExact' argument must be a numeric vector or matrix.")
+  }
+
+  # Check for valid range of values (0 to 1)
+  if (is.vector(rolloffExact) && any(rolloffExact < 0 | rolloffExact > 1)) {
+    stop("When 'rolloffExact' is a vector, all values must be between 0 and 1.")
+  }
+
+  # If it's a matrix, check each value
+  if (is.matrix(rolloffExact)) {
+    if (any(rolloffExact < 0 | rolloffExact > 1)) {
+      stop("When 'rolloffExact' is a matrix, all values must be between 0 and 1.")
+    }
+  }
+
+  # Check formants is null
+  if (is.null(formants)) {
+      stop("The formants can be NA, a numeric vector, or a list that contains the following elements: times, freqs, amps, bwds.")
+  }
+
+  # if formants is not NA, then vocalTract is allowed to not be NA. But if the vocalTract is not NA, it must be a numeric value
+  if (!is.null(formants) && is.na(formants) && !is.na(vocalTract)) {
+      stop("The 'vocalTract' can only be specified when formants is also specified.")
+  }
+  
+  if (!is.null(formants) && !is.na(formants) && !is.na(vocalTract) && !is.numeric(vocalTract)) {
+    stop("When 'vocalTract' is provided, it must be a numeric value.")
+  }
+
   if (!is.character(prefix)) {
     stop("The 'prefix' argument must be a character string.")
   }
 
-    # Ensure the save path exists
+  if (!is.character(invalidArgAction) || 
+      !invalidArgAction %in% c("ignore", "adjust", "abort")) {
+    stop("The 'invalidArgAction' argument must be a character string and be one of 'ignore', 'adjust', or 'abort'.")
+  }
+
+  if (!is.list(smoothing)) {
+    stop("The 'smoothing' argument must be a list.")
+  }
+  if (!all(c("interpol", "loessSpan", "discontThres", "jumpThres") %in% names(smoothing))) {
+    stop("The 'smoothing' argument must contain the following elements: interpol, loessSpan, discontThres, jumpThres.")
+  }
+
+  # Ensure the save path exists
   if (!dir.exists(save_path)) {
     dir.create(save_path, recursive = TRUE)
   }
