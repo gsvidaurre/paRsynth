@@ -161,7 +161,7 @@ write_audio <- function(df, sylLen = 200, sampling_rate = 44100, pitch_sampling_
     audio_pathname <- file.path(save_path, audio_filename)
 
     # Generate a synthetic audio file from the frequency anchors using the soundgen package
-    suppressMessages(soundgen(
+    suppressMessages(soundgen::soundgen(
       pitch = frequencies,
       sylLen = sylLen,
       samplingRate = sampling_rate,
