@@ -4,8 +4,8 @@ Version: 0.0.0.9000
 Authors@R: c(
     person("Arlena (Ari)", "Cross", middle = NULL, "across@smith.edu", role = c("aut")),
     person("Vanessa", "Ferdinand", middle = NULL, "vanessa.ferdinand@unimelb.edu.au", role = c("aut")),
-    person("Grace", "Smith-Vidaurre", middle = NULL, "smithvid@msu.edu", role = c("cre", "aut"))
-    person("Raneem", "Samman", middle = NULL, "Sammanr2@msu.edu", role = c("aut"))
+    person("Grace", "Smith-Vidaurre", middle = NULL, "smithvid@msu.edu", role = c("cre", "aut")),
+    person("Raneem", "Samman", middle = NULL, "Sammanr2@msu.edu", role = c("aut")),
     person("G. Alexandra", "Juarez", middle = NULL, "juarezgr@msu.edu", role = c("aut"))
   )
 Year: 2025
