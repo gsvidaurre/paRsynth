@@ -13,6 +13,7 @@
 #' @param starting_frequency Numeric value. A numeric value in Hz that specifies the frequency value that will be used as a baseline for creating frequency anchors with Parsons code. For instance, if this value is 4000 Hz and the first Parsons code value is "constant", then the first frequency anchor will be 4000 Hz. The default value is 4000 Hz.
 #' @param frequency_shift Numeric value. A numeric value in Hz that specifies the frequency value that will be used to shift direction (or not). This is from the previous frequency anchor based on the Parsons code. For instance, if `frequency_shift` is 1000 Hz and the first Parsons code value is "up", then the first frequency anchor will be 5000 Hz. The default value is 1000 Hz. We have found that for total string lengths over 60 characters, it is better to use a smaller value (100 Hz). This avoids generating negative or zero values.
 #' @param section_transition Character string. The transition between sections in the Parsons code. The default value is "starting_frequency". The other option is "continuous_trajectory". In "starting_frequency" mode, the frequency value is reset to the `starting_frequency` value after each section. In "continuous_trajectory" mode, the frequency value is retained from the previous section. This can be useful for creating continuous frequency trajectories across vocalizations.
+#' @importFrom rlang
 #' 
 #' @details `frequency_anchors()` returns the same data frame that was used as input with additional columns that hold frequency values in Hz. These columns will be used as anchors to guide frequency modulation patterns when creating synthetic audio files with the `soundgen` package. The starting frequency value is also used to end the frequency anchors. The number of frequency anchor columns in the data frame returned by the function depends on the length of each string. Currently, this function internally corrects frequency anchors that are negative or zero. It sets those values to the same value as the frequency shift (default of 1 kHz). While testing this function, we found that setting negative or zero values in the resulting data frame to 1000 Hz worked well. However, this change has not been thoroughly tested.
 #'
@@ -23,17 +24,45 @@
 #' set.seed(seed) # For reproducibility
 #' library(tidyverse)
 #'
-#' example_calls <- generate_strings(n_groups = 2, n_individuals = 5, n_calls = 10, string_length = 16, group_information = 8, individual_information = 2, random_variation = 4)
+#' example_calls <- generate_strings(n_groups = 2,
+#'                                    n_individuals = 5,
+#'                                    n_calls = 10,
+#'                                    string_length = 16,
+#'                                    group_information = 8,
+#'                                    individual_information = 2,
+#'                                    random_variation = 4)
 #'
-#' example_calls_parsons <- parsons_code(example_calls, "Call", "Global_head", "Group_head", "Individual_middle", "Random_variation", "Group_tail", "Global_tail", list("A" = "up", "B" = "down", "C" = "constant"))
+#' example_calls_parsons <- parsons_code(example_calls,
+#'                                       "Call",
+#'                                       "Global_head",
+#'                                       "Group_head",
+#'                                       "Individual_middle",
+#'                                       "Random_variation",
+#'                                       "Group_tail",
+#'                                       "Global_tail",
+#'                                       list("A" = "up",
+#'                                            "B" = "down",
+#'                                            "C" = "constant")
+#'                                 )
 #'
-#' anchors <- frequency_anchors(example_calls_parsons, "Parsons_Code", "Group", "Individual", "Call_ID", "Call", starting_frequency = 4000, frequency_shift = 1000, section_transition = "starting_frequency")
+#' anchors <- frequency_anchors(example_calls_parsons,
+#'                              "Parsons_Code",
+#'                              "Group",
+#'                              "Individual",
+#'                              "Call_ID",
+#'                              "Call",
+#'                              starting_frequency = 4000,
+#'                              frequency_shift = 1000,
+#'                              section_transition = "starting_frequency")
 #'
 #' glimpse(anchors)
 #'
 #' @export
 
-frequency_anchors <- function(df, parsons_col, group_id_col, individual_id_col, call_id_col, call_string_col, starting_frequency = 4000, frequency_shift = 1000, section_transition = "starting_frequency") {
+frequency_anchors <- function(df, parsons_col, group_id_col, individual_id_col,
+                              call_id_col, call_string_col,
+                              starting_frequency = 4000, frequency_shift = 1000,
+                              section_transition = "starting_frequency") {
   
   if (starting_frequency <= 0) {
     stop("starting_frequency must be a positive value")
@@ -44,11 +73,17 @@ frequency_anchors <- function(df, parsons_col, group_id_col, individual_id_col, 
   if (nrow(df) == 0) {
     stop("Input data frame is empty")
   }
-  if (!all(c(parsons_col, group_id_col, individual_id_col, call_id_col, call_string_col) %in% colnames(df))) {
+  if (!all(c(parsons_col,
+             group_id_col,
+             individual_id_col,
+             call_id_col,
+             call_string_col) %in% colnames(df))) {
     stop("One or more columns were not found in the data frame")
   }
-  if (section_transition != "starting_frequency" && section_transition != "continuous_trajectory") {
-    stop("section_transition must be 'starting_frequency' or 'continuous_trajectory'")
+  if (section_transition != "starting_frequency" &&
+        section_transition != "continuous_trajectory") {
+    stop("section_transition must be 'starting_frequency' or ",
+         "'continuous_trajectory'")
   }
   
   # Ensure column names are case-insensitive
@@ -57,23 +92,24 @@ frequency_anchors <- function(df, parsons_col, group_id_col, individual_id_col, 
   group_id_col <- tolower(group_id_col)
   individual_id_col <- tolower(individual_id_col)
   call_id_col <- tolower(call_id_col)
-  call_string_col <- tolower(call_string_col) # Fix: Added [i] to access specific row
+  call_string_col <- tolower(call_string_col)
   
   # Initialize an empty list to store the results
   results <- list()
   
   # Check all of these sections for NA values, which would indicate that they were not converted to Parsons code and should not be included in the frequency anchors
-  sections <- c("global_head", "group_head", "individual_middle", "random_variation", "group_tail", "global_tail")
+  sections <- c("global_head", "group_head", "individual_middle",
+                "random_variation", "group_tail", "global_tail")
   
   # Get the names of section columns with NA values
-  rem_nms <- names(which(sapply(sections, function(z){
+  rem_nms <- names(which(sapply(sections, function(z) {
     any(is.na(df[[z]]))
   })))
   
   # Remove any columns with NAs from the sections to include in frequency anchors below
-  if(length(rem_nms) > 0){
+  if(length(rem_nms) > 0) {
     tmp_sections <- sections[-grep(paste(paste("^", rem_nms, "$", sep = ""), collapse = "|"), sections)]
-  } else if(length(rem_nms) == 0){
+  } else if(length(rem_nms) == 0) {
     tmp_sections <- sections
   }
   
