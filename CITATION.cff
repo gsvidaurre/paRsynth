@@ -13,7 +13,7 @@ authors:
 - family-names: "Smith-Vidaurre"
   given-names: "Grace"
   orcid: "https://orcid.org/0000-0002-0155-8159"
-title: "Sonify character strings to create synthetic frequency modulated vocalizations"
+title: "paRsynth: Sonify character strings to create synthetic frequency modulated vocalizations"
 version: 0.0.0.9000
 doi: 10.5281/zenodo.13246829
 date-released: 2024-08-06
