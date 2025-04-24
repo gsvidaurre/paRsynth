@@ -21,7 +21,7 @@ Before using the functions in the paRsynth package, there are some preliminary s
 
 It is good practice to clean your global environment before using functions from open-sourced packages. In order for paRsynth functions to run, they need specific external R packages as well. For example, 'write_audio' generates and saves audio files in .wav format which requires the package `soundgen::soundgen()` to be installed and loaded. 
 
-```{r message = FALSE, warning = FALSE}
+```{r}
 
 # Clean the global environment
 rm(list = ls())
