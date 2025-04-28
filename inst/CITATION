@@ -1,0 +1,16 @@
+citHeader("To cite the paRsynth package in publications use:")
+
+bibentry(
+  bibtype = "Manual",
+  title = "paRsynth: Synthetic Audio Generator",
+  author = c(
+    person("Arlena", "Cross", middle = "Ari"),
+    person("Vanessa", "Ferdinand"),
+    person("Grace", "Smith-Vidaurre"),
+    person("Raneem", "Samman"),
+    person("G. Alexandra", "Juarez")
+  ),
+  year = "2025",
+  note = "R package version 0.1.0",
+  url = "https://github.com/BIRDS-Lab/paRsynth"
+)

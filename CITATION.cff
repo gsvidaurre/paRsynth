@@ -6,11 +6,15 @@ authors:
 - family-names: "Ferdinand"
   given-names: "Vanessa"
   orcid: "https://orcid.org/0000-0003-2643-0116"
+- family-names: "Juarez"
+  given-names: "G. Alexandra"
+- family-names: "Samman"
+  given-names: "Raneem"
 - family-names: "Smith-Vidaurre"
   given-names: "Grace"
   orcid: "https://orcid.org/0000-0002-0155-8159"
-title: "paRsynth: Use Parsons code to sonify character strings"
-version: 1.0.0-alpha
+title: "paRsynth: Sonify character strings to create synthetic frequency modulated vocalizations"
+version: 0.0.0.9000
 doi: 10.5281/zenodo.13246829
 date-released: 2024-08-06
 url: "https://github.com/gsvidaurre/paRsynth"
