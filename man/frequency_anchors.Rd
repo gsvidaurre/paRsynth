@@ -48,12 +48,36 @@ This function converts Parsons code strings to frequency anchors for later guidi
 seed <- 8
 set.seed(seed) # For reproducibility
 library(tidyverse)
+example_calls <- generate_strings(n_groups = 2,
+                                   n_individuals = 5,
+                                   n_calls = 10,
+                                   string_length = 16,
+                                   group_information = 8,
+                                   individual_information = 2,
+                                   random_variation = 2)
 
-example_calls <- generate_strings(n_groups = 2, n_individuals = 5, n_calls = 10, string_length = 16, group_information = 8, individual_information = 2, random_variation = 4)
+example_calls_parsons <- parsons_code(example_calls,
+                                      "Call",
+                                      "Global_head",
+                                      "Group_head",
+                                      "Individual_middle",
+                                      "Random_variation",
+                                      "Group_tail",
+                                      "Global_tail",
+                                      list("A" = "up",
+                                           "B" = "down",
+                                           "C" = "constant")
+                                )
 
-example_calls_parsons <- parsons_code(example_calls, "Call", "Global_head", "Group_head", "Individual_middle", "Random_variation", "Group_tail", "Global_tail", list("A" = "up", "B" = "down", "C" = "constant"))
-
-anchors <- frequency_anchors(example_calls_parsons, "Parsons_Code", "Group", "Individual", "Call_ID", "Call", starting_frequency = 4000, frequency_shift = 1000, section_transition = "starting_frequency")
+anchors <- frequency_anchors(example_calls_parsons,
+                             "Call_Parsons_Code",
+                             "Group",
+                             "Individual",
+                             "Call_ID",
+                             "Call",
+                             starting_frequency = 4000,
+                             frequency_shift = 1000,
+                             section_transition = "starting_frequency")
 
 glimpse(anchors)
 
