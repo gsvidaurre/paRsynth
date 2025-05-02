@@ -14,7 +14,7 @@
 #' @param group_information Integer. The number of characters that vary in the middle of the string across groups. The default is 8 characters. The user must provide an even value; negative values will result in unexpected behavior.
 #' @param individual_information Integer. The number of characters that vary in the middle of the string within groups. The default is 2 characters. The user must provide an even value; negative values will result in unexpected behavior.
 #' @param random_variation Integer. The number of characters that will vary randomly and will be appended after the individual information. The default is 2 characters. The user must provide an even value; negative values will result in unexpected behavior.
-#' @importFrom rlang
+#'
 #' @details The individual-specific and group-specific string components are combined to form the middle of a longer string. The individual-specific component of the string may not be unique to a single individual within a group, as individual distinctiveness  depends on the total number of individuals in the group, the length of the individually-specific string component, and the number of unique characters or symbols available for creating strings (which may vary depending on how users modify the function). For example, if the length of the individual-specific string component is 2 characters long and 3 unique characters are used, there will be 3^2 (or 9) possible unique individual signatures.
 #'
 #' The final string is composed of a global head (a short string of characters shared across all individuals), the group membership information, individual identity information, random variation, and a global tail (a short string of characters shared across all individuals). The global heads and tails are used to guide the start and end of frequency modulation patterns created after converting the character strings to Parsons code in later functions. The relative amount of group versus individual information across calls can be controlled by setting the length of `group_information` and `individual_information`, respectively. For example, when `group_information` is longer than `individual_information`, there will be more group membership information encoded in strings, and vice versa. The current version of the function does not facilitate varying string length within or across individuals. The random variation added to each string simulates the stochasticity in vocal production to facilitate variation within an individual.
@@ -33,7 +33,7 @@
 #'                                    string_length = 16,
 #'                                    group_information = 8,
 #'                                    individual_information = 2,
-#'                                    random_variation = 4
+#'                                    random_variation = 2
 #'                                  )
 #' glimpse(example_calls)
 #'
@@ -42,7 +42,7 @@
 generate_strings <- function(n_groups = 2, n_individuals = 5, n_calls = 10,
                              string_length = 16, group_information = 8,
                              individual_information = 2, random_variation = 2, alphabet = c("A", "B", "C")) {
-  
+
   if (string_length < 6 || string_length > 200) {
     stop("string_length must be between 6 and 200")
   }
@@ -58,9 +58,10 @@ generate_strings <- function(n_groups = 2, n_individuals = 5, n_calls = 10,
   if (!is.numeric(individual_information) || length(individual_information) != 1) {
     stop("individual_information must be numeric")
   }
-  if (floor(n_groups) != n_groups || floor(n_individuals) != n_individuals || 
-      floor(n_calls) != n_calls || floor(string_length) != string_length || 
-      floor(group_information) != group_information || floor(individual_information) != individual_information) {
+  if (floor(n_groups) != n_groups || floor(n_individuals) != n_individuals ||
+        floor(n_calls) != n_calls || floor(string_length) != string_length ||
+        floor(group_information) != group_information ||
+        floor(individual_information) != individual_information) {
     stop("All arguments must be integers")
   }
   if (n_calls < 1 || n_groups < 1 || n_individuals < 1) {
@@ -72,11 +73,12 @@ generate_strings <- function(n_groups = 2, n_individuals = 5, n_calls = 10,
   if (random_variation %% 2 != 0) {
     stop("random_variation must be an even number")
   }
-  
+
   # Create global header and tail strings. The length of these strings will vary depending on the length of the group-specific information (group_information) and the individual-specific information (individual_information)
   head_tail_length <- floor((string_length - group_information - individual_information - random_variation) / 2)
-  
+
   # Generate a single head and tail for all groups
+
   global_head <- generate_random_string(head_tail_length, alphabet)
   global_tail <- generate_random_string(head_tail_length, alphabet)
   
@@ -87,7 +89,7 @@ generate_strings <- function(n_groups = 2, n_individuals = 5, n_calls = 10,
       group_middles[g] <- generate_random_string(group_information, alphabet)
     }
   }
-  
+
   calls <- character(n_groups * n_individuals * n_calls)
   groups <- rep(1:n_groups, each = n_individuals * n_calls)
   individuals <- numeric(n_groups * n_individuals * n_calls)
@@ -98,25 +100,25 @@ generate_strings <- function(n_groups = 2, n_individuals = 5, n_calls = 10,
   random_string_calls <- character(n_groups * n_individuals * n_calls)
   group_head_calls <-  character(n_groups * n_individuals * n_calls)
   group_tail_calls <-  character(n_groups * n_individuals * n_calls)
-  
+
   for (group in 1:n_groups) {
     for (ind in 1:n_individuals) {
-      
+
       # Generate a unique middle part for each individual
       individual_middle <- generate_random_string(individual_information, alphabet)
-      
+
       for (call in 1:n_calls) {
-        
+
         # Generate random variation per call that will be appended after the individual information (to create variation within individuals)
         random_string <- generate_random_string(random_variation, alphabet)
-        
+
         # Assemble the string with both group and individual information if both group and individual information are greater than 0
-        if(group_information > 0 & individual_information > 0){
-          
+        if(group_information > 0 & individual_information > 0) {
+
           group_info <- group_middles[group]
           group_head <- substr(group_info, 1, group_information / 2)
           group_tail <- substr(group_info, group_information / 2 + 1, group_information)
-          
+
           # Combine all components to create a string that represents a vocalization. Append the random information after the individual identity information
           individual_call <- paste0(
             global_head,
@@ -126,7 +128,7 @@ generate_strings <- function(n_groups = 2, n_individuals = 5, n_calls = 10,
             group_tail,
             global_tail
           )
-          
+
           # Save general values for the current loop iteration
           idx <- ((group - 1) * n_individuals * n_calls) + ((ind - 1) * n_calls) + call
           individuals[idx] <- ind
@@ -137,12 +139,12 @@ generate_strings <- function(n_groups = 2, n_individuals = 5, n_calls = 10,
           individual_middle_calls[idx] <- individual_middle
           group_head_calls[idx] <- group_head
           group_tail_calls[idx] <- group_tail
-          
+
           # Save the full assembled vocalization for the current loop iteration
           calls[idx] <- individual_call
-          
+
           # Assemble the string with individual information only if group information is 0
-        } else if(group_information == 0 & individual_information > 0){
+        } else if (group_information == 0 & individual_information > 0){
           
           individual_call <- paste0(
             global_head,
@@ -150,7 +152,7 @@ generate_strings <- function(n_groups = 2, n_individuals = 5, n_calls = 10,
             random_string,
             global_tail
           )
-          
+
           # Save general values for the current loop iteration
           idx <- ((group - 1) * n_individuals * n_calls) + ((ind - 1) * n_calls) + call
           individuals[idx] <- ind
@@ -161,17 +163,17 @@ generate_strings <- function(n_groups = 2, n_individuals = 5, n_calls = 10,
           individual_middle_calls[idx] <- individual_middle
           group_head_calls[idx] <- NA
           group_tail_calls[idx] <- NA
-          
+
           # Save the full assembled vocalization for the current loop iteration
           calls[idx] <- individual_call
-          
+
           # Assemble the string with group information only if individual information is 0
-        } else if(group_information > 0 & individual_information == 0){
-          
+        } else if (group_information > 0 & individual_information == 0) {
+
           group_info <- group_middles[group]
           group_head <- substr(group_info, 1, group_information / 2)
           group_tail <- substr(group_info, group_information / 2 + 1, group_information)
-          
+
           individual_call <- paste0(
             global_head,
             group_head,
@@ -179,7 +181,7 @@ generate_strings <- function(n_groups = 2, n_individuals = 5, n_calls = 10,
             group_tail,
             global_tail
           )
-          
+
           # Save general values for the current loop iteration
           idx <- ((group - 1) * n_individuals * n_calls) + ((ind - 1) * n_calls) + call
           individuals[idx] <- ind
@@ -190,12 +192,11 @@ generate_strings <- function(n_groups = 2, n_individuals = 5, n_calls = 10,
           individual_middle_calls[idx] <- NA
           group_head_calls[idx] <- group_head
           group_tail_calls[idx] <- group_tail
-          
+
           # Save the full assembled vocalization for the current loop iteration
           calls[idx] <- individual_call
-          
+
         }
-        
       }
     }
   }
