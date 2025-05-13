@@ -81,7 +81,6 @@ generate_strings <- function(n_groups = 2, n_individuals = 5, n_calls = 10,
   global_head <- generate_random_string(head_tail_length, alphabet)
   global_tail <- generate_random_string(head_tail_length, alphabet)
   
-
   if (group_information > 0) {
     # Generate distinct group middle sections
     group_middles <- character(n_groups)
