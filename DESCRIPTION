@@ -23,7 +23,9 @@ Imports:
     data.table,
     dplyr,
     soundgen,
+    rlang,
+    magrittr,
     pbapply
 Suggests: 
-    rlang,
-    testthat
+    testthat,
+    tidyverse
