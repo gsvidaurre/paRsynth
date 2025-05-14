@@ -41,7 +41,7 @@
 
 generate_strings <- function(n_groups = 2, n_individuals = 5, n_calls = 10,
                              string_length = 16, group_information = 8,
-                             individual_information = 2, random_variation = 2) {
+                             individual_information = 2, random_variation = 2, alphabet = c("A", "B", "C")) {
 
   if (string_length < 6 || string_length > 200) {
     stop("string_length must be between 6 and 200")
@@ -78,14 +78,14 @@ generate_strings <- function(n_groups = 2, n_individuals = 5, n_calls = 10,
   head_tail_length <- floor((string_length - group_information - individual_information - random_variation) / 2)
 
   # Generate a single head and tail for all groups
-  global_head <- generate_random_string(head_tail_length)
-  global_tail <- generate_random_string(head_tail_length)
-
+  global_head <- generate_random_string(head_tail_length, alphabet)
+  global_tail <- generate_random_string(head_tail_length, alphabet)
+  
   if (group_information > 0) {
     # Generate distinct group middle sections
     group_middles <- character(n_groups)
     for (g in 1:n_groups) {
-      group_middles[g] <- generate_random_string(group_information)
+      group_middles[g] <- generate_random_string(group_information, alphabet)
     }
   }
 
@@ -104,12 +104,12 @@ generate_strings <- function(n_groups = 2, n_individuals = 5, n_calls = 10,
     for (ind in 1:n_individuals) {
 
       # Generate a unique middle part for each individual
-      individual_middle <- generate_random_string(individual_information)
+      individual_middle <- generate_random_string(individual_information, alphabet)
 
       for (call in 1:n_calls) {
 
         # Generate random variation per call that will be appended after the individual information (to create variation within individuals)
-        random_string <- generate_random_string(random_variation)
+        random_string <- generate_random_string(random_variation, alphabet)
 
         # Assemble the string with both group and individual information if both group and individual information are greater than 0
         if(group_information > 0 & individual_information > 0) {
@@ -217,6 +217,6 @@ generate_strings <- function(n_groups = 2, n_individuals = 5, n_calls = 10,
 
 
 # Helper function to generate a random string from 3 unique characters (for 1-base Parsons code)
-generate_random_string <- function(length) {
-  paste(sample(c("A", "B", "C"), length, replace = TRUE), collapse = "")
+generate_random_string <- function(length, alphabet) {
+  paste(sample(alphabet, length, replace = TRUE), collapse = "")
 }
