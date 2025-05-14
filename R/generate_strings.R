@@ -206,5 +206,5 @@ generate_strings <- function(n_groups = 2, n_individuals = 5, n_calls = 10, stri
 
 # Helper function to generate a random string from 3 unique characters (for 1-base Parsons code)
 generate_random_string <- function(length) {
-  paste(sample(c("A", "B", "C"), length, replace = TRUE), collapse = "")
+  paste(sample(c("A", "B", "C","D"), length, replace = TRUE), collapse = "")
 }

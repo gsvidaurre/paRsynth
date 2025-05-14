@@ -105,6 +105,9 @@ frequency_anchors <- function(df, parsons_col, group_id_col, individual_id_col, 
           frequency <- previous_value - frequency_shift
         } else if (direction == "constant") {
           frequency <- previous_value
+        } 
+        else if (direction == "double"){
+          frequency<- previous_value * 2
         } else {
           stop("Invalid direction: ", direction)
         }

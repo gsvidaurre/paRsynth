@@ -46,7 +46,7 @@ X <- c(X, "paRsynth")
 
 # Change "Desktop/.../GitHub_repos" to where paRsynth is stored on your local machine
 # testing_path <- "C://Users/summe/OneDrive/Desktop/github_repo/paRsynth/R/" # Summer's testing path
-testing_path <- "~/Desktop/BIRDS/GitHub_repos/paRsynth/R" # Alexandra's testing path
+testing_path <- "/Users/Ollia/Downloads/BIRDS/GitHub_Repos/paRsynth/R" # Alexandra's testing path
 
 # Load all of the packages specified above
 invisible(lapply(X, library, character.only = TRUE))
@@ -62,7 +62,7 @@ It is important to have your files organized, especially when creating many diff
 # Initialize a base path (this will need to be different per user)
 # path <- "/Users/raneemsamman/Desktop" # Raneem's path
 # path <- "/Users/gracesmith-vidaurre/Desktop" # Grace's path
-path <- "/Users/gretheljuarez/Desktop/BIRDS" # Alexandra's path
+path <- "/Users/Ollia/Downloads/BIRDS/paRsynthdata" # Alexandra's path
 # path <- "/Users/summe/OneDrive/Desktop/" # Summer's path
 
 # Initialize the directory for analysis on your local computer
@@ -134,7 +134,7 @@ After installing paRsynth and loading the relevant libraries, you will be able t
 ```{r}
 
 # Set the seed for reproducibility
-set.seed(333)
+set.seed(1002)
 
 # Initialize the values of group_information and individual_information, which correspond to the length of the string that will be allocated to encoding group membership or individual identity information
 # Group information can outweigh individual information by a factor of at least 10 or higher
@@ -173,7 +173,7 @@ calls <- generate_strings(
   )
 
 dplyr::glimpse(calls)
-
+view(calls)
 ```
 
 The above chunk of code will generate a data frame called calls. Each row of the data frame represents a call, including the group, individual, and call identifiers, along with the vocalization string itself. 
@@ -193,11 +193,11 @@ calls_parsons <- parsons_code(
   group_tail_col = "Group_tail",
   global_tail_col = "Global_tail",
   random_variation_col = "Random_variation",
-  mapping = list("A" = "up", "B" = "down", "C" = "constant")
+  mapping = list("A" = "up", "B" = "down", "C" = "constant", "D"="double")
 )
 
 glimpse(calls_parsons)
-
+view(calls_parsons)
 ```
 
 This will return a data frame with all the previous columns in example_calls in addition to one extra column called "Parsons_code", which contains the Parsons code representation of each segment of the vocalization string.
