@@ -11,7 +11,7 @@ knitr::opts_chunk$set(echo = TRUE, eval = TRUE)
 
 ```
 
-This vigentte is very similar to Vignette 02 BUT with added steps exploring the effects of the two different frequency_anchors settings: continuous_trajectory and starting_frequency.
+This vignette is very similar to Vignette 02 *BUT* with added steps exploring the effects of the two different `frequency_anchors` settings: "continuous_trajectory" and "starting_frequency". "continuous_trajectory"  uses the set `starting_frequency` parameter at the start of each vocalization component. In other words, if the starting frequency is set to 4000 Hz,then the `global_head` followed by `group_information`, `individual_information`, `random_variation`, and lastly `global_tail` would each section would start at a frequency of 4000 Hz. "starting_frequency" only uses the set `starting_frequency` parameter for the beginning of the vocalization, not after each component. This would mean that depending on the ending frequency of the last component would influence the starting frequency of the next.  
 
 <h1>Set Up Working Environment</h1>
 
@@ -19,7 +19,7 @@ Before using the functions in the paRsynth package, there are some preliminary s
 
 **Load packages and set path**
 
-It is good practice to clean your global environment before using functions from open-sourced packages. In order for paRsynth functions to run, they need specific external R packages as well. For example, 'write_audio' generates and saves audio files in .wav format which requires the package `soundgen::soundgen()` to be installed and loaded. 
+It is good practice to clean your global environment before using functions from open-sourced packages. In order for paRsynth functions to run, they need specific external R packages as well. For example, 'write_audio' generates and saves audio files in .wav format which requires the package `soundgen::soundgen()` to be installed and loaded. You will need to adjust your `testing_path` based on where paRsynth is stored on your local machine.
 
 ```{r message = FALSE, warning = FALSE}
 
@@ -55,7 +55,7 @@ invisible(lapply(X, library, character.only = TRUE))
 
 **Initialize working directories for data on your local machine**
 
-It is important to have your files organized, especially when creating many different types of output data (audios and images). Therefore, initializing working directories in the beginning will be helpful in understanding the data you create with paRsynth and where they are stored.
+It is important to have your files organized, especially when creating many different types of output data (audios and images). Therefore, initializing working directories in the beginning will be helpful in understanding the data you create with paRsynth and where they are stored. You will need to adjust your `path` based on where you want your paRsynth outputs to be stored on your local machine.
 
 ```{r}
 
