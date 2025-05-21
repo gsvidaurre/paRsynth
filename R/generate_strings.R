@@ -41,7 +41,7 @@
 
 generate_strings <- function(n_groups = 2, n_individuals = 5, n_calls = 10,
                              string_length = 16, group_information = 8,
-                             individual_information = 2, random_variation = 2, alphabet = c("A", "B", "C")) {
+                             individual_information = 2, random_variation = 2, alphabet = c("A", "B", "C"), string_structure = "GI-II-RV-GI") {
 
   if (string_length < 6 || string_length > 200) {
     stop("string_length must be between 6 and 200")
@@ -72,6 +72,20 @@ generate_strings <- function(n_groups = 2, n_individuals = 5, n_calls = 10,
   }
   if (random_variation %% 2 != 0) {
     stop("random_variation must be an even number")
+  }
+
+  valid_structures <- c(
+    "GI-II-RV", "GI-RV-II",
+    "II-GI-RV", "II-RV-GI",
+    "RV-II-GI", "RV-GI-II",
+    "GI-II-RV-GI", "GI-RV-II-GI",
+    "II-GI-RV-II", "II-RV-GI-II",
+    "GI-RV-GI", "II-RV-II",
+    "GI-RV", "RV-GI",
+    "RV-II", "II-RV",
+  )
+  if (!(string_structure %in% valid_structures)) {
+  stop("Invalid string_structure. Must be one of: ", paste(valid_structures, collapse = ", "))
   }
 
   # Create global header and tail strings. The length of these strings will vary depending on the length of the group-specific information (group_information) and the individual-specific information (individual_information)
@@ -118,13 +132,15 @@ generate_strings <- function(n_groups = 2, n_individuals = 5, n_calls = 10,
           group_head <- substr(group_info, 1, group_information / 2)
           group_tail <- substr(group_info, group_information / 2 + 1, group_information)
 
-          # Combine all components to create a string that represents a vocalization. Append the random information after the individual identity information
+          ind_head <- substr(individual_middle, 1, individual_information / 2)
+          ind_tail <- substr(individual_middle, individual_information / 2 + 1, individual_information)
+          
+          # Combine all components to create a string that represents a vocalization. 
+          string_assembly <- build_string_structure(string_structure, group_head, group_tail, individual_middle, ind_head, ind_tail, random_string)
+          
           individual_call <- paste0(
             global_head,
-            group_head,
-            individual_middle,
-            random_string,
-            group_tail,
+            string_assembly,
             global_tail
           )
 
@@ -145,10 +161,15 @@ generate_strings <- function(n_groups = 2, n_individuals = 5, n_calls = 10,
           # Assemble the string with individual information only if group information is 0
         } else if (group_information == 0 & individual_information > 0){
           
+          ind_head <- substr(individual_middle, 1, individual_information / 2)
+          ind_tail <- substr(individual_middle, individual_information / 2 + 1, individual_information)
+          
+          # Combine all components to create a string that represents a vocalization. 
+          string_assembly <- build_string_structure(string_structure, "", "", individual_middle, ind_head, ind_tail, random_string)
+          
           individual_call <- paste0(
             global_head,
-            individual_middle,
-            random_string,
+            string_assembly,
             global_tail
           )
 
@@ -172,12 +193,13 @@ generate_strings <- function(n_groups = 2, n_individuals = 5, n_calls = 10,
           group_info <- group_middles[group]
           group_head <- substr(group_info, 1, group_information / 2)
           group_tail <- substr(group_info, group_information / 2 + 1, group_information)
-
+          
+          # Combine all components to create a string that represents a vocalization. 
+          string_assembly <- build_string_structure(string_structure, group_head, group_tail, "", "", "", random_string)
+          
           individual_call <- paste0(
             global_head,
-            group_head,
-            random_string,
-            group_tail,
+            string_assembly,
             global_tail
           )
 
@@ -219,4 +241,33 @@ generate_strings <- function(n_groups = 2, n_individuals = 5, n_calls = 10,
 # Helper function to generate a random string from 3 unique characters (for 1-base Parsons code)
 generate_random_string <- function(length, alphabet) {
   paste(sample(alphabet, length, replace = TRUE), collapse = "")
+}
+
+build_string_structure <- function(structure, GI_head, GI_tail, II, II_head, II_tail, RV) {
+  res <- switch(structure,
+    "GI-II-RV" = paste0(GI_head, GI_tail, II, RV),
+    "GI-RV-II" = paste0(GI_head, GI_tail, RV, II),
+
+    "II-GI-RV" = paste0(II, GI_head, GI_tail, RV),
+    "II-RV-GI" = paste0(II, RV, GI_head, GI_tail),
+
+    "RV-II-GI" = paste0(RV, II, GI_head, GI_tail),
+    "RV-GI-II" = paste0(RV, GI_head, GI_tail, II),
+
+    "GI-II-RV-GI" = paste0(GI_head, II, RV, GI_tail),
+    "GI-RV-II-GI" = paste0(GI_head, RV, II, GI_tail),
+
+    "II-GI-RV-II" = paste0(II_head, GI_head, GI_tail, RV, II_tail),
+    "II-RV-GI-II" = paste0(II_head, RV, GI_head, GI_tail, II_tail),
+
+    "GI-RV-GI" = paste0(GI_head, RV, GI_tail),
+    "II-RV-II" = paste0(II_head, RV, II_tail),
+
+    "GI-RV" = paste0(GI_head, GI_tail, RV),
+    "RV-GI" = paste0(RV, GI_head, GI_tail),
+
+    "II-RV" = paste0(II, RV),
+    "RV-II" = paste0(RV, II),
+  )
+  return(res)
 }
