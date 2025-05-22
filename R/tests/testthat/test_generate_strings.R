@@ -45,12 +45,25 @@ generated_strings <- generate_strings(
   group_information = group_information,
   individual_information = individual_information,
   random_variation = random_variation,
-  alphabet = alphabet,
-  string_structure = "GI-II-RV-GI",
+  alphabet = alphabet
 )
 
-# 1. Unit test to check correect string structure
-test_that("The function generates strings that have the correct length", {
+# 1. Unit test to check correct string structure
+test_that("The function generates strings that have the correct given string structure", {
+  
+  valid_string_structures <- c(
+    "GI-II-RV-GI", "GI-RV-II-GI",
+    "II-GI-RV-II", "II-RV-GI-II",
+    "GI-II-RV", "GI-RV-II",
+    "II-GI-RV", "II-RV-GI",
+    "RV-II-GI", "RV-GI-II",
+    "GI-RV-GI", "II-RV-II",
+    "GI-RV", "RV-GI",
+    "RV-II", "II-RV")
+  
+  
+    
+    
 
   expect_true(all(nchar(generated_strings$Call) == string_length),
               info = "Not all generated strings have the expected length.")
