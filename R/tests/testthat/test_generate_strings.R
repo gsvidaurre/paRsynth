@@ -19,12 +19,7 @@ generated_strings <- generate_strings(
   string_length = string_length,
   group_information = group_information,
   individual_information = individual_information,
-<<<<<<< Updated upstream
   random_variation = random_variation
-=======
-  random_variation = random_variation,
-  alphabet = alphabet
->>>>>>> Stashed changes
 )
 
 # 1. Unit test to check string length
@@ -150,4 +145,3 @@ test_that("The function generates # of calls per individuals per social group co
   expect_true(nrow(duplicate_checks) == 0,
               info = "Some individuals are assigned to the same group more than once per call.")
 })
-
