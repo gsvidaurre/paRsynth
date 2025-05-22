@@ -1,5 +1,29 @@
 # Author: G.A. Juarez and Raneem Samman
-# Date created: December 4, 2024
+# Date created: May 22, 2024
+
+rm(list = ls())
+
+# make a list of packages to install
+pkgs <- c("testthat", "soundgen", "dplyr", "stringr", "rlang", "tidyverse", "lubridate", "pbapply")
+
+# check if the packages are installed, if not, install them
+for (pkg in pkgs) {
+  if (!require(pkg, character.only = TRUE)) {
+    install.packages(pkg, dependencies = TRUE)
+  }
+}
+# load the packages (for software development purposes)
+# lapply(pkgs, library, character.only = TRUE)
+
+# Change the path for testing to reflect where the package is installed on your local machine
+# testing_path <- "/Users/raneemsamman/Documents/GitHub/paRsynth/R" #raneem's
+testing_path <- "~/Desktop/BIRDS/GitHub_repos/paRsynth/R" #alexandra's
+
+# Change the desktop path to reflect where temporary directories for testing will be created to save files generated during testing
+desktop_path <- "~/Desktop"
+
+# Load the paRsynth functions that will be tested below
+source(file.path(testing_path, "generate_strings.R"))
 
 # Define parameters
 group_information <- 8
@@ -10,6 +34,7 @@ string_length <- group_information + individual_information + random_variation +
 n_calls <- 10
 n_groups <- 2
 n_individuals <- 5
+alphabet <- c("A", "B", "C")
 
 # Call the function using parameters
 generated_strings <- generate_strings(
@@ -19,10 +44,12 @@ generated_strings <- generate_strings(
   string_length = string_length,
   group_information = group_information,
   individual_information = individual_information,
-  random_variation = random_variation
+  random_variation = random_variation,
+  alphabet = alphabet,
+  string_structure = "GI-II-RV-GI",
 )
 
-# 1. Unit test to check string length
+# 1. Unit test to check correect string structure
 test_that("The function generates strings that have the correct length", {
 
   expect_true(all(nchar(generated_strings$Call) == string_length),
