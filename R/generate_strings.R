@@ -82,7 +82,7 @@ generate_strings <- function(n_groups = 2, n_individuals = 5, n_calls = 10,
     "II-GI-RV-II", "II-RV-GI-II",
     "GI-RV-GI", "II-RV-II",
     "GI-RV", "RV-GI",
-    "RV-II", "II-RV",
+    "RV-II", "II-RV"
   )
   if (!(string_structure %in% valid_structures)) {
   stop("Invalid string_structure. Must be one of: ", paste(valid_structures, collapse = ", "))

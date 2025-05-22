@@ -46,7 +46,7 @@ invisible(lapply(1:length(X), function(x){
 
 # Change "Desktop/.../GitHub_repos" based on where paRsynth is stored on your local machine
 # testing_path <- "C://Users/summe/OneDrive/Desktop/github_repo/paRsynth/R/" # Summer's testing path
-testing_path <- "~/Desktop/BIRDS/GitHub_repos/paRsynth/R" # Alexandra's testing path
+testing_path <- "C://Users/Ollia/Downloads/BIRDS/GitHub_Repos/paRsynth/R" # Alexandra's testing path
 
 # Load the paRsynth functions that will be tested below
 source(file.path(testing_path, "generate_strings.R"))
@@ -68,7 +68,7 @@ It is important to have your files organized, especially when creating many diff
 # Initialize a base path (this will need to be different per user)
 # path <- "/Users/raneemsamman/Desktop" # Raneem's path
 # path <- "/Users/gracesmith-vidaurre/Desktop" # Grace's path
-path <- "/Users/gretheljuarez/Desktop/BIRDS/" # Alexandra's path
+path <- "C://Users/Ollia/Downloads/BIRDS/paRsynthdata" # Alexandra's path
 # path <- "/Users/summe/OneDrive/Desktop/" # Summer's path
 
 # Initialize the directory for analysis on your local computer
