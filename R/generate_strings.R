@@ -223,9 +223,9 @@ generate_strings <- function(n_groups = 2, n_individuals = 5, n_calls = 10,
   }
   
   # Return the assembled vocalizations and metadata across iterations, including the separate sections of character strings used to assemble vocalizations
-  data.frame(
+    data.frame(
     Group = groups,
-    Individual = individuals,
+    Individual= individuals,
     Call_ID = call_numbers,
     Call = calls,
     Global_head = global_head_calls,
@@ -271,3 +271,4 @@ build_string_structure <- function(structure, GI_head, GI_tail, II, II_head, II_
   )
   return(res)
 }
+

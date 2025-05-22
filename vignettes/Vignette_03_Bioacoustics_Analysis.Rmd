@@ -42,7 +42,7 @@ invisible(lapply(1:length(X), function(x){
 
 # Change "Desktop/.../GitHub_repos" based on where paRsynth is stored on your local machine
 # testing_path <- "/Users/summe/OneDrive/Desktop/github_repo/paRsynth/R/"
-testing_path <- "~/Desktop/BIRDS/GitHub_repos/paRsynth/R/"
+testing_path <- "C://Users/Ollia/Downloads/BIRDS/GitHub_Repos/paRsynth/R"
 
 # Load the paRsynth functions that will be tested below
 source(file.path(testing_path, "generate_strings.R"))
@@ -64,7 +64,7 @@ It is important to have your files organized, especially when creating many diff
 # Initialize a base path (this will need to be different per user)
 # path <- "/Users/raneemsamman/Desktop" # Raneem's path
 # path <- "/Users/gracesmith-vidaurre/Desktop" # Grace's path
-path <- "/Users/gretheljuarez/Desktop/BIRDS/" # Alexandra's path
+path <- "C://Users/Ollia/Downloads/BIRDS/paRsynthdata" # Alexandra's path
 # path <- "/Users/summe/OneDrive/Desktop/"
 
 # Initialize the directory for analysis on your local computer (this is likely the name of the folder all of you data is being stored in)
@@ -123,7 +123,7 @@ sel_tbl <- data.table::rbindlist(lapply(1:length(wavs), function(w){
   
   # Return the metadata for the given call using the synthetic metadata generated during audio file generation above
   
-  synthetic_call_metadata <- read.csv("/Users/gretheljuarez/Desktop/BIRDS/paRsynth_methods_synthetic_dataset/synthetic_call_metadata.csv")
+  synthetic_call_metadata <- read.csv("/Users/Ollia/Downloads/BIRDS/paRsynthdata/paRsynth_methods_synthetic_dataset/synthetic_call_metadata.csv")
   
   metadats_tmp <- synthetic_call_metadata %>%
     dplyr::filter(grepl(wavs[w], audio_file_name))
@@ -247,6 +247,8 @@ Using the results from the SPCC, acoustic space plots can be used as a figure to
 
 ```{r message = FALSE, warning = FALSE}
 # Convert to a distance matrix and dist object for isoMDS (helps visualize the data in a simplified way)
+xc_mat <- pmin(pmax(xc_mat, 0), 0.999999)
+
 dist_mat <- stats::as.dist(1 - xc_mat, diag = TRUE, upper = TRUE)
 # str(dist_mat)
 
@@ -364,6 +366,8 @@ xc_mat2[xc_mat2 < 0]
 
 dimnames(xc_mat2) <- list(IndividualIdentity_sel_tbl$sound.files, IndividualIdentity_sel_tbl$sound.files)
 
+xc_mat2 <- pmin(pmax(xc_mat2, 0), 0.999999)
+
 dist_mat2 <- stats::as.dist(1 - xc_mat2, diag = TRUE, upper = TRUE)
 
 iso2 <- invisible(MASS::isoMDS(dist_mat2, k = 2, maxit = 1000, trace = FALSE))
@@ -459,14 +463,19 @@ calls <- generate_strings(
   )
 
 calls_parsons <- parsons_code(
-  df = calls, 
-  string_col = "Call", 
+  df = calls, string_col = "Call", 
+  global_head_col = "Global_head", 
+  group_head_col = "Group_head",
+  individual_middle_col = "Individual_middle",
+  random_variation_col = "Random_variation",
+  group_tail_col = "Group_tail", 
+  global_tail_col = "Global_tail", 
   mapping = list("A" = "up", "B" = "down", "C" = "constant")
 )
 
 calls_parsons_frequencies <- frequency_anchors(
   df = calls_parsons, 
-  parsons_col = "Parsons_Code", 
+  parsons_col = "Call_Parsons_Code", 
   group_id_col = "Group", 
   individual_id_col = "Individual", 
   call_id_col = "Call_ID", 
@@ -491,7 +500,7 @@ sel_tblEE <- data.table::rbindlist(lapply(1:length(wavs), function(w){
   tmpEE <- tuneR::readWave(file.path(audio_path, wavs[w]))
   
   # synthetic_call_metadataEEcsv <- read.csv("/Users/summe/OneDrive/Desktop/paRsynth_methods_synthetic_dataset/synthetic_call_metadataEE.csv")  
-  synthetic_call_metadataEEcsv <-read.csv("/Users/gretheljuarez/Desktop/BIRDS/paRsynth_methods_synthetic_dataset/synthetic_call_metadataEE.csv")
+  synthetic_call_metadataEEcsv <-read.csv("/Users/Ollia/Downloads/BIRDS/paRsynthdata/paRsynth_methods_synthetic_dataset/synthetic_call_metadataEE.csv")
   
   metadats_tmpEE <- synthetic_call_metadataEEcsv %>%
     dplyr::filter(grepl(wavs[w], audio_file_name))

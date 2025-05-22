@@ -170,6 +170,12 @@ Now that you have a data frame of generated calls, you can use the parsons_code(
 calls_parsons <- parsons_code(
   df = calls, 
   string_col = "Call", 
+  global_head_col = "Global_head", 
+  group_head_col = "Group_head",
+  individual_middle_col = "Individual_middle",
+  random_variation_col = "Random_variation",
+  group_tail_col = "Group_tail", 
+  global_tail_col = "Global_tail",
   mapping = list("A" = "up", "B" = "down", "C" = "constant")
 )
 
@@ -187,7 +193,7 @@ With the Parsons code in your data frame, you are now able to use the frequency_
 
 calls_parsons_frequencies <- frequency_anchors(
   df = calls_parsons, 
-  parsons_col = "Parsons_Code", 
+  parsons_col = "Call_Parsons_Code", 
   group_id_col = "Group", 
   individual_id_col = "Individual", 
   call_id_col = "Call_ID", 
@@ -268,14 +274,20 @@ calls2 <- generate_strings(
 ### Convert each string to Parsons code
 calls_parsons2 <- parsons_code(
   df = calls2, 
-  string_col = "Call", 
+  string_col = "Call",
+  global_head_col = "Global_head", 
+  group_head_col = "Group_head",
+  individual_middle_col = "Individual_middle",
+  random_variation_col = "Random_variation",
+  group_tail_col = "Group_tail", 
+  global_tail_col = "Global_tail",
   mapping = list("A" = "up", "B" = "down", "C" = "constant")
 )
 
 ### Convert each Parsons code to frequency values
 calls_parsons_frequencies2 <- frequency_anchors(
   df = calls_parsons2, 
-  parsons_col = "Parsons_Code", 
+  parsons_col = "Call_Parsons_Code", 
   group_id_col = "Group", 
   individual_id_col = "Individual", 
   call_id_col = "Call_ID", 
@@ -320,8 +332,8 @@ It may be helpful for downstream bioacoustic analysis to create a CSV file inclu
 # Read the CSV file of each dataset
 # group <- read.csv("/Users/summe/OneDrive/Desktop/paRsynth_methods_synthetic_dataset/synthetic_call_metadata1.csv")
 # individual <- read.csv("/Users/summe/OneDrive/Desktop/paRsynth_methods_synthetic_dataset/synthetic_call_metadata2.csv") # Summer's CSV files
-group <- read.csv("/Users/gretheljuarez/Desktop/BIRDS/paRsynth_methods_synthetic_dataset/synthetic_call_metadata1.csv")
-individual <- read.csv("/Users/gretheljuarez/Desktop/BIRDS/paRsynth_methods_synthetic_dataset/synthetic_call_metadata2.csv")
+group <- read.csv("/Users/Ollia/Downloads/BIRDS/paRsynthdata/paRsynth_methods_synthetic_dataset/synthetic_call_metadata1.csv")
+individual <- read.csv("/Users/Ollia/Downloads/BIRDS/paRsynthdata/paRsynth_methods_synthetic_dataset/synthetic_call_metadata2.csv")
 
 # Combine the CSV files of each dataset
 synthetic_call_metadata <- rbind(group, individual)
