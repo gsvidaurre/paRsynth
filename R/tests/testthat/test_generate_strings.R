@@ -34,7 +34,6 @@ string_length <- group_information + individual_information + random_variation +
 n_calls <- 10
 n_groups <- 2
 n_individuals <- 5
-alphabet <- c("A", "B", "C")
 
 # Call the function using parameters
 generated_strings <- generate_strings(
@@ -44,27 +43,12 @@ generated_strings <- generate_strings(
   string_length = string_length,
   group_information = group_information,
   individual_information = individual_information,
-  random_variation = random_variation,
-  alphabet = alphabet
+  random_variation = random_variation
 )
 
-# 1. Unit test to check correct string structure
-test_that("The function generates strings that have the correct given string structure", {
+# 1. Unit test to check string length
+test_that("The function generates strings that have the correct length", {
   
-  valid_string_structures <- c(
-    "GI-II-RV-GI", "GI-RV-II-GI",
-    "II-GI-RV-II", "II-RV-GI-II",
-    "GI-II-RV", "GI-RV-II",
-    "II-GI-RV", "II-RV-GI",
-    "RV-II-GI", "RV-GI-II",
-    "GI-RV-GI", "II-RV-II",
-    "GI-RV", "RV-GI",
-    "RV-II", "II-RV")
-  
-  
-    
-    
-
   expect_true(all(nchar(generated_strings$Call) == string_length),
               info = "Not all generated strings have the expected length.")
 })
@@ -184,4 +168,23 @@ test_that("The function generates # of calls per individuals per social group co
   # Expect no duplicates for any (Group, Individual) in a given Call_ID
   expect_true(nrow(duplicate_checks) == 0,
               info = "Some individuals are assigned to the same group more than once per call.")
+})
+
+# 6. Unit test to check correct string structure
+test_that("The function generates strings that have the correct given string structure", {
+  
+  valid_structures <- c(
+    "GI-II-RV-GI", "GI-RV-II-GI",
+    "II-GI-RV-II", "II-RV-GI-II",
+    "GI-II-RV", "GI-RV-II",
+    "II-GI-RV", "II-RV-GI",
+    "RV-II-GI", "RV-GI-II",
+    "GI-RV-GI", "II-RV-II",
+    "GI-RV", "RV-GI",
+    "RV-II", "II-RV")
+  
+  lapply(valid_structures, generate_strings)
+  
+  expect_true(all(nchar(generated_strings$Call) == string_length),
+              info = "Not all generated strings have the expected length.")
 })
