@@ -247,6 +247,7 @@ Using the results from the SPCC, acoustic space plots can be used as a figure to
 
 ```{r message = FALSE, warning = FALSE}
 # Convert to a distance matrix and dist object for isoMDS (helps visualize the data in a simplified way)
+xc_mat <- pmin(pmax(xc_mat, 0), 0.999999)
 dist_mat <- stats::as.dist(1 - xc_mat, diag = TRUE, upper = TRUE)
 # str(dist_mat)
 
@@ -364,6 +365,7 @@ xc_mat2[xc_mat2 < 0]
 
 dimnames(xc_mat2) <- list(IndividualIdentity_sel_tbl$sound.files, IndividualIdentity_sel_tbl$sound.files)
 
+xc_mat2 <- pmin(pmax(xc_mat2, 0), 0.999999)
 dist_mat2 <- stats::as.dist(1 - xc_mat2, diag = TRUE, upper = TRUE)
 
 iso2 <- invisible(MASS::isoMDS(dist_mat2, k = 2, maxit = 1000, trace = FALSE))
@@ -460,13 +462,19 @@ calls <- generate_strings(
 
 calls_parsons <- parsons_code(
   df = calls, 
-  string_col = "Call", 
+  string_col = "Call",
+  global_head_col = "Global_head", 
+  group_head_col = "Group_head",
+  individual_middle_col = "Individual_middle",
+  random_variation_col = "Random_variation",
+  group_tail_col = "Group_tail", 
+  global_tail_col = "Global_tail", 
   mapping = list("A" = "up", "B" = "down", "C" = "constant")
 )
 
 calls_parsons_frequencies <- frequency_anchors(
   df = calls_parsons, 
-  parsons_col = "Parsons_Code", 
+  parsons_col = "Call_Parsons_Code", 
   group_id_col = "Group", 
   individual_id_col = "Individual", 
   call_id_col = "Call_ID", 
