@@ -128,7 +128,7 @@ After installing paRsynth and loading the relevant libraries, you will be able t
 ```{r message = FALSE, warning = FALSE}
 
 # Set the seed for reproducibility
-set.seed(44)
+set.seed(62)
 
 # Initialize the values of group_information and individual_information, which correspond to the length of the string that will be allocated to encoding group membership or individual identity information
 # Group information can outweigh individual information by a factor of at least 10 or higher
@@ -152,9 +152,9 @@ calls <- generate_strings(
   n_calls = n_calls, 
   string_length = string_length, 
   group_information = group_information, 
-  individual_information = individual_information
+  individual_information = individual_information,
+  string_structure = "II-GI-RV-II"
   )
-
 dplyr::glimpse(calls)
 
 ```
@@ -200,6 +200,7 @@ calls_parsons_frequencies <- frequency_anchors(
   call_string_col = "Call", 
   starting_frequency = 4000, 
   frequency_shift = 1000,
+  section_transition = "continuous_trajectory"
   )
 
 glimpse(calls_parsons_frequencies)
@@ -249,7 +250,7 @@ Let's do a 2nd example where individual information is greater than group inform
 ```{r eval = FALSE}
 
 # Set the seed for reproducibility
-set.seed(456)
+set.seed(63)
 
 # Interchange individual_information with group_information
 factor_ratio2 <- 4
@@ -268,7 +269,8 @@ calls2 <- generate_strings(
   n_calls = n_calls2, 
   string_length = string_length2, 
   group_information = group_information2, 
-  individual_information = individual_information2
+  individual_information = individual_information2,
+  string_structure = "II-GI-RV-II"
   )
 
 ### Convert each string to Parsons code
@@ -293,7 +295,9 @@ calls_parsons_frequencies2 <- frequency_anchors(
   call_id_col = "Call_ID", 
   call_string_col = "Call", 
   starting_frequency = 4000, 
-  frequency_shift = 1000
+  frequency_shift = 1000,
+  section_transition = "continuous_trajectory"
+  
   )
 
 ### For each call, use the frequency vectors to generate synthetic audio files with the soundgen package
