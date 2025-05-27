@@ -323,7 +323,7 @@ mds_df %>%
   )
   
 ```
-
+GROUP INFORMATION > INDIVIDUAL INFORMATION
 This will output an acoustic space plot to represent the acoustic similarity of the paRsynth generated vocalizations using the spectrograms created in vignette 02. In this case, we generated space plots for the first dataset that has more group information encoded in the vocalizations. It will not look the same as the plot you generated because paRsynth randomly generates vocalizations strings, but the overall trends should be similar
 
 
