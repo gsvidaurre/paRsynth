@@ -151,7 +151,7 @@ After installing paRsynth and loading the relevant libraries, you will be able t
 ```{r message = FALSE, warning = FALSE}
 
 # Set the seed for reproducibility
-set.seed(1)
+set.seed(3)
 
 # Initialize the values of group_information and individual_information, which correspond to the length of the string that will be allocated to encoding group membership or individual identity information
 # Group information can outweigh individual information by a factor of at least 10 or higher
@@ -197,17 +197,18 @@ Now that you have a data frame of generated calls, you can use the parsons_code(
 calls_parsons <- parsons_code(
   df = calls, 
   string_col = "Call", 
-   global_head_col = "Global_head", 
+  global_head_col = "Global_head", 
   group_head_col = "Group_head",
   individual_middle_col = "Individual_middle",
   random_variation_col = "Random_variation",
   group_tail_col = "Group_tail", 
   global_tail_col = "Global_tail",
-  # string_structure_col = "String_structure",
+  string_structure_col = "String_structure",
   mapping = list("A" = "up", "B" = "down", "C" = "constant")
 )
 
 glimpse(calls_parsons)
+view(calls_parsons)
 
 ```
 
@@ -225,7 +226,8 @@ calls_parsons_frequencies <- frequency_anchors(
   group_id_col = "Group", 
   individual_id_col = "Individual", 
   call_id_col = "Call_ID", 
-  call_string_col = "Call", 
+  call_string_col = "Call",
+  string_structure_col = "String_structure",
   starting_frequency = 4000, 
   frequency_shift = 1000,
   section_transition = "continuous_trajectory"
@@ -319,7 +321,7 @@ calls_parsons2 <- parsons_code(
   random_variation_col = "Random_variation",
   group_tail_col = "Group_tail", 
   global_tail_col = "Global_tail",
-  # string_structure_col = "String_structure",
+  string_structure_col = "String_structure",
   mapping = list("A" = "up", "B" = "down", "C" = "constant")
 )
 
@@ -330,7 +332,8 @@ calls_parsons_frequencies2 <- frequency_anchors(
   group_id_col = "Group", 
   individual_id_col = "Individual", 
   call_id_col = "Call_ID", 
-  call_string_col = "Call", 
+  call_string_col = "Call",
+  string_structure_col = "String_structure",
   starting_frequency = 4000, 
   frequency_shift = 1000,
   section_transition = "continuous_trajectory"
