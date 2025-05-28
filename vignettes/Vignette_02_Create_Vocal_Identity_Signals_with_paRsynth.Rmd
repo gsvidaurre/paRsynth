@@ -47,6 +47,7 @@ invisible(lapply(1:length(X), function(x){
 # Change "Desktop/.../GitHub_repos" based on where paRsynth is stored on your local machine
 # testing_path <- "C://Users/summe/OneDrive/Desktop/github_repo/paRsynth/R/" # Summer's testing path
 testing_path <- "~/Desktop/BIRDS/GitHub_repos/paRsynth/R" # Alexandra's testing path
+testing_path <- "/Users/raneemsamman/Documents/GitHub/paRsynth/R/"
 
 # Load the paRsynth functions that will be tested below
 source(file.path(testing_path, "generate_strings.R"))
@@ -66,9 +67,9 @@ It is important to have your files organized, especially when creating many diff
 ```{r}
 
 # Initialize a base path (this will need to be different per user)
-# path <- "/Users/raneemsamman/Desktop" # Raneem's path
+path <- "/Users/raneemsamman/Desktop" # Raneem's path
 # path <- "/Users/gracesmith-vidaurre/Desktop" # Grace's path
-path <- "/Users/gretheljuarez/Desktop/BIRDS/" # Alexandra's path
+# path <- "/Users/gretheljuarez/Desktop/BIRDS/" # Alexandra's path
 # path <- "/Users/summe/OneDrive/Desktop/" # Summer's path
 
 # Initialize the directory for analysis on your local computer
@@ -153,6 +154,7 @@ calls <- generate_strings(
   string_length = string_length, 
   group_information = group_information, 
   individual_information = individual_information
+  string_structure = "II-RV-GI"
   )
 
 dplyr::glimpse(calls)
@@ -177,6 +179,9 @@ calls_parsons <- parsons_code(
   group_tail_col = "Group_tail", 
   global_tail_col = "Global_tail",
   mapping = list("A" = "up", "B" = "down", "C" = "constant")
+  string_structure_col = "String_structure",
+  mapping = list("A" = "up", "B" = "down", "C" = "constant"),
+  alphabet = c("A", "B", "C")
 )
 
 glimpse(calls_parsons)
@@ -197,9 +202,11 @@ calls_parsons_frequencies <- frequency_anchors(
   group_id_col = "Group", 
   individual_id_col = "Individual", 
   call_id_col = "Call_ID", 
-  call_string_col = "Call", 
+  call_string_col = "Call",
+  string_structure_col = "String_structure",
   starting_frequency = 4000, 
   frequency_shift = 1000,
+  section_transition = "starting_frequency"
   )
 
 glimpse(calls_parsons_frequencies)
@@ -268,7 +275,8 @@ calls2 <- generate_strings(
   n_calls = n_calls2, 
   string_length = string_length2, 
   group_information = group_information2, 
-  individual_information = individual_information2
+  individual_information = individual_information2,
+  string_structure = "GI-RV-II"
   )
 
 ### Convert each string to Parsons code
@@ -281,6 +289,7 @@ calls_parsons2 <- parsons_code(
   random_variation_col = "Random_variation",
   group_tail_col = "Group_tail", 
   global_tail_col = "Global_tail",
+  string_structure_col = "String_structure",
   mapping = list("A" = "up", "B" = "down", "C" = "constant")
 )
 
@@ -291,7 +300,8 @@ calls_parsons_frequencies2 <- frequency_anchors(
   group_id_col = "Group", 
   individual_id_col = "Individual", 
   call_id_col = "Call_ID", 
-  call_string_col = "Call", 
+  call_string_col = "Call",
+  string_structure_col = "String_structure",
   starting_frequency = 4000, 
   frequency_shift = 1000
   )
@@ -332,8 +342,10 @@ It may be helpful for downstream bioacoustic analysis to create a CSV file inclu
 # Read the CSV file of each dataset
 # group <- read.csv("/Users/summe/OneDrive/Desktop/paRsynth_methods_synthetic_dataset/synthetic_call_metadata1.csv")
 # individual <- read.csv("/Users/summe/OneDrive/Desktop/paRsynth_methods_synthetic_dataset/synthetic_call_metadata2.csv") # Summer's CSV files
-group <- read.csv("/Users/gretheljuarez/Desktop/BIRDS/paRsynth_methods_synthetic_dataset/synthetic_call_metadata1.csv")
-individual <- read.csv("/Users/gretheljuarez/Desktop/BIRDS/paRsynth_methods_synthetic_dataset/synthetic_call_metadata2.csv")
+# group <- read.csv("/Users/gretheljuarez/Desktop/BIRDS/paRsynth_methods_synthetic_dataset/synthetic_call_metadata1.csv")
+# individual <- read.csv("/Users/gretheljuarez/Desktop/BIRDS/paRsynth_methods_synthetic_dataset/synthetic_call_metadata2.csv")
+group <- read.csv("/Users/Raneemsamman/Desktop/paRsynth_methods_synthetic_dataset/synthetic_call_metadata1.csv")
+individual <- read.csv("/Users/Raneemsamman/Desktop/paRsynth_methods_synthetic_dataset/synthetic_call_metadata2.csv")
 
 # Combine the CSV files of each dataset
 synthetic_call_metadata <- rbind(group, individual)
