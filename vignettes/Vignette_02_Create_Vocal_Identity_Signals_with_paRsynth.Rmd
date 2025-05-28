@@ -46,7 +46,7 @@ invisible(lapply(1:length(X), function(x){
 
 # Change "Desktop/.../GitHub_repos" based on where paRsynth is stored on your local machine
 # testing_path <- "C://Users/summe/OneDrive/Desktop/github_repo/paRsynth/R/" # Summer's testing path
-testing_path <- "~/Desktop/BIRDS/GitHub_repos/paRsynth/R" # Alexandra's testing path
+# testing_path <- "~/Desktop/BIRDS/GitHub_repos/paRsynth/R" # Alexandra's testing path
 testing_path <- "/Users/raneemsamman/Documents/GitHub/paRsynth/R/"
 
 # Load the paRsynth functions that will be tested below
@@ -153,7 +153,7 @@ calls <- generate_strings(
   n_calls = n_calls, 
   string_length = string_length, 
   group_information = group_information, 
-  individual_information = individual_information
+  individual_information = individual_information,
   string_structure = "II-RV-GI"
   )
 
@@ -178,7 +178,6 @@ calls_parsons <- parsons_code(
   random_variation_col = "Random_variation",
   group_tail_col = "Group_tail", 
   global_tail_col = "Global_tail",
-  mapping = list("A" = "up", "B" = "down", "C" = "constant")
   string_structure_col = "String_structure",
   mapping = list("A" = "up", "B" = "down", "C" = "constant"),
   alphabet = c("A", "B", "C")

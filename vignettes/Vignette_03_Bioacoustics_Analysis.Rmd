@@ -346,6 +346,7 @@ Now lets run this code to analyze the acoustic similarities for the 2nd example 
 
 IndividualIdentity_sel_tbl <- sel_tbl %>%
     dplyr::filter(grepl("IndividualIdentity", sound.files))
+glimpse(IndividualIdentity_sel_tbl)
 ```
 
 ```{r eval = FALSE}
