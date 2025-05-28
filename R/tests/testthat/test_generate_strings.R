@@ -212,8 +212,25 @@ test_that("The function generates strings that have the correct given string str
       string_structure = structures
     )
   })
+  # view(results)
   
-  view(results)
+  # Change column names to respective abbreviation
+  res <- results %>%
+    rename(
+      Group_head = GI,
+      Individual_head = II,
+      Group_middle = GI,
+      Individual_middle = II,
+      Random_variation = RV,
+      Group_tail = GI,
+      Individual_tail = II
+      
+    )
+  
+  # Get columns pertaining to string structure
+  structure_columns <- grep(res), names(results), value = TRUE)
+  
+  expect_true(valid_structures == )
   
   
  })
