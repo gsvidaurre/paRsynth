@@ -151,7 +151,7 @@ After installing paRsynth and loading the relevant libraries, you will be able t
 ```{r message = FALSE, warning = FALSE}
 
 # Set the seed for reproducibility
-set.seed(3)
+set.seed(5)
 
 # Initialize the values of group_information and individual_information, which correspond to the length of the string that will be allocated to encoding group membership or individual identity information
 # Group information can outweigh individual information by a factor of at least 10 or higher
@@ -291,7 +291,7 @@ Let's do a 2nd example where individual information is greater than group inform
 ```{r eval = FALSE}
 
 # Set the seed for reproducibility
-set.seed(3)
+set.seed(5)
 
 # Interchange individual_information with group_information
 group_information2 <- 2
