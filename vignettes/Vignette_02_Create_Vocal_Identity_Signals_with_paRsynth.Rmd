@@ -179,7 +179,7 @@ calls <- generate_strings(
   individual_information = individual_information,
   random_variation = random_variation,
   alphabet = c("A", "B", "C"),
-  string_structure = "GI-RV-II"
+  string_structure = "II-RV-GI" # Change string_structure to the one you want
   )
 
 dplyr::glimpse(calls)
@@ -208,7 +208,7 @@ calls_parsons <- parsons_code(
 )
 
 glimpse(calls_parsons)
-view(calls_parsons)
+# view(calls_parsons)
 
 ```
 
@@ -260,7 +260,7 @@ synthetic_call_metadata1 <- write_audio(
   subratio = 2, 
   shortestEpoch = 300, 
   vibratoFreq = 1,
-  save_path = audio_path[2], # Make sure the audio_path matches the string_structure set to be saved in the appropriate directory
+  save_path = audio_path[4], # Make sure the audio_path matches the string_structure set to be saved in the appropriate directory
   prefix = "GroupMembership"
   )
 
@@ -278,7 +278,7 @@ The data frames that you generate in R using paRsynth can be saved as physical f
 
 # Add extra metadata for upcoming image files names and rearrange columns
 synthetic_call_metadata1 %>%
-  write.csv(., file = file.path(string_structure_path[2], "synthetic_call_metadata1.csv"), row.names = FALSE) # Make sure to set to the appropriate string_structure_path
+  write.csv(., file = file.path(string_structure_path[4], "synthetic_call_metadata1.csv"), row.names = FALSE) # Make sure to set to the appropriate string_structure_path
 
 ```
 
@@ -291,7 +291,7 @@ Let's do a 2nd example where individual information is greater than group inform
 ```{r eval = FALSE}
 
 # Set the seed for reproducibility
-set.seed(1)
+set.seed(3)
 
 # Interchange individual_information with group_information
 group_information2 <- 2
@@ -308,7 +308,7 @@ calls2 <- generate_strings(
   individual_information = individual_information2,
   random_variation = random_variation,
   alphabet = c("A", "B", "C"),
-  string_structure = "GI-RV-II"
+  string_structure = "II-RV-GI" # Change string_structure to the one you want
   )
 
 ### Convert each string to Parsons code
@@ -355,21 +355,21 @@ synthetic_call_metadata2 <- write_audio(
   subratio = 2, 
   shortestEpoch = 300, 
   vibratoFreq = 1, 
-  save_path = audio_path[2], # Make sure the audio_path matches the string_structure set to be saved in the appropriate directory
+  save_path = audio_path[4], # Make sure the audio_path matches the string_structure set to be saved in the appropriate directory
   prefix = "IndividualIdentity"
   )
 
 ### Save the metadata for the synthetic audio files to a CSV file
 # Add extra metadata for upcoming image files names and rearrange columns
 synthetic_call_metadata2 %>%
-  write.csv(., file = file.path(string_structure_path[2], "synthetic_call_metadata2.csv"), row.names = FALSE) # Make sure to set to the appropriate string_structure_path
+  write.csv(., file = file.path(string_structure_path[4], "synthetic_call_metadata2.csv"), row.names = FALSE) # Make sure to set to the appropriate string_structure_path
 
 ```
 
 Read in the spreadsheet you created.
 ```{r}
 
-synthetic_call_metadata2 <- read.csv(file.path(string_structure_path[2], "synthetic_call_metadata2.csv"))
+synthetic_call_metadata2 <- read.csv(file.path(string_structure_path[4], "synthetic_call_metadata2.csv"))
 
 glimpse(synthetic_call_metadata2)
 
@@ -386,23 +386,23 @@ It may be helpful for downstream bioacoustic analysis to create a CSV file inclu
 # Read the CSV file of each dataset
 # group <- read.csv("/Users/summe/OneDrive/Desktop/paRsynth_methods_synthetic_dataset/synthetic_call_metadata1.csv")
 # individual <- read.csv("/Users/summe/OneDrive/Desktop/paRsynth_methods_synthetic_dataset/synthetic_call_metadata2.csv") # Summer's CSV files
-group <- read.csv("/Users/gretheljuarez/Desktop/BIRDS/paRsynth_methods_synthetic_dataset/GI-RV-II/synthetic_call_metadata1.csv")
+group <- read.csv("/Users/gretheljuarez/Desktop/BIRDS/paRsynth_methods_synthetic_dataset/II-RV-GI/synthetic_call_metadata1.csv") # Change to appropriate csv files
 
-individual <- read.csv("/Users/gretheljuarez/Desktop/BIRDS/paRsynth_methods_synthetic_dataset/GI-RV-II/synthetic_call_metadata2.csv")
+individual <- read.csv("/Users/gretheljuarez/Desktop/BIRDS/paRsynth_methods_synthetic_dataset/II-RV-GI/synthetic_call_metadata2.csv") # Change to appropriate csv files
 
 # Combine the CSV files of each dataset
 synthetic_call_metadata <- rbind(group, individual)
 
 # Write out the CSV file containing both datasets
 synthetic_call_metadata %>%
-  write.csv(., file = file.path(string_structure_path[2], "GI-RV-II_synthetic_call_metadata.csv"), row.names = FALSE) #TKTK do we want store the metadata with both data sets in the analysis_path for its appropriate string_structure_path
+  write.csv(., file = file.path(string_structure_path[4], "II-RV-GI_synthetic_call_metadata.csv"), row.names = FALSE) #TKTK do we want store the metadata with both data sets in the analysis_path for its appropriate string_structure_path
 
 ```
 
 Read in the spreadsheet you created.
 ```{r}
 
-synthetic_call_metadata <- read.csv(file.path(string_structure_path[2], "GI-RV-II_synthetic_call_metadata.csv")) #TKTK do we want store the metadata with both data sets in the analysis_path for its appropriate string_structure_path
+synthetic_call_metadata <- read.csv(file.path(string_structure_path[4], "II-RV-GI_synthetic_call_metadata.csv")) #TKTK do we want store the metadata with both data sets in the analysis_path for its appropriate string_structure_path
 
 glimpse(synthetic_call_metadata)
 
