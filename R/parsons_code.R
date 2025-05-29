@@ -52,7 +52,7 @@
 
 parsons_code <- function(df, string_col, global_head_col, group_head_col,
                 individual_middle_col, random_variation_col,
-                group_tail_col, global_tail_col,
+                group_tail_col, global_tail_col, string_structure_col,
                 mapping = list("A" = "up", "B" = "down", "C" = "constant"),
                 alphabet = c("A", "B", "C")) {
 

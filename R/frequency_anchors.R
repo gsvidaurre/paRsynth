@@ -58,7 +58,7 @@
 #' @export frequency_anchors
 
 frequency_anchors <- function(df, parsons_col, group_id_col, individual_id_col,
-                              call_id_col, call_string_col,
+                              call_id_col, call_string_col, string_structure_col,
                               starting_frequency = 4000, frequency_shift = 1000,
                               section_transition = "starting_frequency") {
 

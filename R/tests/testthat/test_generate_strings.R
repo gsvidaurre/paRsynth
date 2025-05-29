@@ -1,5 +1,29 @@
 # Author: G.A. Juarez and Raneem Samman
-# Date created: December 4, 2024
+# Date created: May 22, 2024
+
+rm(list = ls())
+
+# make a list of packages to install
+pkgs <- c("testthat", "soundgen", "dplyr", "stringr", "rlang", "tidyverse", "lubridate", "pbapply")
+
+# check if the packages are installed, if not, install them
+for (pkg in pkgs) {
+  if (!require(pkg, character.only = TRUE)) {
+    install.packages(pkg, dependencies = TRUE)
+  }
+}
+# load the packages (for software development purposes)
+# lapply(pkgs, library, character.only = TRUE)
+
+# Change the path for testing to reflect where the package is installed on your local machine
+# testing_path <- "/Users/raneemsamman/Documents/GitHub/paRsynth/R" #raneem's
+testing_path <- "~/Desktop/BIRDS/GitHub_repos/paRsynth/R" #alexandra's
+
+# Change the desktop path to reflect where temporary directories for testing will be created to save files generated during testing
+desktop_path <- "~/Desktop"
+
+# Load the paRsynth functions that will be tested below
+source(file.path(testing_path, "generate_strings.R"))
 
 # Define parameters
 group_information <- 8
@@ -7,9 +31,11 @@ individual_information <- 2
 random_variation <- 4
 global_head <- 4
 string_length <- group_information + individual_information + random_variation + (global_head * 2)
-n_calls <- 10
+n_calls <- 1
 n_groups <- 2
-n_individuals <- 5
+n_individuals <- 2
+alphabet <- c("A", "B", "C")
+string_structure <- "GI-II-RV-GI"
 
 # Call the function using parameters
 generated_strings <- generate_strings(
@@ -19,27 +45,36 @@ generated_strings <- generate_strings(
   string_length = string_length,
   group_information = group_information,
   individual_information = individual_information,
-  random_variation = random_variation
+  random_variation = random_variation,
+  alphabet = alphabet,
+  string_structure = string_structure
 )
 
 # 1. Unit test to check string length
 test_that("The function generates strings that have the correct length", {
-
-  expect_true(all(nchar(generated_strings$Call) == string_length),
+  
+  # Check that the number of characters in each Call equal the number of string_length
+  expect_true(unique(nchar(generated_strings$Call) == string_length),
               info = "Not all generated strings have the expected length.")
+  cat("expected string_length:", string_length, "\n")
+  cat("unique string_length in test", unique(nchar(generated_strings$Call)), "\n")
 })
 
 # 2. Unit test to check that correct number of string were generated
 test_that("The function generates the correct number of strings", {  
+  
   # Get the number of generated calls
-  generated_calls <- nrow(generated_strings)
+  n_generated_calls <- nrow(generated_strings)
 
   # Get the number of expected calls
   n_expected_calls <- n_calls*n_groups*n_individuals
 
   # Check that the number of generated calls equal the number of expected calls
-  expect_true(generated_calls == n_expected_calls,
+  expect_true(n_generated_calls == n_expected_calls,
               info = "Not all generated calls have the expected number.")
+  cat("expected number of calls", n_expected_calls, "\n")
+  cat("number of generated calls in test:", n_generated_calls, "\n")
+  
 })
 
 # 3. Unit test to check that the number of groups and individuals is correct
@@ -144,4 +179,58 @@ test_that("The function generates # of calls per individuals per social group co
   # Expect no duplicates for any (Group, Individual) in a given Call_ID
   expect_true(nrow(duplicate_checks) == 0,
               info = "Some individuals are assigned to the same group more than once per call.")
+  
+  cat("number of extra unwanted group/individual information:", nrow(duplicate_checks), "\n")
+  
 })
+
+# 6. Unit test to check correct string structure
+test_that("The function generates strings that have the correct given string structure", {
+  
+  # Create a vector of all valid structures
+  valid_structures <- c(
+    "GI-II-RV-GI", "GI-RV-II-GI",
+    "II-GI-RV-II", "II-RV-GI-II",
+    "GI-II-RV", "GI-RV-II",
+    "II-GI-RV", "II-RV-GI",
+    "RV-II-GI", "RV-GI-II",
+    "GI-RV-GI", "II-RV-II",
+    "GI-RV", "RV-GI",
+    "RV-II", "II-RV")
+  
+  # Loop the function to create calls of each valid structure
+  results <- lapply(valid_structures, function(structures){
+    generate_strings(
+      n_groups = n_groups,
+      n_individuals = n_individuals,
+      n_calls = n_calls,
+      string_length = string_length,
+      group_information = group_information,
+      individual_information = individual_information,
+      random_variation = random_variation,
+      alphabet = alphabet,
+      string_structure = structures
+    )
+  })
+  # view(results)
+  
+  # Change column names to respective abbreviation
+  res <- results %>%
+    rename(
+      Group_head = GI,
+      Individual_head = II,
+      Group_middle = GI,
+      Individual_middle = II,
+      Random_variation = RV,
+      Group_tail = GI,
+      Individual_tail = II
+      
+    )
+  
+  # Get columns pertaining to string structure
+  structure_columns <- grep(res), names(results), value = TRUE)
+  
+  expect_true(valid_structures == )
+  
+  
+ })
