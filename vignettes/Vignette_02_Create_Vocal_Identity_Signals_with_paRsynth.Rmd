@@ -395,14 +395,14 @@ synthetic_call_metadata <- rbind(group, individual)
 
 # Write out the CSV file containing both datasets
 synthetic_call_metadata %>%
-  write.csv(., file = file.path(analysis_path, "GI-RV-II_synthetic_call_metadata.csv"), row.names = FALSE) #TKTK do we want store the metadata with both data sets in the analysis_path for its appropriate string_structure_path
+  write.csv(., file = file.path(string_structure_path[2], "GI-RV-II_synthetic_call_metadata.csv"), row.names = FALSE) #TKTK do we want store the metadata with both data sets in the analysis_path for its appropriate string_structure_path
 
 ```
 
 Read in the spreadsheet you created.
 ```{r}
 
-synthetic_call_metadata <- read.csv(file.path(analysis_path, "GI-RV-II_synthetic_call_metadata.csv")) #TKTK do we want store the metadata with both data sets in the analysis_path for its appropriate string_structure_path
+synthetic_call_metadata <- read.csv(file.path(string_structure_path[2], "GI-RV-II_synthetic_call_metadata.csv")) #TKTK do we want store the metadata with both data sets in the analysis_path for its appropriate string_structure_path
 
 glimpse(synthetic_call_metadata)
 
