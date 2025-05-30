@@ -11,7 +11,7 @@ knitr::opts_chunk$set(echo = TRUE, eval = TRUE)
 
 ```
 
-In this vignette, we will go through how to create vocalization strings, convert them into Parsons code, calculate frequency anchors, and generate synthetic audio files using the paRsynth package for downstream bioacoustics analyses. 
+In this vignette, we will go through how to create vocalization strings, convert them into Parsons code, calculate frequency anchors, and generate synthetic audio files using the paRsynth package for downstream bioacoustics analyses.
 
 <h1>Set Up Working Environment</h1>
 
@@ -19,7 +19,7 @@ Before using the functions in the paRsynth package, there are some preliminary s
 
 **Load packages and set path**
 
-It is good practice to clean your global environment before using functions from open-sourced packages. In order for paRsynth functions to run, they need specific external R packages as well. For example, 'write_audio' generates and saves audio files in .WAV format which requires the package `soundgen::soundgen()` to be installed and loaded. 
+It is good practice to clean your global environment before using functions from open-sourced packages. In order for paRsynth functions to run, they need specific external R packages as well. For example, 'write_audio' generates and saves audio files in .WAV format which requires the package `soundgen::soundgen()` to be installed and loaded.
 
 ```{r message = FALSE, warning = FALSE}
 
@@ -132,7 +132,7 @@ vapply(images_path, function(path) {
 
 **Check out documentation for the paRsynth functions. These functions are written below in the order in which they should be used**
 
-Before using the paRsynth package, it would be beneficial for you to go over the description, usage, arguments, extra details, and examples of each function. 
+Before using the paRsynth package, it would be beneficial for you to go over the description, usage, arguments, extra details, and examples of each function.
 
 ```{r}
 
@@ -147,7 +147,7 @@ Before using the paRsynth package, it would be beneficial for you to go over the
 
 **Step 1: Create character strings representing vocal signals with more group membership information encoded within the call than individual identity information**
 
-After installing paRsynth and loading the relevant libraries, you will be able to take the first step into creating synthetic bird calls. The first step is generating the character strings that represent vocalizations using the function generate_strings(). These strings encode both group membership (characters that are shared across individuals within a group) and individual identity (characters that are unique to each individual in a group). The function allows you to specify the length of the string as well as how much of the string encodes group versus individual identity information. It also allows you to control the number of groups, individuals in each group and calls per individual. These variables that you can control are known as the parameters of the function. 
+After installing paRsynth and loading the relevant libraries, you will be able to take the first step into creating synthetic bird calls. The first step is generating the character strings that represent vocalizations using the function generate_strings(). These strings encode both group membership (characters that are shared across individuals within a group) and individual identity (characters that are unique to each individual in a group). The function allows you to specify the length of the string as well as how much of the string encodes group versus individual identity information. It also allows you to control the number of groups, individuals in each group and calls per individual. These variables that you can control are known as the parameters of the function.
 
 ```{r message = FALSE, warning = FALSE}
 
@@ -184,10 +184,9 @@ calls <- generate_strings(
   )
 
 dplyr::glimpse(calls)
-
 ```
 
-The above chunk of code will generate a data frame called calls. Each row of the data frame represents a call, including the group, individual, and call identifiers, along with the vocalization string itself. 
+The above chunk of code will generate a data frame called calls. Each row of the data frame represents a call, including the group, individual, and call identifiers, along with the vocalization string itself.
 
 **Step 2: Convert strings to Parsons code**
 
@@ -219,7 +218,7 @@ This will return a data frame with all the previous columns in example_calls in 
 
 **Step 3: Convert the Parsons code to frequency values**
 
-With the Parsons code in your data frame, you are now able to use the frequency_anchors() function to create frequency anchors that will guide the changes in pitch when creating synthetic audio files. Starting at a baseline frequency value, frequency values are calculated for each sequential character of the string using the Parsons code from the previous step. Therefore, the parameters of this function are the data frame with the parsons code, the names of the columns containing the parsons code (parsons_col), the numeric group identifiers (group_id_col), the numeric individual identifiers (individual_id_col), unique numeric identifiers for each vocalization per individual (call_id_col),  the character string per vocalization (call_string_col), the baseline frequency value (starting_frequency) which has a default of 4000 Hz, and a value of frequency shift (frequency_shift) which has a default value of 1000. 
+With the Parsons code in your data frame, you are now able to use the frequency_anchors() function to create frequency anchors that will guide the changes in pitch when creating synthetic audio files. Starting at a baseline frequency value, frequency values are calculated for each sequential character of the string using the Parsons code from the previous step. Therefore, the parameters of this function are the data frame with the parsons code, the names of the columns containing the parsons code (parsons_col), the numeric group identifiers (group_id_col), the numeric individual identifiers (individual_id_col), unique numeric identifiers for each vocalization per individual (call_id_col), the character string per vocalization (call_string_col), the baseline frequency value (starting_frequency) which has a default of 4000 Hz, and a value of frequency shift (frequency_shift) which has a default value of 1000.
 
 ```{r}
 
@@ -287,7 +286,7 @@ synthetic_call_metadata1 %>%
 
 Now that you have generated your metadata with paRsyth and it has been saved as a CSV file, navigate to Vignette 03 Analysis to learn how to use the generated outputs of the package described above for downstream bioacoustics analysis.
 
-<h2>2nd Example: Individual Information > Group Information</h2>
+<h2>2nd Example: Individual Information \> Group Information</h2>
 
 Let's do a 2nd example where individual information is greater than group information. Run the same steps above, but interchange 'individual_information' and 'group_information in the code. Make sure to reassign group_information to an even integer larger than 8 and reassign factor_ratio to a smaller even integer starting from 2 - 10.
 
@@ -370,6 +369,7 @@ synthetic_call_metadata2 %>%
 ```
 
 Read in the spreadsheet you created.
+
 ```{r}
 
 synthetic_call_metadata2 <- read.csv(file.path(string_structure_path[4], "synthetic_call_metadata2.csv"))
@@ -378,7 +378,7 @@ glimpse(synthetic_call_metadata2)
 
 ```
 
-The .wav files for this dataset have been added to the audio folder and a CSV file has been created for it. After running this code you will have two datasets: 1) reflects vocalizations with more group information than individual and 2) vice versa. 
+The .wav files for this dataset have been added to the audio folder and a CSV file has been created for it. After running this code you will have two datasets: 1) reflects vocalizations with more group information than individual and 2) vice versa.
 
 **Additional Step 6: Combine datasets into one single CSV file**
 
@@ -389,8 +389,11 @@ It may be helpful for downstream bioacoustic analysis to create a CSV file inclu
 # Read the CSV file of each dataset
 # group <- read.csv("/Users/summe/OneDrive/Desktop/paRsynth_methods_synthetic_dataset/synthetic_call_metadata1.csv")
 # individual <- read.csv("/Users/summe/OneDrive/Desktop/paRsynth_methods_synthetic_dataset/synthetic_call_metadata2.csv") # Summer's CSV files
-group <- read.csv("/Users/gretheljuarez/Desktop/BIRDS/paRsynth_methods_synthetic_dataset/II-RV-GI/synthetic_call_metadata1.csv") # Change to appropriate csv files
-individual <- read.csv("/Users/gretheljuarez/Desktop/BIRDS/paRsynth_methods_synthetic_dataset/II-RV-GI/synthetic_call_metadata2.csv") # Change to appropriate csv files
+# group <- read.csv("/Users/gretheljuarez/Desktop/BIRDS/paRsynth_methods_synthetic_dataset/II-RV-GI/synthetic_call_metadata1.csv") # Change to appropriate csv files
+# individual <- read.csv("/Users/gretheljuarez/Desktop/BIRDS/paRsynth_methods_synthetic_dataset/II-RV-GI/synthetic_call_metadata2.csv") # Change to appropriate csv files
+
+group <- read.csv("/Users/raneemsamman/Desktop/paRsynth_methods_synthetic_dataset/II-RV-GI/synthetic_call_metadata1.csv") # Change to appropriate csv files
+individual <- read.csv("/Users/raneemsamman/Desktop/paRsynth_methods_synthetic_dataset/II-RV-GI/synthetic_call_metadata2.csv") # Change to appropriate csv files
 
 # Combine the CSV files of each dataset
 synthetic_call_metadata <- rbind(group, individual)
@@ -402,6 +405,7 @@ synthetic_call_metadata %>%
 ```
 
 Read in the spreadsheet you created.
+
 ```{r}
 
 synthetic_call_metadata <- read.csv(file.path(string_structure_path[4], "II-RV-GI_synthetic_call_metadata.csv")) #TKTK do we want store the metadata with both data sets in the analysis_path for its appropriate string_structure_path
@@ -409,5 +413,5 @@ synthetic_call_metadata <- read.csv(file.path(string_structure_path[4], "II-RV-G
 glimpse(synthetic_call_metadata)
 
 ```
- 
+
 After running this code you will have two datasets combined into a single CSV: 1) reflects vocalizations with more group information than individual and 2) vice versa. Navigate to Vignette 03 to learn how to analyze these outputs you created with paRsynth.
