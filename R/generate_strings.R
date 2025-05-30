@@ -235,7 +235,8 @@ generate_strings <- function(n_groups = 2, n_individuals = 5, n_calls = 10,
     Random_variation = random_string_calls,
     Group_tail = group_tail_calls,
     Global_tail = global_tail_calls,
-    String_structure = string_structure
+    String_structure = rep(string_structure, length(calls))
+
   )
 }
 

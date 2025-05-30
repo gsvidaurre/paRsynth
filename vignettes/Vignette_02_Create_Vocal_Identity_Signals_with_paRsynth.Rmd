@@ -46,7 +46,8 @@ invisible(lapply(1:length(X), function(x){
 
 # Change "Desktop/.../GitHub_repos" based on where paRsynth is stored on your local machine
 # testing_path <- "C://Users/summe/OneDrive/Desktop/github_repo/paRsynth/R/" # Summer's testing path
-testing_path <- "~/Desktop/BIRDS/GitHub_repos/paRsynth/R" # Alexandra's testing path
+# testing_path <- "~/Desktop/BIRDS/GitHub_repos/paRsynth/R" # Alexandra's testing path
+testing_path <- "/Users/raneemsamman/Documents/GitHub/paRsynth/R/"
 
 # Load the paRsynth functions that will be tested below
 source(file.path(testing_path, "generate_strings.R"))
@@ -66,9 +67,9 @@ It is important to have your files organized, especially when creating many diff
 ```{r}
 
 # Initialize a base path (this will need to be different per user)
-# path <- "/Users/raneemsamman/Desktop" # Raneem's path
+path <- "/Users/raneemsamman/Desktop" # Raneem's path
 # path <- "/Users/gracesmith-vidaurre/Desktop" # Grace's path
-path <- "/Users/gretheljuarez/Desktop/BIRDS/" # Alexandra's path
+# path <- "/Users/gretheljuarez/Desktop/BIRDS/" # Alexandra's path
 # path <- "/Users/summe/OneDrive/Desktop/" # Summer's path
 
 # Initialize the directory for analysis on your local computer
@@ -204,7 +205,9 @@ calls_parsons <- parsons_code(
   group_tail_col = "Group_tail", 
   global_tail_col = "Global_tail",
   string_structure_col = "String_structure",
-  mapping = list("A" = "up", "B" = "down", "C" = "constant")
+  mapping = list("A" = "up", "B" = "down", "C" = "constant"),
+  alphabet = c("A", "B", "C")
+
 )
 
 glimpse(calls_parsons)
@@ -387,7 +390,6 @@ It may be helpful for downstream bioacoustic analysis to create a CSV file inclu
 # group <- read.csv("/Users/summe/OneDrive/Desktop/paRsynth_methods_synthetic_dataset/synthetic_call_metadata1.csv")
 # individual <- read.csv("/Users/summe/OneDrive/Desktop/paRsynth_methods_synthetic_dataset/synthetic_call_metadata2.csv") # Summer's CSV files
 group <- read.csv("/Users/gretheljuarez/Desktop/BIRDS/paRsynth_methods_synthetic_dataset/II-RV-GI/synthetic_call_metadata1.csv") # Change to appropriate csv files
-
 individual <- read.csv("/Users/gretheljuarez/Desktop/BIRDS/paRsynth_methods_synthetic_dataset/II-RV-GI/synthetic_call_metadata2.csv") # Change to appropriate csv files
 
 # Combine the CSV files of each dataset

@@ -42,7 +42,8 @@ invisible(lapply(1:length(X), function(x){
 
 # Change "Desktop/.../GitHub_repos" based on where paRsynth is stored on your local machine
 # testing_path <- "/Users/summe/OneDrive/Desktop/github_repo/paRsynth/R/"
-testing_path <- "~/Desktop/BIRDS/GitHub_repos/paRsynth/R/"
+# testing_path <- "~/Desktop/BIRDS/GitHub_repos/paRsynth/R/"
+testing_path <- "/Users/raneemsamman/Documents/GitHub/paRsynth/R/"
 
 # Load the paRsynth functions that will be tested below
 source(file.path(testing_path, "generate_strings.R"))
@@ -62,10 +63,11 @@ It is important to have your files organized, especially when creating many diff
 ```{r eval = TRUE}
 
 # Initialize a base path (this will need to be different per user)
-# path <- "/Users/raneemsamman/Desktop" # Raneem's path
+path <- "/Users/raneemsamman/Desktop" # Raneem's path
 # path <- "/Users/gracesmith-vidaurre/Desktop" # Grace's path
-path <- "/Users/gretheljuarez/Desktop/BIRDS/" # Alexandra's path
-# path <- "/Users/summe/OneDrive/Desktop/" # Summer's path
+# path <- "/Users/gretheljuarez/Desktop/BIRDS/" # Alexandra's path
+# path <- "/Users/summe/OneDrive/Desktop/"
+
 
 # Initialize the directory for analysis on your local computer
 analysis_dir <- "paRsynth_methods_synthetic_dataset"
@@ -140,6 +142,9 @@ tail(wavs)
 # w <- 25 # testing
 
 # Create a selection table including synthetic call metadata and its corresponding audio file name
+synthetic_call_metadata <- read.csv("/Users/raneemsamman/Desktop/paRsynth_methods_synthetic_dataset/synthetic_call_metadata.csv")
+# synthetic_call_metadata <- read.csv("/Users/gretheljuarez/Desktop/BIRDS/paRsynth_methods_synthetic_dataset/synthetic_call_metadata.csv")
+
 sel_tbl <- data.table::rbindlist(lapply(1:length(wavs), function(w){
   
   tmp <- tuneR::readWave(file.path(audio_path[4], wavs[w]))
@@ -147,7 +152,7 @@ sel_tbl <- data.table::rbindlist(lapply(1:length(wavs), function(w){
   # Return the metadata for the given call using the synthetic metadata generated during audio file generation above
   
   synthetic_call_metadata <- read.csv("/Users/gretheljuarez/Desktop/BIRDS/paRsynth_methods_synthetic_dataset/II-RV-GI/II-RV-GI_synthetic_call_metadata.csv") # Change the path to the metadata you are working with
-  
+
   metadats_tmp <- synthetic_call_metadata %>%
     dplyr::filter(grepl(wavs[w], audio_file_name))
   
@@ -194,8 +199,14 @@ sel_tbl <- data.table::rbindlist(lapply(1:length(wavs), function(w){
 glimpse(sel_tbl)
 # view(sel_tbl)
 
+sel_tbl <- sel_tbl %>%
+  left_join(synthetic_call_metadata %>%
+              dplyr::select(audio_file_name, String_structure),
+            by = c("sound.files" = "audio_file_name"))
+
 # Check the selection table for all the unique sampling rates
 unique(sel_tbl$sampling_rate)
+view(sel_tbl)
 
 # Check the selection table for all the unique string structure
 unique(sel_tbl$string_structure)
@@ -205,7 +216,7 @@ This will output a neatly organized selection table of the uniquely generated vo
 
 **Step 2: Create spectrogram image files of each audio file**
 
-Using the warbleR package, spectrogram images can be created from each synthetic vocalization you generated with paRsynth. Using a spectrogram is beneficial to analyze vocalizations because it provides precise information on frequency over time. First, you will use warbleR to create spectrograms of the generated vocalization in the selection table. Then you will rename the spectrogram image files saved in your images_path. 
+Using the warbleR package, spectrogram images can be created from each synthetic vocalization you generated with paRsynth. Using a spectrogram is beneficial to analyze vocalizations because it provides precise information on frequency over time. First, you will use warbleR to create spectrograms of the generated vocalization in the selection table. Then you will rename the spectrogram image files saved in your images_path.
 
 In the following example, we are creating spectrograms for the first dataset we created, where more group information is encoded in the vocalization than individual identity information.
 
@@ -250,12 +261,11 @@ invisible(file.rename(file.path(images_path[4], imgs), file.path(images_path[4],
 
 This will output appropriately named spectrograms for the synthetically generated vocalizations in the selection table created previously. Refer to the image below for an example of a spectrogram (GroupMembership_Group1_Ind1_Call1).
 
-<br>
-![Example Spectrogram of GroupMembership_Group1_Ind1_Call1](/Users/gretheljuarez/Desktop/BIRDS/GitHub_repos/paRsynth/vignettes/images/GroupMembership_Group1_Ind1_Call1copy-min.png)
+<br> ![Example Spectrogram of GroupMembership_Group1_Ind1_Call1](/Users/gretheljuarez/Desktop/BIRDS/GitHub_repos/paRsynth/vignettes/images/GroupMembership_Group1_Ind1_Call1copy-min.png)
 
 **Step 3: Perform spectrogrphic cross-correlation (SPCC) to measure acoustic similarity of all calls in dataset (pairwise similarity matrix)**
 
-Now, we are getting the key analysis step. Using warbleR, a spectrographic cross-correlation (SPCC) can be performed to find acoustic similarities between the spectrograms created. 
+Now, we are getting the key analysis step. Using warbleR, a spectrographic cross-correlation (SPCC) can be performed to find acoustic similarities between the spectrograms created.
 
 ```{r message = FALSE, warning = FALSE}
 
@@ -301,7 +311,7 @@ This will output data about the measured acoustic similarities of all the vocali
 
 Using the results from the SPCC, acoustic space plots can be used as a figure to represent the acoustic similarity of all the calls in the dataset. Here we will use the vocalizations where more group information is encoded within the calls.
 
-```{r message = FALSE, warning = FALSE}
+```{r message=FALSE, warning=FALSE}
 # Convert to a distance matrix and dist object for isoMDS (helps visualize the data in a simplified way)
 xc_mat <- pmin(pmax(xc_mat, 0), 0.999999)
 dist_mat <- stats::as.dist(1 - xc_mat, diag = TRUE, upper = TRUE)
@@ -310,6 +320,7 @@ dist_mat <- stats::as.dist(1 - xc_mat, diag = TRUE, upper = TRUE)
 iso <- invisible(MASS::isoMDS(dist_mat, k = 2, maxit = 1000, trace = FALSE))
 str(iso)
 
+
 mds_df <- data.frame(
   sound.files = dimnames(xc_mat)[[1]],
   X = as.vector(iso$points[, 1]), 
@@ -317,7 +328,7 @@ mds_df <- data.frame(
 ) %>% 
   inner_join(
     GroupMembership_sel_tbl %>% 
-      dplyr::select(sound.files, group_ID, individual_ID),
+      dplyr::select(sound.files, group_ID, individual_ID, String_structure),
     by = c("sound.files")
   ) %>% 
   # glimpse()
@@ -325,8 +336,12 @@ mds_df <- data.frame(
     unique_individuals = paste(group_ID, individual_ID, sep = " - "),
     group_ID = factor(group_ID),
     individual_ID = factor(individual_ID),
-    unique_individuals = factor(unique_individuals)
+    unique_individuals = factor(unique_individuals),
+    String_structure = factor(String_structure)
   )
+mds_df <- mds_df %>% 
+  filter(!is.na(group_ID) & !is.na(individual_ID) & !is.na(String_structure))
+
 
 glimpse(mds_df)
 # View(mds_df)
@@ -334,7 +349,7 @@ glimpse(mds_df)
 levels(mds_df$group_ID)
 levels(mds_df$individual_ID)
 levels(mds_df$unique_individuals)
-
+levels(mds_df$String_structure)
 # Colors by group
 cols <- scales::alpha(c("navy", "orange"), 0.65)
 
@@ -392,6 +407,7 @@ Now lets run this code to analyze the acoustic similarities for the 2nd example 
 
 IndividualIdentity_sel_tbl <- sel_tbl %>%
     dplyr::filter(grepl("IndividualIdentity", sound.files))
+glimpse(IndividualIdentity_sel_tbl)
 ```
 
 ```{r eval = FALSE}
@@ -463,7 +479,7 @@ mds_df2 <- data.frame(
 ) %>% 
   inner_join(
     IndividualIdentity_sel_tbl %>% 
-      dplyr::select(sound.files, group_ID, individual_ID),
+      dplyr::select(sound.files, group_ID, individual_ID, String_structure),
     by = c("sound.files")
   ) %>% 
   # glimpse()
@@ -471,13 +487,16 @@ mds_df2 <- data.frame(
     unique_individuals = paste(group_ID, individual_ID, sep = " - "),
     group_ID = factor(group_ID),
     individual_ID = factor(individual_ID),
-    unique_individuals = factor(unique_individuals)
+    unique_individuals = factor(unique_individuals),
+    String_structure = factor(String_structure)
   )
+mds_df2 <- mds_df2 %>% 
+  filter(!is.na(group_ID) & !is.na(individual_ID) & !is.na(String_structure))
 
 levels(mds_df2$group_ID)
 levels(mds_df2$individual_ID)
 levels(mds_df2$unique_individuals)
-
+levels(mds_df2$unique_individuals)
 cols <- scales::alpha(c("navy", "orange"), 0.65)
 
 shps <- c(0, 1, 2, 5, 6, 15, 19, 17, 18, 14)
@@ -674,7 +693,8 @@ mds_dfEE <- data.frame(
     unique_individuals = paste(group_ID, individual_ID, sep = " - "),
     group_ID = factor(group_ID),
     individual_ID = factor(individual_ID),
-    unique_individuals = factor(unique_individuals)
+    unique_individuals = factor(unique_individuals),
+    String_structure = factor(String_structure)
   )
 
 levels(mds_dfEE$group_ID)
