@@ -142,7 +142,8 @@ tail(wavs)
 # w <- 25 # testing
 
 # Create a selection table including synthetic call metadata and its corresponding audio file name
-synthetic_call_metadata <- read.csv("/Users/raneemsamman/Desktop/paRsynth_methods_synthetic_dataset/synthetic_call_metadata.csv")
+# synthetic_call_metadata <- read.csv("/Users/raneemsamman/Desktop/paRsynth_methods_synthetic_dataset/II-RV-GI/synthetic_call_metadata.csv")
+synthetic_call_metadata <- read.csv(file.path(string_structure_path[4], "II-RV-GI_synthetic_call_metadata.csv")) 
 # synthetic_call_metadata <- read.csv("/Users/gretheljuarez/Desktop/BIRDS/paRsynth_methods_synthetic_dataset/synthetic_call_metadata.csv")
 
 sel_tbl <- data.table::rbindlist(lapply(1:length(wavs), function(w){
@@ -151,7 +152,8 @@ sel_tbl <- data.table::rbindlist(lapply(1:length(wavs), function(w){
   
   # Return the metadata for the given call using the synthetic metadata generated during audio file generation above
   
-  synthetic_call_metadata <- read.csv("/Users/gretheljuarez/Desktop/BIRDS/paRsynth_methods_synthetic_dataset/II-RV-GI/II-RV-GI_synthetic_call_metadata.csv") # Change the path to the metadata you are working with
+  # synthetic_call_metadata <- read.csv("/Users/gretheljuarez/Desktop/BIRDS/paRsynth_methods_synthetic_dataset/II-RV-GI/II-RV-GI_synthetic_call_metadata.csv") # Change the path to the metadata you are working with
+    synthetic_call_metadata <- read.csv("/Users/raneemsamman/Desktop/paRsynth_methods_synthetic_dataset/II-RV-GI/II-RV-GI_synthetic_call_metadata.csv")
 
   metadats_tmp <- synthetic_call_metadata %>%
     dplyr::filter(grepl(wavs[w], audio_file_name))
@@ -201,7 +203,7 @@ glimpse(sel_tbl)
 
 sel_tbl <- sel_tbl %>%
   left_join(synthetic_call_metadata %>%
-              dplyr::select(audio_file_name, String_structure),
+              dplyr::select(audio_file_name),
             by = c("sound.files" = "audio_file_name"))
 
 # Check the selection table for all the unique sampling rates
@@ -290,6 +292,12 @@ dim(xc_mat)
 
 xc_mat[xc_mat < 0]
 
+sum(xc_mat < 0)         # count of negative values
+mean(xc_mat < 0)        # proportion of matrix affected
+summary(xc_mat[xc_mat < 0])  # how bad are the negative values?
+
+xc_mat <- pmin(pmax(xc_mat, 0), 0.999999) #avoids the error
+
 # Get the percentage of values that are negative
 neg_values <- length(xc_mat[xc_mat<0])/(dim(xc_mat)[1]*dim(xc_mat)[2])
 
@@ -328,7 +336,7 @@ mds_df <- data.frame(
 ) %>% 
   inner_join(
     GroupMembership_sel_tbl %>% 
-      dplyr::select(sound.files, group_ID, individual_ID, String_structure),
+      dplyr::select(sound.files, group_ID, individual_ID, string_structure),
     by = c("sound.files")
   ) %>% 
   # glimpse()
@@ -337,10 +345,10 @@ mds_df <- data.frame(
     group_ID = factor(group_ID),
     individual_ID = factor(individual_ID),
     unique_individuals = factor(unique_individuals),
-    String_structure = factor(String_structure)
+    String_structure = factor(string_structure)
   )
-mds_df <- mds_df %>% 
-  filter(!is.na(group_ID) & !is.na(individual_ID) & !is.na(String_structure))
+# mds_df <- mds_df %>% 
+#   filter(!is.na(group_ID) & !is.na(individual_ID) & !is.na(string_structure))
 
 
 glimpse(mds_df)
@@ -398,8 +406,7 @@ ggsave("II-RV-GI_GroupMembership_mds.png", width = 7, height = 5, path = string_
 
 This will output an acoustic space plot to represent the acoustic similarity of the paRsynth generated vocalizations using the spectrograms created in vignette 02. In this case, we generated space plots for the first dataset that has more group information encoded in the vocalizations. It will not look the same as the plot you generated because paRsynth randomly generates vocalizations strings, but the overall trends should be similar
 
-
-<h1>2nd Example: Individual Information > Group Information</h1>
+<h1>2nd Example: Individual Information \> Group Information</h1>
 
 Now lets run this code to analyze the acoustic similarities for the 2nd example dataset where more individual information is encoded within the calls than group information.
 
@@ -456,7 +463,16 @@ dim(xc_mat2)
 
 xc_mat2[xc_mat2 < 0]
 
+sum(xc_mat2 < 0)         # count of negative values
+mean(xc_mat2 < 0)        # proportion of matrix affected
+summary(xc_mat2[xc_mat2 < 0])  # how bad are the negative values?
+
+xc_mat2 <- pmin(pmax(xc_mat2, 0), 0.999999) #avoids the error
+
 neg_values2 <- length(xc_mat2[xc_mat2<0])/(dim(xc_mat2)[1]*dim(xc_mat2)[2])
+
+
+
 
 if(neg_values2 > 0){
   stop("Negative values are present in the spectrographic cross-correlation matrix")
@@ -466,7 +482,6 @@ xc_mat2[xc_mat2 < 0]
 
 dimnames(xc_mat2) <- list(IndividualIdentity_sel_tbl$sound.files, IndividualIdentity_sel_tbl$sound.files)
 
-xc_mat2 <- pmin(pmax(xc_mat2, 0), 0.999999)
 dist_mat2 <- stats::as.dist(1 - xc_mat2, diag = TRUE, upper = TRUE)
 
 iso2 <- invisible(MASS::isoMDS(dist_mat2, k = 2, maxit = 1000, trace = FALSE))
@@ -479,7 +494,7 @@ mds_df2 <- data.frame(
 ) %>% 
   inner_join(
     IndividualIdentity_sel_tbl %>% 
-      dplyr::select(sound.files, group_ID, individual_ID, String_structure),
+      dplyr::select(sound.files, group_ID, individual_ID, string_structure),
     by = c("sound.files")
   ) %>% 
   # glimpse()
@@ -488,10 +503,9 @@ mds_df2 <- data.frame(
     group_ID = factor(group_ID),
     individual_ID = factor(individual_ID),
     unique_individuals = factor(unique_individuals),
-    String_structure = factor(String_structure)
+    String_structure = factor(string_structure)
   )
-mds_df2 <- mds_df2 %>% 
-  filter(!is.na(group_ID) & !is.na(individual_ID) & !is.na(String_structure))
+
 
 levels(mds_df2$group_ID)
 levels(mds_df2$individual_ID)
@@ -544,7 +558,7 @@ This last vignette has showed you how to conduct downstream bioacoustics analysi
 
 <h2>Extreme Group-level Variation Example</h2>
 
-You may create vocalization that have much greater group information than individual information to the point when you make the acoustic space plot it result in all the individuals of one group to be clustered on top of each other and each group are a outstandingly great distance from each other. 
+You may create vocalization that have much greater group information than individual information to the point when you make the acoustic space plot it result in all the individuals of one group to be clustered on top of each other and each group are a outstandingly great distance from each other.
 
 ```{r eval = TRUE, echo = FALSE}
 
