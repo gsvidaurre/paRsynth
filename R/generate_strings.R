@@ -113,7 +113,6 @@ generate_strings <- function(n_groups = 2, n_individuals = 5, n_calls = 10,
   random_string_calls <- character(n_groups * n_individuals * n_calls)
   group_head_calls <-  character(n_groups * n_individuals * n_calls)
   group_tail_calls <-  character(n_groups * n_individuals * n_calls)
-  string_structure <- valid_structures
 
   for (group in 1:n_groups) {
     for (ind in 1:n_individuals) {
