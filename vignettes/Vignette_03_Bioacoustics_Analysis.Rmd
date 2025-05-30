@@ -68,10 +68,11 @@ path <- "/Users/raneemsamman/Desktop" # Raneem's path
 # path <- "/Users/gretheljuarez/Desktop/BIRDS/" # Alexandra's path
 # path <- "/Users/summe/OneDrive/Desktop/"
 
-# Initialize the directory for analysis on your local computer (this is likely the name of the folder all of you data is being stored in)
+
+# Initialize the directory for analysis on your local computer
 analysis_dir <- "paRsynth_methods_synthetic_dataset"
 
-# Combine the base path and the data directory into a single path
+# Combine the base path and the newly created data directory into a single path
 analysis_path <- file.path(path, analysis_dir)
 
 # Create the data directory if it doesn't already exist on your computer
@@ -79,27 +80,50 @@ if(!dir.exists(analysis_path)){
   dir.create(analysis_path)
 }
 
+# Create a folder inside the analysis directory to store vocalization data by it's string_structures
+valid_structures <- c(
+    "GI-II-RV", "GI-RV-II",
+    "II-GI-RV", "II-RV-GI",
+    "RV-II-GI", "RV-GI-II",
+    "GI-II-RV-GI", "GI-RV-II-GI",
+    "II-GI-RV-II", "II-RV-GI-II",
+    "GI-RV-GI", "II-RV-II",
+    "GI-RV", "RV-GI",
+    "RV-II", "II-RV"
+)
+
+# Combine the base path and the string_structes into a single path
+string_structure_path <- file.path(path, analysis_dir, valid_structures)
+
+# Create the data directory if it doesn't already exist on your computer
+vapply(string_structure_path, function(path) {
+  if (!dir.exists(path)) dir.create(path, recursive = TRUE)
+  else FALSE
+}, logical(1))
+
 # Specify a folder inside the analysis directory where audio will be written out/read in
 audio_dir <- "audio"
 
 # Combine the base path, the analysis directory, and the audio directory into a single path
-audio_path <- file.path(path, analysis_dir, audio_dir)
+audio_path <- file.path(path, analysis_dir, valid_structures, audio_dir)
 
 # Create the audio directory if it doesn't already exist on your computer
-if(!dir.exists(audio_path)){ 
-  dir.create(audio_path)
-}
+vapply(audio_path, function(path) {
+  if(!dir.exists(path)) dir.create(path, recursive = TRUE)
+  else FALSE
+}, logical(1))
 
 # Specify a folder inside the analysis directory where images will be written out/read in
 images_dir <- "images"
 
 # Combine the base path, the analysis directory, and the data directory into a single path
-images_path <- file.path(path, analysis_dir, images_dir)
+images_path <- file.path(path, analysis_dir, valid_structures, images_dir)
 
 # Create the data directory if it doesn't already exist on your computer
-if(!dir.exists(images_path)){ 
-  dir.create(images_path)
-}
+vapply(images_path, function(path) {
+  if(!dir.exists(path)) dir.create(path, recursive = TRUE)
+  else FALSE
+}, logical(1))
 
 ```
 
@@ -112,7 +136,7 @@ To organize all the paRsynth generated outputs you created in the previous vigne
 ```{r message = FALSE, warning = FALSE}
 
 # Create a vector of all of the audio files in the analysis path
-wavs <- list.files(path = audio_path, pattern = ".wav$", full.names = FALSE)
+wavs <- list.files(path = audio_path[4], pattern = ".wav$", full.names = FALSE) # Make sure the path matches the appropriate path according to string_structure
 tail(wavs)
 
 # w <- 25 # testing
@@ -123,10 +147,12 @@ synthetic_call_metadata <- read.csv("/Users/raneemsamman/Desktop/paRsynth_method
 
 sel_tbl <- data.table::rbindlist(lapply(1:length(wavs), function(w){
   
-  tmp <- tuneR::readWave(file.path(audio_path, wavs[w]))
+  tmp <- tuneR::readWave(file.path(audio_path[4], wavs[w]))
   
   # Return the metadata for the given call using the synthetic metadata generated during audio file generation above
   
+  synthetic_call_metadata <- read.csv("/Users/gretheljuarez/Desktop/BIRDS/paRsynth_methods_synthetic_dataset/II-RV-GI/II-RV-GI_synthetic_call_metadata.csv") # Change the path to the metadata you are working with
+
   metadats_tmp <- synthetic_call_metadata %>%
     dplyr::filter(grepl(wavs[w], audio_file_name))
   
@@ -145,7 +171,8 @@ sel_tbl <- data.table::rbindlist(lapply(1:length(wavs), function(w){
       sampling_rate = tmp@samp.rate,
       group_ID = metadats_tmp[["Group"]],
       individual_ID = metadats_tmp[["Individual"]],
-      call_ID = metadats_tmp[["Call"]]
+      call_ID = metadats_tmp[["Call"]],
+      string_structure = metadats_tmp[["String_structure"]]
     )
     
   } else {
@@ -158,7 +185,8 @@ sel_tbl <- data.table::rbindlist(lapply(1:length(wavs), function(w){
       sampling_rate = NA,
       group_ID = NA,
       individual_ID = NA,
-      call_ID = NA
+      call_ID = NA,
+      string_structure = NA
     )
     
   }
@@ -169,6 +197,7 @@ sel_tbl <- data.table::rbindlist(lapply(1:length(wavs), function(w){
 
 # See the selection table in warbleR format with all useful metadata for the synthetic experiment
 glimpse(sel_tbl)
+# view(sel_tbl)
 
 sel_tbl <- sel_tbl %>%
   left_join(synthetic_call_metadata %>%
@@ -179,6 +208,8 @@ sel_tbl <- sel_tbl %>%
 unique(sel_tbl$sampling_rate)
 view(sel_tbl)
 
+# Check the selection table for all the unique string structure
+unique(sel_tbl$string_structure)
 ```
 
 This will output a neatly organized selection table of the uniquely generated vocalizations and their corresponding metadata.
@@ -195,19 +226,37 @@ In the following example, we are creating spectrograms for the first dataset we 
 GroupMembership_sel_tbl <- sel_tbl %>%
     dplyr::filter(grepl("GroupMembership", sound.files))
 
-# View(GroupMembership_sel_tbl)
+# view(GroupMembership_sel_tbl)
 glimpse(GroupMembership_sel_tbl)
 
 # Create spectrograms for filtered calls
-warbleR::spectrograms(GroupMembership_sel_tbl, wl = 512, flim = c(0, 12), wn = "hanning", pal = reverse.gray.colors.2,ovlp = 90, inner.mar = c(5, 4, 4, 2), outer.mar = c(0, 0, 0, 0), picsize = 1, res = 100, cexlab = 1, propwidth = FALSE, xl = 1, osci = FALSE, gr = FALSE, sc = FALSE, line = FALSE, mar = 0.05, it = "jpeg", parallel = 1, path = audio_path, pb = TRUE, fast.spec = FALSE, by.song = NULL, sel.labels = NULL, title.labels = NULL, dest.path = images_path, box = TRUE, axis = TRUE)
+warbleR::spectrograms(GroupMembership_sel_tbl, 
+                      wl = 512, 
+                      flim = c(0, 12), 
+                      wn = "hanning", 
+                      pal = reverse.gray.colors.2,
+                      ovlp = 90, 
+                      inner.mar = c(5, 4, 4, 2), 
+                      outer.mar = c(0, 0, 0, 0), 
+                      picsize = 1, 
+                      res = 100, 
+                      cexlab = 1, 
+                      xl = 1,
+                      mar = 0.05, 
+                      it = "jpeg", 
+                      parallel = 1, 
+                      propwidth = FALSE, osci = FALSE, gr = FALSE, sc = FALSE, line = FALSE,
+                      pb = TRUE, fast.spec = FALSE, by.song = NULL, sel.labels = NULL, title.labels = NULL, 
+                      path = audio_path[4], dest.path = images_path[4], # Make sure to specify audio_path and images_path to the correct string_structure
+                      box = TRUE, axis = TRUE)
 
 # Rename the image files
-imgs <- list.files(images_path)
+imgs <- list.files(images_path[4]) # Make sure to specify images_path to the correct string_structure
 
 new_nms <- gsub(".wav-1", "", imgs)
 
-invisible(file.rename(file.path(images_path, imgs), file.path(images_path, new_nms)))
-view(GroupMembership_sel_tbl)
+invisible(file.rename(file.path(images_path[4], imgs), file.path(images_path[4], new_nms))) # Make sure to specify images_path to the correct string_structure
+
 ```
 
 This will output appropriately named spectrograms for the synthetically generated vocalizations in the selection table created previously. Refer to the image below for an example of a spectrogram (GroupMembership_Group1_Ind1_Call1).
@@ -221,8 +270,18 @@ Now, we are getting the key analysis step. Using warbleR, a spectrographic cross
 ```{r message = FALSE, warning = FALSE}
 
 glimpse(GroupMembership_sel_tbl)
+# view(GroupMembership_sel_tbl)
 
-xc_mat <- warbleR::cross_correlation(GroupMembership_sel_tbl, wl = 512, ovlp = 90, bp = c(0, 20), wn = "hanning", cor.method = "pearson", parallel = 1, na.rm = FALSE, type = "spectrogram", path = audio_path)
+xc_mat <- warbleR::cross_correlation(GroupMembership_sel_tbl, 
+                                     wl = 512, 
+                                     ovlp = 90, 
+                                     bp = c(0, 20), 
+                                     wn = "hanning", 
+                                     cor.method = "pearson", 
+                                     parallel = 1, 
+                                     na.rm = FALSE, 
+                                     type = "spectrogram", 
+                                     path = audio_path[4]) # Make sure to specify audio_path to the correct string_structure
 
 str(xc_mat)
 dim(xc_mat)
@@ -327,11 +386,13 @@ mds_df %>%
     panel.grid.major = element_blank(),
     panel.grid.minor = element_blank(),
     axis.ticks = element_line(size = 0.25),
-    plot.margin = margin(0, 3, -3, -3),
+    plot.margin = margin(5, 5, 5, 5),
     legend.position = "top",
     legend.key.spacing = unit(0.1, "lines"),
     legend.box.spacing = unit(0.1, "lines")
   )
+
+ggsave("II-RV-GI_GroupMembership_mds.png", width = 7, height = 5, path = string_structure_path[4]) # Make sure you are naming it using the correct string_structure and greater social information 
   
 ```
 
@@ -350,18 +411,45 @@ glimpse(IndividualIdentity_sel_tbl)
 ```
 
 ```{r eval = FALSE}
-warbleR::spectrograms(IndividualIdentity_sel_tbl, wl = 512, flim = c(0, 12), wn = "hanning", pal = reverse.gray.colors.2,ovlp = 90, inner.mar = c(5, 4, 4, 2), outer.mar = c(0, 0, 0, 0), picsize = 1, res = 100, cexlab = 1, propwidth = FALSE, xl = 1, osci = FALSE, gr = FALSE, sc = FALSE, line = FALSE, mar = 0.05, it = "jpeg", parallel = 1, path = audio_path, pb = TRUE, fast.spec = FALSE, by.song = NULL, sel.labels = NULL, title.labels = NULL, dest.path = images_path, box = TRUE, axis = TRUE)
+warbleR::spectrograms(IndividualIdentity_sel_tbl, 
+                      wl = 512, 
+                      flim = c(0, 12), 
+                      wn = "hanning", 
+                      pal = reverse.gray.colors.2,
+                      ovlp = 90, 
+                      inner.mar = c(5, 4, 4, 2), 
+                      outer.mar = c(0, 0, 0, 0), 
+                      picsize = 1, 
+                      res = 100, 
+                      cexlab = 1,
+                      xl = 1, 
+                      mar = 0.05, 
+                      it = "jpeg", 
+                      parallel = 1,
+                      propwidth = FALSE, osci = FALSE, gr = FALSE, sc = FALSE, line = FALSE, pb = TRUE, fast.spec = FALSE, by.song = NULL, sel.labels = NULL, title.labels = NULL, box = TRUE, axis = TRUE,
+                      path = audio_path[4], dest.path = images_path[4] # Make sure you set the correct paths according to string_structure
+                      )
 
-imgs <- list.files(images_path)
+imgs <- list.files(images_path[4]) # Make sure you set the correct paths according to string_structure
 
 new_nms <- gsub(".wav-1", "", imgs)
 
-invisible(file.rename(file.path(images_path, imgs), file.path(images_path, new_nms)))
+invisible(file.rename(file.path(images_path[4], imgs), file.path(images_path[4], new_nms))) # Make sure you set the correct paths according to string_structure
 ```
 
 ```{r}
 
-xc_mat2 <- warbleR::cross_correlation(IndividualIdentity_sel_tbl, wl = 512, ovlp = 90, bp = c(0, 20), wn = "hanning", cor.method = "pearson", parallel = 1, na.rm = FALSE, type = "spectrogram", path = audio_path)
+xc_mat2 <- warbleR::cross_correlation(IndividualIdentity_sel_tbl, 
+                                      wl = 512, 
+                                      ovlp = 90, 
+                                      bp = c(0, 20), 
+                                      wn = "hanning", 
+                                      cor.method = "pearson",
+                                      parallel = 1, 
+                                      na.rm = FALSE, 
+                                      type = "spectrogram", 
+                                      path = audio_path[4] # Set path to appropriate string_structure
+                                      )
 
 str(xc_mat2)
 dim(xc_mat2)
@@ -440,11 +528,13 @@ mds_df2 %>%
     panel.grid.major = element_blank(),
     panel.grid.minor = element_blank(),
     axis.ticks = element_line(size = 0.25),
-    plot.margin = margin(0, 3, -3, -3),
+    plot.margin = margin(5, 5, 5, 5),
     legend.position = "top",
     legend.key.spacing = unit(0.1, "lines"),
     legend.box.spacing = unit(0.1, "lines")
   )
+
+ggsave("II-RV-GI_IndividualIdentity_mds.png", width = 7, height = 5, path = string_structure_path[4]) # Make sure you are naming it using the correct string_structure and greater social information 
 
 ```
 
