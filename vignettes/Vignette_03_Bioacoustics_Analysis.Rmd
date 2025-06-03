@@ -235,7 +235,7 @@ This will output appropriately named spectrograms for the synthetically generate
 
 **Step 3: Perform spectrogrphic cross-correlation (SPCC) to measure acoustic similarity of all calls in dataset (pairwise similarity matrix)**
 
-Now, we are getting to the key analysis step. Using warbleR, a spectrographic cross-correlation (SPCC) can be performed to find acoustic similarities between the spectrograms created. 
+Now, we are getting to the key analysis step. Using warbleR, a spectrographic cross-correlation (SPCC) can be performed to find acoustic similarities between the spectrograms created. The output is single similarity measurement for every unique vocalization compared to the dataset. 
 
 If the `temperature` argument used by `soundgen` is set to 0 (for no stochasticity in sound generation), then you will need to filter out any calls that have duplicated strings prior to running cross-correlation. Otherwise you will have values of 1 outside of the diagonal representing comparisons among calls of exactly the same structure or duplicates, and multidimensional scaling will fail.
 
