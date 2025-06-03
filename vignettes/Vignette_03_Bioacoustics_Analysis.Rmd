@@ -294,7 +294,7 @@ This will output data about the measured acoustic similarities of all the vocali
 
 **Step 4: Create acoustic space plots for the vocalizations**
 
-Using the results from the SPCC, acoustic space plots can be used as a figure to represent the acoustic similarity of all the calls in the dataset. Here we will use the vocalizations where more group information is encoded within the calls.
+Using the results from the SPCC, acoustic space plots can be used as a figure to represent the acoustic similarity of all the calls in the dataset. We can then apply an unsupervised machine learning approach, multidemnsional scaling (mds). Here we will use the vocalizations where more group information is encoded within the calls.
 
 ```{r}
 
