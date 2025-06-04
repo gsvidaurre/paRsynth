@@ -111,6 +111,8 @@ if(!dir.exists(figures_path)){
 
 **Read in the synthetic call metadata and set cores for parallel processing**
 
+For vignette 3 to run it will need to read in the metadata collected in a CSV file that you created in vignette 2. By setting your cores for parallel processing, this will make running this code more streamlined and attain results faster.
+
 ```{r}
 
 synthetic_call_metadata <- read.csv(file.path(analysis_path, "synthetic_call_metadata.csv"))
@@ -235,7 +237,7 @@ This will output appropriately named spectrograms for the synthetically generate
 
 **Step 3: Perform spectrogrphic cross-correlation (SPCC) to measure acoustic similarity of all calls in dataset (pairwise similarity matrix)**
 
-Now, we are getting to the key analysis step. Using warbleR, a spectrographic cross-correlation (SPCC) can be performed to find acoustic similarities between the spectrograms created. The output is single similarity measurement for every unique vocalization compared to the dataset. 
+Now, we are getting to the key analysis step. By using the spectrograms created using the `warbleR` package, spectrographic cross-correlation (SPCC) can be performed to find acoustic similarities between each spectrograms created to the others in the same dataset. The output is a single similarity measurement for every unique vocalization compared to the dataset. 
 
 If the `temperature` argument used by `soundgen` is set to 0 (for no stochasticity in sound generation), then you will need to filter out any calls that have duplicated strings prior to running cross-correlation. Otherwise you will have values of 1 outside of the diagonal representing comparisons among calls of exactly the same structure or duplicates, and multidimensional scaling will fail.
 
@@ -294,7 +296,7 @@ This will output data about the measured acoustic similarities of all the vocali
 
 **Step 4: Create acoustic space plots for the vocalizations**
 
-Using the results from the SPCC, acoustic space plots can be used as a figure to represent the acoustic similarity of all the calls in the dataset. We can then apply an unsupervised machine learning approach, multidemnsional scaling (mds). Here we will use the vocalizations where more group information is encoded within the calls.
+Using the results from the SPCC, acoustic space plots can be used as a figure to represent the acoustic similarity of all the calls in the dataset. We can then apply an unsupervised machine learning approach, multidemnsional scaling (mds). By creating convex hulls for each group in the dataset, polygons are created to outline all the similarity measurement of each call from each group. This will allow us to visually see how similar each group is to each other; seeing if they overlap or not. Here we will use the vocalizations where more group information is encoded within the calls.
 
 ```{r}
 
