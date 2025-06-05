@@ -4,7 +4,7 @@
 rm(list = ls())
 
 # make a list of packages to install
-pkgs <- c("testthat", "soundgen", "dplyr", "stringr", "rlang", "tidyverse", "lubridate", "pbapply")
+pkgs <- c("testthat", "soundgen", "dplyr", "stringr", "rlang", "tidyverse", "lubridate", "pbapply", data.table)
 
 # check if the packages are installed, if not, install them
 for (pkg in pkgs) {
@@ -199,7 +199,7 @@ test_that("The function generates strings that have the correct given string str
     "RV-II", "II-RV")
   
   # Loop the function to create calls of each valid structure
-  results <- lapply(valid_structures, function(structures){
+  generated_structures <- lapply(valid_structures, function(x){
     generate_strings(
       n_groups = n_groups,
       n_individuals = n_individuals,
@@ -209,28 +209,17 @@ test_that("The function generates strings that have the correct given string str
       individual_information = individual_information,
       random_variation = random_variation,
       alphabet = alphabet,
-      string_structure = structures
+      string_structure = x
     )
   })
-  # view(results)
   
-  # Change column names to respective abbreviation
-  res <- results %>%
-    rename(
-      Group_head = GI,
-      Individual_head = II,
-      Group_middle = GI,
-      Individual_middle = II,
-      Random_variation = RV,
-      Group_tail = GI,
-      Individual_tail = II
-      
-    )
+  all_generated_structures <- data.table::rbindlist(generated_structures)
+  # glimpse(generated_structures)
   
-  # Get columns pertaining to string structure
-  structure_columns <- grep(res), names(results), value = TRUE)
+  expect_identical(valid_structures, unique(all_generated_structures$String_structure))
   
-  expect_true(valid_structures == )
+  setequal(valid_structures, unique(all_generated_structures$String_structure))
   
+  cat("String structures generated:", unique(all_generated_structures$String_structure)x)
   
  })
