@@ -201,7 +201,8 @@ write_audio <- function(df, sylLen = 200, sampling_rate = 44100,
     pitch_ceiling <- sampling_rate / 2 # Nyquist rule for sampling rate and max frequency
 
     # Construct the audio filename with a unique identifier
-    audio_filename <- paste0(prefix, "_Group", df$Group[i], "_Indiv", df$Individual[i],"_Call", df$Call_ID[i], ".wav")
+    structure_str <- if ("String_structure" %in% colnames(df)) gsub("-", "", df$String_structure[i]) else "NA"
+    audio_filename <- paste0(prefix, "_", structure_str, "_Group", df$Group[i], "_Indiv", df$Individual[i],"_Call", df$Call_ID[i], ".wav")
 
     audio_pathname <- file.path(save_path, audio_filename)
 

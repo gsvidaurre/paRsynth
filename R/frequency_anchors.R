@@ -58,7 +58,7 @@
 #' @export frequency_anchors
 
 frequency_anchors <- function(df, parsons_col, group_id_col, individual_id_col,
-                              call_id_col, call_string_col,
+                              call_id_col, call_string_col, string_structure_col,
                               starting_frequency = 4000, frequency_shift = 1000,
                               section_transition = "starting_frequency") {
 
@@ -91,6 +91,7 @@ frequency_anchors <- function(df, parsons_col, group_id_col, individual_id_col,
   individual_id_col <- tolower(individual_id_col)
   call_id_col <- tolower(call_id_col)
   call_string_col <- tolower(call_string_col)
+  string_structure_col <- tolower(string_structure_col)
 
   # Initialize an empty list to store the results
   results <- list()
@@ -118,6 +119,7 @@ frequency_anchors <- function(df, parsons_col, group_id_col, individual_id_col,
     call_id <- df[[call_id_col]][i]
     call_string <- df[[call_string_col]][i]
     parsons_code <- df[[parsons_col]][i] # Extract the full Parsons code for each call 
+    string_structure <- df[[string_structure_col]][i]
 
     frequencies <- numeric(0) #initiating an empty vector to store the frequencies later
     previous_value <- starting_frequency
@@ -171,6 +173,7 @@ frequency_anchors <- function(df, parsons_col, group_id_col, individual_id_col,
       Individual = individual_id,
       Call_ID = call_id,
       Call = call_string,
+      String_structure = string_structure,
       Parsons_Code = parsons_code,
       stringsAsFactors = FALSE
     )
