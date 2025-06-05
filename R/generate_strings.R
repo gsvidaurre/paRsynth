@@ -102,6 +102,12 @@ generate_strings <- function(n_groups = 2, n_individuals = 5, n_calls = 10,
       group_middles[g] <- generate_random_string(group_information, alphabet)
     }
   }
+  if (individual_information > 0) {
+    individual_middle <- character(n_individuals)
+    for (i in 1:n_individuals) {
+      individual_middle[i] <- generate_random_string(individual_information, alphabet)
+    }
+  }
 
   calls <- character(n_groups * n_individuals * n_calls)
   groups <- rep(1:n_groups, each = n_individuals * n_calls)
@@ -109,17 +115,14 @@ generate_strings <- function(n_groups = 2, n_individuals = 5, n_calls = 10,
   call_numbers <- numeric(n_groups * n_individuals * n_calls)
   global_head_calls  <- character(n_groups * n_individuals * n_calls)
   global_tail_calls <- character(n_groups * n_individuals * n_calls)
-  individual_middle_calls <- character(n_groups * n_individuals * n_calls)
+  individual_head_calls <- character(n_groups * n_individuals * n_calls)
+  individual_tail_calls <- character(n_groups * n_individuals * n_calls)
   random_string_calls <- character(n_groups * n_individuals * n_calls)
   group_head_calls <-  character(n_groups * n_individuals * n_calls)
   group_tail_calls <-  character(n_groups * n_individuals * n_calls)
 
   for (group in 1:n_groups) {
     for (ind in 1:n_individuals) {
-
-      # Generate a unique middle part for each individual
-      individual_middle <- generate_random_string(individual_information, alphabet)
-
       for (call in 1:n_calls) {
 
         # Generate random variation per call that will be appended after the individual information (to create variation within individuals)
@@ -132,11 +135,12 @@ generate_strings <- function(n_groups = 2, n_individuals = 5, n_calls = 10,
           group_head <- substr(group_info, 1, group_information / 2)
           group_tail <- substr(group_info, group_information / 2 + 1, group_information)
 
-          ind_head <- substr(individual_middle, 1, individual_information / 2)
-          ind_tail <- substr(individual_middle, individual_information / 2 + 1, individual_information)
+          individual_info <- individual_middle[ind]
+          ind_head <- substr(individual_info, 1, individual_information / 2)
+          ind_tail <- substr(individual_info, individual_information / 2 + 1, individual_information)
           
           # Combine all components to create a string that represents a vocalization. 
-          string_assembly <- build_string_structure(string_structure, group_head, group_tail, individual_middle, ind_head, ind_tail, random_string)
+          string_assembly <- build_string_structure(string_structure, group_head, group_tail, ind_head, ind_tail, random_string)
           
           individual_call <- paste0(
             global_head,
@@ -151,7 +155,8 @@ generate_strings <- function(n_groups = 2, n_individuals = 5, n_calls = 10,
           global_head_calls[idx] <- global_head
           global_tail_calls[idx] <- global_tail
           random_string_calls[idx] <- random_string
-          individual_middle_calls[idx] <- individual_middle
+          individual_head_calls[idx] <- ind_head
+          individual_tail_calls[idx] <- ind_tail
           group_head_calls[idx] <- group_head
           group_tail_calls[idx] <- group_tail
 
@@ -161,11 +166,12 @@ generate_strings <- function(n_groups = 2, n_individuals = 5, n_calls = 10,
           # Assemble the string with individual information only if group information is 0
         } else if (group_information == 0 & individual_information > 0){
           
-          ind_head <- substr(individual_middle, 1, individual_information / 2)
-          ind_tail <- substr(individual_middle, individual_information / 2 + 1, individual_information)
+          individual_info <- individual_middle[ind]
+          ind_head <- substr(individual_info, 1, individual_information / 2)
+          ind_tail <- substr(individual_info, individual_information / 2 + 1, individual_information)
           
           # Combine all components to create a string that represents a vocalization. 
-          string_assembly <- build_string_structure(string_structure, "", "", individual_middle, ind_head, ind_tail, random_string)
+          string_assembly <- build_string_structure(string_structure, "", "", ind_head, ind_tail, random_string)
           
           individual_call <- paste0(
             global_head,
@@ -180,7 +186,8 @@ generate_strings <- function(n_groups = 2, n_individuals = 5, n_calls = 10,
           global_head_calls[idx] <- global_head
           global_tail_calls[idx] <- global_tail
           random_string_calls[idx] <- random_string
-          individual_middle_calls[idx] <- individual_middle
+          individual_head_calls[idx] <- ind_head
+          individual_tail_calls[idx] <- ind_tail
           group_head_calls[idx] <- NA
           group_tail_calls[idx] <- NA
 
@@ -195,7 +202,7 @@ generate_strings <- function(n_groups = 2, n_individuals = 5, n_calls = 10,
           group_tail <- substr(group_info, group_information / 2 + 1, group_information)
           
           # Combine all components to create a string that represents a vocalization. 
-          string_assembly <- build_string_structure(string_structure, group_head, group_tail, "", "", "", random_string)
+          string_assembly <- build_string_structure(string_structure, group_head, group_tail, "", "", random_string)
           
           individual_call <- paste0(
             global_head,
@@ -209,8 +216,9 @@ generate_strings <- function(n_groups = 2, n_individuals = 5, n_calls = 10,
           call_numbers[idx] <- call
           global_head_calls[idx] <- global_head
           global_tail_calls[idx] <- global_tail
-          random_string_calls[idx] <- random_string 
-          individual_middle_calls[idx] <- NA
+          random_string_calls[idx] <- random_string
+          individual_head_calls[idx] <- NA
+          individual_tail_calls[idx] <- NA
           group_head_calls[idx] <- group_head
           group_tail_calls[idx] <- group_tail
 
@@ -230,7 +238,8 @@ generate_strings <- function(n_groups = 2, n_individuals = 5, n_calls = 10,
     Call = calls,
     Global_head = global_head_calls,
     Group_head = group_head_calls,
-    Individual_middle = individual_middle_calls,
+    Individual_head = individual_head_calls,
+    Individual_tail = individual_tail_calls,
     Random_variation = random_string_calls,
     Group_tail = group_tail_calls,
     Global_tail = global_tail_calls,
@@ -245,19 +254,19 @@ generate_random_string <- function(length, alphabet) {
   paste(sample(alphabet, length, replace = TRUE), collapse = "")
 }
 
-build_string_structure <- function(structure, GI_head, GI_tail, II, II_head, II_tail, RV) {
+build_string_structure <- function(structure, GI_head, GI_tail, II_head, II_tail, RV) {
   res <- switch(structure,
-    "GI-II-RV" = paste0(GI_head, GI_tail, II, RV),
-    "GI-RV-II" = paste0(GI_head, GI_tail, RV, II),
+    "GI-II-RV" = paste0(GI_head, GI_tail, II_head, II_tail, RV),
+    "GI-RV-II" = paste0(GI_head, GI_tail, RV, II_head, II_tail),
 
-    "II-GI-RV" = paste0(II, GI_head, GI_tail, RV),
-    "II-RV-GI" = paste0(II, RV, GI_head, GI_tail),
+    "II-GI-RV" = paste0(II_head, II_tail, GI_head, GI_tail, RV),
+    "II-RV-GI" = paste0(II_head, II_tail, RV, GI_head, GI_tail),
 
-    "RV-II-GI" = paste0(RV, II, GI_head, GI_tail),
-    "RV-GI-II" = paste0(RV, GI_head, GI_tail, II),
+    "RV-II-GI" = paste0(RV, II_head, II_tail, GI_head, GI_tail),
+    "RV-GI-II" = paste0(RV, GI_head, GI_tail, II_head, II_tail),
 
-    "GI-II-RV-GI" = paste0(GI_head, II, RV, GI_tail),
-    "GI-RV-II-GI" = paste0(GI_head, RV, II, GI_tail),
+    "GI-II-RV-GI" = paste0(GI_head, II_head, II_tail, RV, GI_tail),
+    "GI-RV-II-GI" = paste0(GI_head, RV, II_head, II_tail, GI_tail),
 
     "II-GI-RV-II" = paste0(II_head, GI_head, GI_tail, RV, II_tail),
     "II-RV-GI-II" = paste0(II_head, RV, GI_head, GI_tail, II_tail),
@@ -268,8 +277,8 @@ build_string_structure <- function(structure, GI_head, GI_tail, II, II_head, II_
     "GI-RV" = paste0(GI_head, GI_tail, RV),
     "RV-GI" = paste0(RV, GI_head, GI_tail),
 
-    "II-RV" = paste0(II, RV),
-    "RV-II" = paste0(RV, II),
+    "II-RV" = paste0(II_head, II_tail, RV),
+    "RV-II" = paste0(RV, II_head, II_tail),
   )
   return(res)
 }
