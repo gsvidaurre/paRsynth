@@ -4,7 +4,7 @@
 rm(list = ls())
 
 # make a list of packages to install
-pkgs <- c("testthat", "soundgen", "dplyr", "stringr", "rlang", "tidyverse", "lubridate", "pbapply", data.table)
+pkgs <- c("testthat", "soundgen", "dplyr", "stringr", "rlang", "tidyverse", "lubridate", "pbapply", "data.table")
 
 # check if the packages are installed, if not, install them
 for (pkg in pkgs) {
@@ -220,6 +220,33 @@ test_that("The function generates strings that have the correct given string str
   
   setequal(valid_structures, unique(all_generated_structures$String_structure))
   
-  cat("String structures generated:", unique(all_generated_structures$String_structure)x)
+  cat("Expected Valid Structures:", valid_structures)
+  cat("String structures generated:", unique(all_generated_structures$String_structure))
   
  })
+
+# 7. Unit test to check that `generate_structures` throws an error for invalid string structures input
+test_that("The function outputs an error when given invalid string structure", {
+  
+  # Create a vector of all valid structures
+  invalid_structures <- c(
+    "GI-GI-GI", "ABC", "123", "***")
+  
+  # Loop the function to create calls of each valid structure
+  expect_error(lapply(invalid_structures, function(y){
+    generate_strings(
+      n_groups = n_groups,
+      n_individuals = n_individuals,
+      n_calls = n_calls,
+      string_length = string_length,
+      group_information = group_information,
+      individual_information = individual_information,
+      random_variation = random_variation,
+      alphabet = alphabet,
+      string_structure = y
+    )
+  }))
+  
+  cat("Error thrown for these invalid structures:", invalid_structures)
+  
+})
