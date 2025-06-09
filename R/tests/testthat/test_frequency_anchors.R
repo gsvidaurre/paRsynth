@@ -86,6 +86,12 @@ test_that("This function shifts up, constant, and down directions frequency corr
     frequency_shift = 1000,
     section_transition = "continuous_trajectory"
   )
+    Global_head <- "AABA"
+  Group_head <- "BBCC"
+  Individual_middle <- "CCBA"
+  Random_variation <- "BA"
+  Group_tail <- "BBAC"
+  Global_tail <- "BBAA"
   # Check the first row's frequencies (the starting frequency is 4 kHz)
   expected_anchors <- c(4, 5, 6, 5, 6, 5, 4, 4, 4, 4, 4, 3, 4, 3, 4, 3, 2, 3, 3, 2, 1, 2, 3) * 1000
   expect_equal(as.vector(t(result[, grep("Frequency", names(result))])), expected_anchors)
@@ -133,4 +139,24 @@ test_that("The function corrects negative or zero frequencies", {
   # There should be no zero or negative values in the frequency anchors
   expect_false(any(freq_cols[freq_cols <= 0]))
 
+})
+
+test_that("In starting_frequency mode, each section resets to start freq and applies directional shifts", {
+  generated_strings <- generate_test_data()
+  Conversion <- apply_parsons_code(generated_strings)
+
+  result <- frequency_anchors(
+    df = Conversion,
+    parsons_col = "Call_Parsons_Code",
+    group_id_col = "Group_ID",
+    individual_id_col = "Individual_ID",
+    call_id_col = "Call_ID",
+    call_string_col = "Call",
+    starting_frequency = 4000,
+    frequency_shift = 1000,
+    section_transition = "starting_frequency"
+  )
+
+  expected_anchors <- c(4, 5, 6, 5, 6, 3, 2, 2, 2, 4, 4, 3, 4, 3, 4, 3, 2, 3, 3, 3, 2, 3, 4) * 1000
+  expect_equal(as.vector(t(result[, grep("Frequency", names(result))])), expected_anchors)
 })

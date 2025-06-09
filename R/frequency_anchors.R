@@ -60,7 +60,7 @@
 frequency_anchors <- function(df, parsons_col, group_id_col, individual_id_col,
                               call_id_col, call_string_col,
                               starting_frequency = 4000, frequency_shift = 1000,
-                              section_transition = "starting_frequency") {
+                              section_transition = "continuous_trajectory") {
 
   if (starting_frequency <= 0) {
     stop("starting_frequency must be a positive value")
@@ -129,7 +129,14 @@ frequency_anchors <- function(df, parsons_col, group_id_col, individual_id_col,
       call_length <- length(split_parsons_code)
       # Calculate frequencies for the current section
       section_frequencies <- numeric(call_length + 1)
-      section_frequencies[1] <- previous_value  # Start with the previous section's last frequency
+
+      if (section_transition == "starting_frequency") {
+        previous_value <- starting_frequency
+        section_frequencies[1] <- previous_value
+      } else {
+        # In continuous trajectory mode, retain the last frequency value for the next section
+        section_frequencies[1] <- previous_value
+      }
 
       for (j in seq_len(call_length)) {
         direction <- split_parsons_code[j]
