@@ -256,11 +256,16 @@ str(xc_mat)
 dim(xc_mat)
 
 # Get the percentage of values that are negative
+<<<<<<< Updated upstream
         neg_values <- ((length(xc_mat[xc_mat < 0])/length(xc_mat))) * 100
+=======
+neg_values <- ((length(xc_mat[xc_mat < 0])/length(xc_mat))) * 100
+>>>>>>> Stashed changes
 
 # Set all negative values to the minimum positive value in the SPCC matrix to represent the fact that these calls are very structurally different from one another
         if(neg_values > 0){
           
+<<<<<<< Updated upstream
           xc_mat[xc_mat < 0] <- round(min(xc_mat[xc_mat > 0]), 8)
           
         }
@@ -285,6 +290,48 @@ dim(xc_mat)
         }
 
 # Update the dimension names of the matrix to include the sound file names from the selection table to keep track of the vocalizations
+=======
+          # Initialize a record of what was changed to save to the final results
+          neg_notes <- paste(round(neg_values, 8), "% of all SPCC cells or", length(xc_mat[xc_mat < 0])/2,"unique comparisons were negative and were changed to the minimum positive SPCC value of", round(min(xc_mat[xc_mat > 0]), 8), sep = " ")
+          
+          xc_mat[xc_mat < 0] <- round(min(xc_mat[xc_mat > 0]), 8)
+          
+        } else {
+          
+          neg_notes <- ""
+          
+        }
+
+# Check that negative values have been changed
+xc_mat[xc_mat < 0]
+
+
+# Make sure to calculate the true number of values in the symmetric matrix (multiply the number of unique values that are 1 by 2)
+ones <- ((length(which(xc_mat[lower.tri(xc_mat)] == 1))*2)/length(xc_mat)) * 100
+        
+        if(ones > 0){
+          
+          # Get the maximum similarity value after 1 in the matrix
+          max_vals <- xc_mat[lower.tri(xc_mat)]
+          
+          # Use a value just under one to catch floating point numbers that are visually represented as 1
+          sec_max_val <- max(max_vals[max_vals < 0.9999999])
+          
+          # Initialize a record of what was changed to save to the final results
+          one_notes <- paste(round(ones, 8), "% of all SPCC cells or", length(which(xc_mat[lower.tri(xc_mat)] == 1)), "unique comparisons were had an original SPCC value of 1 and were changed to the next maximum SPCC value of", round(sec_max_val, 8), sep = " ")
+          
+          # Then set the values of 1 off of the diagonal (in both the upper and lower triangle) to the next highest similarity value in this matrix
+          xc_mat[lower.tri(xc_mat)][xc_mat[lower.tri(xc_mat)] == 1] <- round(sec_max_val, 8)
+          xc_mat[upper.tri(xc_mat)][xc_mat[upper.tri(xc_mat)] == 1] <- round(sec_max_val, 8)
+          
+        } else {
+          
+          one_notes <- ""
+          
+        }
+
+# Update the dimension names of the matrix
+>>>>>>> Stashed changes
 dimnames(xc_mat) <- list(GroupMembership_sel_tbl$sound.files, GroupMembership_sel_tbl$sound.files)
 
 # Save this matrix since it can take a long time to generate when there are many vocalizations
