@@ -34,7 +34,8 @@ apply_parsons_code <- function(generated_strings) {
     random_variation_col = "Random_variation",
     group_tail_col = "Group_tail",
     global_tail_col = "Global_tail",
-    list("A" = "up", "B" = "down", "C" = "constant")
+    mapping = list("A" = "up", "B" = "down", "C" = "constant"),
+    alphabet = c("A", "B", "C")
   )
 }
 
@@ -70,7 +71,8 @@ test_that("The function generates a data frame with multiple rows", {
 # 2. Unit test to check that frequency directions shift
 test_that("This function shifts up, constant, and down directions frequency correctly in contineous trajectory", {
   # generate test data
-  generated_strings <- generate_test_data()
+  generated_strings <- generate_strings(
+    n_groups = 2,
     n_individuals = 5,
     n_calls = 10,
     string_length = 40,
