@@ -61,6 +61,13 @@ frequency_anchors <- function(df, parsons_col, group_id_col, individual_id_col,
                               call_id_col, call_string_col,
                               starting_frequency = 4000, frequency_shift = 1000,
                               section_transition = "continuous_trajectory") {
+  # Ensure column names are case-insensitive
+  colnames(df) <- tolower(colnames(df))
+  parsons_col <- tolower(parsons_col)
+  group_id_col <- tolower(group_id_col)
+  individual_id_col <- tolower(individual_id_col)
+  call_id_col <- tolower(call_id_col)
+  call_string_col <- tolower(call_string_col)
 
   if (starting_frequency <= 0) {
     stop("starting_frequency must be a positive value")
@@ -83,14 +90,6 @@ frequency_anchors <- function(df, parsons_col, group_id_col, individual_id_col,
     stop("section_transition must be 'starting_frequency' or ",
          "'continuous_trajectory'")
   }
-
-  # Ensure column names are case-insensitive
-  colnames(df) <- tolower(colnames(df))
-  parsons_col <- tolower(parsons_col)
-  group_id_col <- tolower(group_id_col)
-  individual_id_col <- tolower(individual_id_col)
-  call_id_col <- tolower(call_id_col)
-  call_string_col <- tolower(call_string_col)
 
   # Initialize an empty list to store the results
   results <- list()
