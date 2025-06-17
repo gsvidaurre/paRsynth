@@ -68,9 +68,13 @@ test_that("The function generates a data frame with multiple rows", {
 
 })
 
-# 2. Unit test to check that frequency directions shift
-test_that("This function shifts up, constant, and down directions frequency correctly in contineous trajectory", {
-  # generate test data
+# 2. Unit test to check that frequency directions shifts correctly in continuous_trajectory mode
+test_that("This function computes frequency anchors correctly in continuous trajectory", {
+  
+  starting_freq <- 4000
+  freq_shift <- 1000
+
+  # Generate synthetic test data
   generated_strings <- generate_strings(
     n_groups = 2,
     n_individuals = 5,
@@ -91,57 +95,52 @@ test_that("This function shifts up, constant, and down directions frequency corr
     individual_id_col = "Individual",
     call_id_col = "Call_ID",
     call_string_col = "Call",
-    starting_frequency = 4000,
-    frequency_shift = 1000,
+    starting_frequency = starting_freq,
+    frequency_shift = freq_shift,
     section_transition = "continuous_trajectory"
   )
 
-  # make parsons code columns to character strings
-  section_parsons_cols <- c(
-    global_head = "Global_Head_Parsons_Code",
-    group_head = "Group_Head_Parsons_Code",
-    individual_middle = "Individual_Middle_Parsons_Code",
-    random_variation = "Random_Variation_Parsons_Code",
-    group_tail = "Group_Tail_Parsons_Code",
-    global_tail = "Global_Tail_Parsons_Code"
-  )
+  for (row in seq_len(nrow(result))) {
+    # Extract the frequencies
+    frequencies <- as.numeric(result[row, grep("^Frequency", names(result))])
+    parsons_code <- as.character(result$Parsons_Code[row])
+    directions <- strsplit(parsons_code, "-")[[1]]
 
-  frequencies <- as.numeric(result[1, grep("Frequency", names(result))])
-  # Confirm it starts at 4000
-  expect_equal(frequencies[1], 4000)
+    # Check that expected lengths are correct
+    expect_equal(
+      length(frequencies), length(directions) + 1,
+      info = paste("Row", row, "frequency length mismatch with Parsons code")
+    )
 
-  # All diffs must be in {+1000, 0, -1000}
-  diffs <- diff(frequencies)
-  expect_true(all(diffs %in% c(-1000, 0, 1000)))
+    # Check that start frequency is correct
+    expect_equal(
+      frequencies[1], starting_freq,
+      info = paste("Row", row, "should start at starting_freq")
+    )
 
-  for (section in names(section_parsons_cols)) {
-        code_col <- section_parsons_cols[[section]]
-        directions <- strsplit(parsons_results[[code_col]][1], "-")[[1]]
+    # get expected frequencies
+    expected_freqs <- numeric(length(frequencies))
+    expected_freqs[1] <- starting_freq
 
-        if (length(directions) == 0 || is.na(directions[1])) next
+    for (i in seq_along(directions)) {
+      shift <- switch(directions[i],
+        "up" = freq_shift,
+        "down" = -freq_shift,
+        "constant" = 0,
+        stop(paste("Invalid direction in row", row, ":", directions[i])))
+        
+        candidate_freqs <- expected_freqs[i] + shift
+        if (candidate_freqs <= 0) {
+          candidate_freqs <- freq_shift
+        }
+      expected_freqs[i + 1] <- candidate_freqs
+    }
 
-        # Section starts at 4000
-        first_direction <- directions[1]
-        # Compute expected first frequency based on direction of the first character of the section
-        expected_first_freq <- switch(first_direction,
-                                      up = starting_freq + freq_shift,
-                                      down = max(starting_freq - freq_shift, freq_shift),
-                                      constant = starting_freq,
-                                      stop("Invalid direction in Parsons code"))
-
-        observed_first_freq <- returned_freqs[freq_idx]
-
-        # Check that the section's first frequency is correctly computed
-        expect_equal(observed_first_freq, expected_first_freq,
-                    info = paste("Section:", section,
-                                  "| First direction:", first_direction,
-                                  "| Expected:", expected_first_freq,
-                                  "| Got:", observed_first_freq))
-        cat(sprintf("Section: %s | First direction: %s | Expected: %s | Got: %s\n",
-        section, first_direction, expected_first_freq, observed_first_freq))
-
-        # Advance freq_idx to skip over rest of section (length of directions)
-        freq_idx <- freq_idx + length(directions)
+    # check if the generated frequencies match the expected frequencies
+    expect_equal(
+      frequencies, expected_freqs,
+      info = paste("Row", row, "frequencies mismatch expected trajectory")
+    )
   }
 })
 
@@ -189,6 +188,7 @@ test_that("The function corrects negative or zero frequencies", {
 
 })
 
+# 4. Unit test to check that the function works in starting_frequency mode
 test_that("In starting_frequency mode, each section resets to start freq and applies directional shifts", {
   starting_freq <- 4000
   freq_shift <- 1000
