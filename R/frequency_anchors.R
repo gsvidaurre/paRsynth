@@ -98,42 +98,25 @@ frequency_anchors <- function(df, parsons_col, group_id_col, individual_id_col,
   # Initialize an empty list to store the results
   results <- list()
 
-<<<<<<< PAR-107
   # Check all of these sections for NA values, which would indicate that they were not converted to Parsons code and should not be included in the frequency anchors
   structure_sections <- get_section_order(string_structure)
   sections <- c("global_head", structure_sections, "global_tail")
 
-=======
-  structure_section_map <- list(
-    "GI-II-RV" = c("group_complete_parsons_code", "individual_complete_parsons_code", "random_variation_parsons_code"), # nolint
-    "GI-RV-II" = c("group_complete_parsons_code", "random_variation_parsons_code", "individual_complete_parsons_code"), # nolint
->>>>>>> PAR-V2
 
-    "II-GI-RV" = c("individual_complete_parsons_code", "group_complete_parsons_code", "random_variation_parsons_code"), # nolint
-    "II-RV-GI" = c("individual_complete_parsons_code", "random_variation_parsons_code", "group_complete_parsons_code"), # nolint
+  # Get the names of section columns with NA values
+  rem_nms <- names(which(sapply(sections, function(z) {
+    any(is.na(df[[z]]))
+  })))
 
-    "RV-II-GI" = c("random_variation_parsons_code", "individual_complete_parsons_code", "group_complete_parsons_code"), # nolint
-    "RV-GI-II" = c("random_variation_parsons_code", "group_complete_parsons_code", "individual_complete_parsons_code"), # nolint
-
-    "GI-II-RV-GI" = c("group_head_parsons_code", "individual_complete_parsons_code", "random_variation_parsons_code", "group_tail_parsons_code"), # nolint
-    "GI-RV-II-GI" = c("group_head_parsons_code", "random_variation_parsons_code", "individual_complete_parsons_code", "group_tail_parsons_code"), # nolint
-
-    "II-GI-RV-II" = c("individual_head_parsons_code", "group_complete_parsons_code", "random_variation_parsons_code", "individual_tail_parsons_code"), # nolint
-    "II-RV-GI-II" = c("individual_head_parsons_code", "random_variation_parsons_code", "group_complete_parsons_code", "individual_tail_parsons_code"), # nolint
-
-    "GI-RV-GI" = c("group_head_parsons_code", "random_variation_parsons_code", "group_tail_parsons_code"), # nolint
-    "II-RV-II" = c("individual_head_parsons_code", "random_variation_parsons_code", "individual_tail_parsons_code"), # nolint
-
-    "GI-RV" = c("group_complete_parsons_code", "random_variation_parsons_code"), # nolint
-    "RV-GI" = c("random_variation_parsons_code", "group_complete_parsons_code"), # nolint
-
-    "II-RV" = c("individual_complete_parsons_code", "random_variation_parsons_code"), # nolint
-    "RV-II" = c("random_variation_parsons_code", "individual_complete_parsons_code") # nolint
-  )
+  # Remove any columns with NAs from the sections to include in frequency anchors below
+  if(length(rem_nms) > 0) {
+    tmp_sections <- sections[-grep(paste(paste("^", rem_nms, "$", sep = ""), collapse = "|"), sections)]
+  } else if(length(rem_nms) == 0) {
+    tmp_sections <- sections
+  }
 
   # Iterate over each row in the data frame
   for (i in seq_len(nrow(df))) {
-    row <- df[i, ]
     group_id <- df[[group_id_col]][i]
     individual_id <- df[[individual_id_col]][i]
     call_id <- df[[call_id_col]][i]
@@ -141,12 +124,9 @@ frequency_anchors <- function(df, parsons_col, group_id_col, individual_id_col,
     parsons_code <- df[[parsons_col]][i] # Extract the full Parsons code for each call 
     # string_structure <- df[[string_structure_col]][i]
 
-    structure_sections <- c("global_head_parsons_code", structure_section_map[[string_structure]], "global_tail_parsons_code")
-
-    frequencies <- starting_frequency
+    frequencies <- numeric(0) #initiating an empty vector to store the frequencies later
     previous_value <- starting_frequency
 
-<<<<<<< PAR-107
     # Iterate over each section in the Parsons_code columns, split the code, and calculate the frequencies
     for (section in tmp_sections) {
       section_code <- as.character(df[[paste0(section, "_parsons_code")]][i])
@@ -190,51 +170,27 @@ frequency_anchors <- function(df, parsons_col, group_id_col, individual_id_col,
         } else {
           stop("Invalid direction: ", direction)
         }
-=======
-    for (section in structure_sections) {
-
-      # Check if the section exists in the df and is not NA
-      if (!(section %in% names(row))) next
-
-      # Extract the section code from the df rows
-      section_code <- df[[section]][i]
-
-      # If the section code is NA or empty, skip to the next section
-      if (is.na(section_code)) next
-
-      # Split the section code into directions
-      directions <- unlist(strsplit(section_code, "-"))
-      # If the directions are empty or all NA, skip to the next section
-      if (length(directions) == 0 || all(is.na(directions))) next
-
-      # Decide section starting frequency based on the transition type ("starting_frequency" or "continuous_trajectory")
-        # If section_transition is "starting_frequency", reset to starting_frequency after each section
-        # If section_transition is "continuous_trajectory", retain the last frequency value for the next section
-      current_frequency <- if (section_transition == "starting_frequency") starting_frequency else previous_value
-      section_frequencies <- current_frequency
-      
-      # Iterate over each direction in the section code and compute the frequencies
-      for (dir in directions) {
-        next_frequency <- switch(dir,
-          "up" = current_frequency + frequency_shift,
-          "down" = current_frequency - frequency_shift,
-          "constant" = current_frequency,
-          stop("Invalid Parsons direction: ", dir)
-        )
->>>>>>> PAR-V2
         # Correct for negative or zero frequencies immediately
-        if (next_frequency <= 0) {
-          next_frequency <- frequency_shift
+        if (frequency <= 0) {
+          frequency <- frequency_shift
         }
-        # appends the value of 'next_frequency' to the 'section_frequencies' vector
-        # and updates 'current_frequency' to the value of 'next_frequency'.
-        section_frequencies <- c(section_frequencies, next_frequency)
-        current_frequency <- next_frequency
+        # Update previous_value to the current section frequency
+        section_frequencies[j + 1] <- frequency
+        previous_value <- frequency
       }
+      frequencies <- c(frequencies, section_frequencies[-1])  # Exclude the first value to avoid repetition
 
-      frequencies <- c(frequencies, section_frequencies[-1]) # Exclude the first value to avoid repetition
-      previous_value <- current_frequency
+      # After each section, reset the frequency or continue the trajectory
+      if (section_transition == "starting_frequency") {
+        previous_value <- starting_frequency
+      } else {
+        # In continuous trajectory mode, retain the last frequency value for the next section
+        previous_value <- frequencies[length(frequencies)]
+      }
     }
+
+    # Do not add the starting frequency as the last frequency anchor
+    frequencies <- c(starting_frequency, frequencies)
 
     # Create a data frame with the metadata and frequency values for the current call
     freq_df <- data.frame(
