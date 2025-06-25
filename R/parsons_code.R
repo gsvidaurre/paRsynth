@@ -51,11 +51,9 @@
 #' @export parsons_code
 
 parsons_code <- function(df, string_col, global_head_col, group_head_col,
-
                 individual_head_col, individual_tail_col,
                 random_variation_col, group_tail_col, global_tail_col, string_structure_col,
-                mapping = list("A" = "up", "B" = "down", "C" = "constant"),
-                alphabet = c("A", "B", "C")) {
+                mapping = list("A" = "up", "B" = "down", "C" = "constant")) {
 
   if (!is.data.frame(df)) {
     stop("The 'df' argument must be a data frame.")
@@ -91,43 +89,40 @@ parsons_code <- function(df, string_col, global_head_col, group_head_col,
         !any(is.na(df[[individual_tail_col]]))) {
 
     res <- df %>%
-      dplyr::mutate(Call_Parsons_Code = sapply(!!rlang::sym(string_col), function(string) paste(convert_to_parsons_code(string, mapping, alphabet), collapse = "-"))) %>%
-      dplyr::mutate(Global_Head_Parsons_Code = sapply(!!rlang::sym(global_head_col), function(string) paste(convert_to_parsons_code(string, mapping, alphabet), collapse = "-"))) %>%
-      dplyr::mutate(Group_Head_Parsons_Code = sapply(!!rlang::sym(group_head_col), function(string) paste(convert_to_parsons_code(string, mapping, alphabet), collapse = "-"))) %>%
-      dplyr::mutate(Individual_Head_Parsons_Code = sapply(!!rlang::sym(individual_head_col), function(string) paste(convert_to_parsons_code(string, mapping, alphabet), collapse = "-"))) %>%
-      dplyr::mutate(Individual_Tail_Parsons_Code = sapply(!!rlang::sym(individual_tail_col), function(string) paste(convert_to_parsons_code(string, mapping, alphabet), collapse = "-"))) %>%
-      dplyr::mutate(Random_Variation_Parsons_Code = sapply(!!rlang::sym(random_variation_col), function(string) paste(convert_to_parsons_code(string, mapping, alphabet), collapse = "-"))) %>%
-      dplyr::mutate(Group_Tail_Parsons_Code = sapply(!!rlang::sym(group_tail_col), function(string) paste(convert_to_parsons_code(string, mapping, alphabet), collapse = "-"))) %>%
-      dplyr::mutate(Global_Tail_Parsons_Code = sapply(!!rlang::sym(global_tail_col), function(string) paste(convert_to_parsons_code(string, mapping, alphabet), collapse = "-"))) %>%
-      dplyr::mutate(String_Structure = !!rlang::sym(string_structure_col))
+      dplyr::mutate(Call_Parsons_Code = sapply(!!rlang::sym(string_col), function(string) paste(convert_to_parsons_code(string, mapping), collapse = "-"))) %>%
+      dplyr::mutate(Global_Head_Parsons_Code = sapply(!!rlang::sym(global_head_col), function(string) paste(convert_to_parsons_code(string, mapping), collapse = "-"))) %>%
+      dplyr::mutate(Group_Head_Parsons_Code = sapply(!!rlang::sym(group_head_col), function(string) paste(convert_to_parsons_code(string, mapping), collapse = "-"))) %>%
+      dplyr::mutate(Individual_Head_Parsons_Code = sapply(!!rlang::sym(individual_head_col), function(string) paste(convert_to_parsons_code(string, mapping), collapse = "-"))) %>%
+      dplyr::mutate(Individual_Tail_Parsons_Code = sapply(!!rlang::sym(individual_tail_col), function(string) paste(convert_to_parsons_code(string, mapping), collapse = "-"))) %>%
+      dplyr::mutate(Random_Variation_Parsons_Code = sapply(!!rlang::sym(random_variation_col), function(string) paste(convert_to_parsons_code(string, mapping), collapse = "-"))) %>%
+      dplyr::mutate(Group_Tail_Parsons_Code = sapply(!!rlang::sym(group_tail_col), function(string) paste(convert_to_parsons_code(string, mapping), collapse = "-"))) %>%
+      dplyr::mutate(Global_Tail_Parsons_Code = sapply(!!rlang::sym(global_tail_col), function(string) paste(convert_to_parsons_code(string, mapping), collapse = "-")))
     # Convert all columns except the group membership strings if no group membership information was specified
   } else if(any(is.na(df[[group_head_col]])) & any(is.na(df[[group_tail_col]]))) {
     
 
     res <- df %>%
-      dplyr::mutate(Call_Parsons_Code = sapply(!!rlang::sym(string_col), function(string) paste(convert_to_parsons_code(string, mapping, alphabet), collapse = "-"))) %>%
-      dplyr::mutate(Global_Head_Parsons_Code = sapply(!!rlang::sym(global_head_col), function(string) paste(convert_to_parsons_code(string, mapping, alphabet), collapse = "-"))) %>%
+      dplyr::mutate(Call_Parsons_Code = sapply(!!rlang::sym(string_col), function(string) paste(convert_to_parsons_code(string, mapping), collapse = "-"))) %>%
+      dplyr::mutate(Global_Head_Parsons_Code = sapply(!!rlang::sym(global_head_col), function(string) paste(convert_to_parsons_code(string, mapping), collapse = "-"))) %>%
       dplyr::mutate(Group_Head_Parsons_Code = !!rlang::sym(group_head_col)) %>%
-      dplyr::mutate(Individual_Head_Parsons_Code = sapply(!!rlang::sym(individual_head_col), function(string) paste(convert_to_parsons_code(string, mapping, alphabet), collapse = "-"))) %>%
-      dplyr::mutate(Individual_Tail_Parsons_Code = sapply(!!rlang::sym(individual_tail_col), function(string) paste(convert_to_parsons_code(string, mapping, alphabet), collapse = "-"))) %>%
-      dplyr::mutate(Random_Variation_Parsons_Code = sapply(!!rlang::sym(random_variation_col), function(string) paste(convert_to_parsons_code(string, mapping, alphabet), collapse = "-"))) %>%
+      dplyr::mutate(Individual_Head_Parsons_Code = sapply(!!rlang::sym(individual_head_col), function(string) paste(convert_to_parsons_code(string, mapping), collapse = "-"))) %>%
+      dplyr::mutate(Individual_Tail_Parsons_Code = sapply(!!rlang::sym(individual_tail_col), function(string) paste(convert_to_parsons_code(string, mapping), collapse = "-"))) %>%
+      dplyr::mutate(Random_Variation_Parsons_Code = sapply(!!rlang::sym(random_variation_col), function(string) paste(convert_to_parsons_code(string, mapping), collapse = "-"))) %>%
       dplyr::mutate(Group_Tail_Parsons_Code = !!rlang::sym(group_tail_col)) %>%
-      dplyr::mutate(Global_Tail_Parsons_Code = sapply(!!rlang::sym(global_tail_col), function(string) paste(convert_to_parsons_code(string, mapping, alphabet), collapse = "-"))) %>%
-      dplyr::mutate(String_Structure = !!rlang::sym(string_structure_col))
+      dplyr::mutate(Global_Tail_Parsons_Code = sapply(!!rlang::sym(global_tail_col), function(string) paste(convert_to_parsons_code(string, mapping), collapse = "-")))
 
     # Convert all columns except the individual identity string if no individual identity information was specified
-  } else if(any(is.na(df[[individual_middle_col]]))) {
-    
+  } else if(any(is.na(df[[individual_head_col]])) & any(is.na(df[[individual_tail_col]]))) {
+
     res <- df %>%
-      dplyr::mutate(Call_Parsons_Code = sapply(!!rlang::sym(string_col), function(string) paste(convert_to_parsons_code(string, mapping, alphabet), collapse = "-"))) %>%
-      dplyr::mutate(Global_Head_Parsons_Code = sapply(!!rlang::sym(global_head_col), function(string) paste(convert_to_parsons_code(string, mapping, alphabet), collapse = "-"))) %>%
-      dplyr::mutate(Group_Head_Parsons_Code = sapply(!!rlang::sym(group_head_col), function(string) paste(convert_to_parsons_code(string, mapping, alphabet), collapse = "-"))) %>%
+      dplyr::mutate(Call_Parsons_Code = sapply(!!rlang::sym(string_col), function(string) paste(convert_to_parsons_code(string, mapping), collapse = "-"))) %>%
+      dplyr::mutate(Global_Head_Parsons_Code = sapply(!!rlang::sym(global_head_col), function(string) paste(convert_to_parsons_code(string, mapping), collapse = "-"))) %>%
+      dplyr::mutate(Group_Head_Parsons_Code = sapply(!!rlang::sym(group_head_col), function(string) paste(convert_to_parsons_code(string, mapping), collapse = "-"))) %>%
       dplyr::mutate(Individual_Head_Parsons_Code = !!rlang::sym(individual_head_col)) %>%
       dplyr::mutate(Individual_Tail_Parsons_Code = !!rlang::sym(individual_tail_col)) %>%
-      dplyr::mutate(Random_Variation_Parsons_Code = sapply(!!rlang::sym(random_variation_col), function(string) paste(convert_to_parsons_code(string, mapping, alphabet), collapse = "-"))) %>%
-      dplyr::mutate(Group_Tail_Parsons_Code = sapply(!!rlang::sym(group_tail_col), function(string) paste(convert_to_parsons_code(string, mapping, alphabet), collapse = "-"))) %>%
-      dplyr::mutate(Global_Tail_Parsons_Code = sapply(!!rlang::sym(global_tail_col), function(string) paste(convert_to_parsons_code(string, mapping, alphabet), collapse = "-"))) %>%
-      dplyr::mutate(String_Structure = !!rlang::sym(string_structure_col))
+      dplyr::mutate(Random_Variation_Parsons_Code = sapply(!!rlang::sym(random_variation_col), function(string) paste(convert_to_parsons_code(string, mapping), collapse = "-"))) %>%
+      dplyr::mutate(Group_Tail_Parsons_Code = sapply(!!rlang::sym(group_tail_col), function(string) paste(convert_to_parsons_code(string, mapping), collapse = "-"))) %>%
+      dplyr::mutate(Global_Tail_Parsons_Code = sapply(!!rlang::sym(global_tail_col), function(string) paste(convert_to_parsons_code(string, mapping), collapse = "-")))
 
   }
 
@@ -136,29 +131,6 @@ parsons_code <- function(df, string_col, global_head_col, group_head_col,
 }
 
 # Helper function to generate Parsons code for existing sequences
-convert_to_parsons_code <- function(string, mapping, alphabet) {
-  chars <- strsplit(string, NULL)[[1]]
-
-  # Use explicit mapping if given
-  if (!is.null(mapping)) {
-    return(sapply(chars, function(char) mapping[[char]], USE.NAMES = FALSE)) 
-  }
-  
-  # Otherwise use relative ordering
-  if (is.null(alphabet) || length(alphabet) < 3) {
-    stop("An alphabet of 3 or more characters must be provided if mapping is not used.")
-  }
-  indices <- match(chars, alphabet)
-  directions <- character(length(indices) - 1)
-
-  for (i in seq_along(directions)) {
-    if (indices[i + 1] > indices[i]) {
-      directions[i] <- "up"
-    } else if (indices[i + 1] < indices[i]) {
-      directions[i] <- "down"
-    } else {
-      directions[i] <- "constant"
-    }
-  }
-  return(directions)
+convert_to_parsons_code <- function(string, mapping) {
+  sapply(strsplit(string, NULL)[[1]], function(char) mapping[[char]], USE.NAMES = FALSE)
 }
