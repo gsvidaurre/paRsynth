@@ -60,7 +60,7 @@
 frequency_anchors <- function(df, parsons_col, group_id_col, individual_id_col,
                               call_id_col, call_string_col, string_structure_col,
                               starting_frequency = 4000, frequency_shift = 1000,
-                              section_transition = "starting_frequency") {
+                              section_transition = "continuous_trajectory") {
 
   if (starting_frequency <= 0) {
     stop("starting_frequency must be a positive value")
@@ -92,13 +92,16 @@ frequency_anchors <- function(df, parsons_col, group_id_col, individual_id_col,
   call_id_col <- tolower(call_id_col)
   call_string_col <- tolower(call_string_col)
   string_structure_col <- tolower(string_structure_col)
+  string_structure <- unique(df[[string_structure_col]])
+
 
   # Initialize an empty list to store the results
   results <- list()
 
   # Check all of these sections for NA values, which would indicate that they were not converted to Parsons code and should not be included in the frequency anchors
-  sections <- c("global_head", "group_head", "individual_middle",
-                "random_variation", "group_tail", "global_tail")
+  structure_sections <- get_section_order(string_structure)
+  sections <- c("global_head", structure_sections, "global_tail")
+
 
   # Get the names of section columns with NA values
   rem_nms <- names(which(sapply(sections, function(z) {
@@ -119,24 +122,46 @@ frequency_anchors <- function(df, parsons_col, group_id_col, individual_id_col,
     call_id <- df[[call_id_col]][i]
     call_string <- df[[call_string_col]][i]
     parsons_code <- df[[parsons_col]][i] # Extract the full Parsons code for each call 
-    string_structure <- df[[string_structure_col]][i]
+    # string_structure <- df[[string_structure_col]][i]
 
     frequencies <- numeric(0) #initiating an empty vector to store the frequencies later
     previous_value <- starting_frequency
 
     # Iterate over each section in the Parsons_code columns, split the code, and calculate the frequencies
     for (section in tmp_sections) {
-      section_code <- df[[paste0(section, "_parsons_code")]][i]
-      split_parsons_code <- strsplit(section_code, "-")[[1]]
-      call_length <- length(split_parsons_code)
-      # Calculate frequencies for the current section
-      section_frequencies <- numeric(call_length + 1)
-      section_frequencies[1] <- previous_value  # Start with the previous section's last frequency
+      section_code <- as.character(df[[paste0(section, "_parsons_code")]][i])
+      section_direction <- strsplit(section_code, "-")[[1]]
+      # creates a numeric vector to store the frequencies
+      section_frequencies <- numeric(length(section_direction) + 1)
 
-      for (j in seq_len(call_length)) {
-        direction <- split_parsons_code[j]
+      if (section_transition == "starting_frequency") {
+        previous_value <- starting_frequency
+        section_frequencies[1] <- starting_frequency
+      } else {
+        # In continuous trajectory mode, retain the last frequency value for the next section
+        section_frequencies[1] <- previous_value # Start with the previous section's last frequency
+      }
 
-        if (direction == "up") {
+      for (j in seq_along(section_direction)) {
+        direction <- section_direction[j]
+        # Convert any fraction like up_1/2 or down_3/4 to decimal format (e.g., up_0.5, down_0.75 etc.)
+        if (grepl("_(\\d+)/(\\d+)$", direction)) {
+          fraction_match <- regmatches(direction, regexec("_(\\d+)/(\\d+)$", direction))[[1]]
+          numerator <- as.numeric(fraction_match[2])
+          denominator <- as.numeric(fraction_match[3])
+          decimal_value <- numerator / denominator
+          
+          # Replace the fraction with the decimal value in the direction string
+          direction <- sub("_(\\d+)/(\\d+)$", paste0("_", decimal_value), direction)
+        }
+
+        if (grepl("^up_\\d+(\\.\\d+)?$", direction)) {
+          step <- as.numeric(sub("up_", "", direction))
+          frequency <- previous_value + (step * frequency_shift)
+        } else if (grepl("^down_\\d+(\\.\\d+)?$", direction)) {
+          step <- as.numeric(sub("down_", "", direction))
+          frequency <- previous_value - (step * frequency_shift)
+        } else if (direction == "up") {
           frequency <- previous_value + frequency_shift
         } else if (direction == "down") {
           frequency <- previous_value - frequency_shift
@@ -190,4 +215,33 @@ frequency_anchors <- function(df, parsons_col, group_id_col, individual_id_col,
   # Combine all results into a single data frame
   final_df <- do.call(rbind, results)
   return(final_df)
+}
+get_section_order <- function(string_structure) {
+  switch(string_structure,
+    "GI-II-RV" = c("group_head", "group_tail", "individual_head", "individual_tail", "random_variation"),
+    "GI-RV-II" = c("group_head", "group_tail", "random_variation", "individual_head", "individual_tail"),
+    
+    "II-GI-RV" = c("individual_head", "individual_tail", "group_head", "group_tail", "random_variation"),
+    "II-RV-GI" = c("individual_head", "individual_tail", "random_variation", "group_head", "group_tail"),
+    
+    "RV-II-GI" = c("random_variation", "individual_head", "individual_tail", "group_head", "group_tail"),
+    "RV-GI-II" = c("random_variation", "group_head", "group_tail", "individual_head", "individual_tail"),
+
+    "GI-II-RV-GI" = c("group_head", "individual_head", "individual_tail", "random_variation", "group_tail"),
+    "GI-RV-II-GI" = c("group_head", "random_variation", "individual_head", "individual_tail", "group_tail"),
+
+    "II-GI-RV-II" = c("individual_head", "group_head", "group_tail", "random_variation", "individual_tail"),
+    "II-RV-GI-II" = c("individual_head", "random_variation", "group_head", "group_tail", "individual_tail"),
+
+    "GI-RV-GI" = c("group_head", "random_variation", "group_tail"),
+    "II-RV-II" = c("individual_head", "random_variation", "individual_tail"),
+
+    "GI-RV" = c("group_head", "group_tail", "random_variation"),
+    "RV-GI" = c("random_variation", "group_head", "group_tail"),
+
+    "II-RV" = c("individual_head", "individual_tail", "random_variation"),
+    "RV-II" = c("random_variation", "individual_head", "individual_tail"),
+
+    stop(paste("Invalid string structure:", string_structure))
+  )
 }
