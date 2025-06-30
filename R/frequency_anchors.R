@@ -218,29 +218,29 @@ frequency_anchors <- function(df, parsons_col, group_id_col, individual_id_col,
 }
 get_section_order <- function(string_structure) {
   switch(string_structure,
-    "GI-II-RV" = c("group_head", "group_tail", "individual_head", "individual_tail", "random_variation"),
-    "GI-RV-II" = c("group_head", "group_tail", "random_variation", "individual_head", "individual_tail"),
+    "GI-II-RV" = c("group_complete", "individual_complete", "random_variation"),
+    "GI-RV-II" = c("group_complete", "random_variation", "individual_complete"),
     
-    "II-GI-RV" = c("individual_head", "individual_tail", "group_head", "group_tail", "random_variation"),
-    "II-RV-GI" = c("individual_head", "individual_tail", "random_variation", "group_head", "group_tail"),
+    "II-GI-RV" = c("individual_complete", "group_complete", "random_variation"),
+    "II-RV-GI" = c("individual_complete", "random_variation", "group_complete"),
     
-    "RV-II-GI" = c("random_variation", "individual_head", "individual_tail", "group_head", "group_tail"),
-    "RV-GI-II" = c("random_variation", "group_head", "group_tail", "individual_head", "individual_tail"),
+    "RV-II-GI" = c("random_variation", "individual_complete", "group_complete"),
+    "RV-GI-II" = c("random_variation", "group_complete", "individual_complete"),
 
-    "GI-II-RV-GI" = c("group_head", "individual_head", "individual_tail", "random_variation", "group_tail"),
-    "GI-RV-II-GI" = c("group_head", "random_variation", "individual_head", "individual_tail", "group_tail"),
+    "GI-II-RV-GI" = c("group_head", "individual_complete", "random_variation", "group_tail"),
+    "GI-RV-II-GI" = c("group_head", "random_variation", "individual_complete", "group_tail"),
 
-    "II-GI-RV-II" = c("individual_head", "group_head", "group_tail", "random_variation", "individual_tail"),
-    "II-RV-GI-II" = c("individual_head", "random_variation", "group_head", "group_tail", "individual_tail"),
+    "II-GI-RV-II" = c("individual_head", "group_complete", "random_variation", "individual_tail"),
+    "II-RV-GI-II" = c("individual_head", "random_variation", "group_complete", "individual_tail"),
 
     "GI-RV-GI" = c("group_head", "random_variation", "group_tail"),
     "II-RV-II" = c("individual_head", "random_variation", "individual_tail"),
 
-    "GI-RV" = c("group_head", "group_tail", "random_variation"),
-    "RV-GI" = c("random_variation", "group_head", "group_tail"),
+    "GI-RV" = c("group_complete", "random_variation"),
+    "RV-GI" = c("random_variation", "group_complete"),
 
-    "II-RV" = c("individual_head", "individual_tail", "random_variation"),
-    "RV-II" = c("random_variation", "individual_head", "individual_tail"),
+    "II-RV" = c("individual_complete", "random_variation"),
+    "RV-II" = c("random_variation", "individual_complete"),
 
     stop(paste("Invalid string structure:", string_structure))
   )
