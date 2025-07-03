@@ -41,21 +41,27 @@
 #'                                    string_length = 16,
 #'                                    group_information = 8,
 #'                                    individual_information = 2,
-#'                                    random_variation = 2
+#'                                    random_variation = 2,
+#'                                    alphabet = c("A", "B", "C"),
+#'                                    string_structure = "GI-II-RV-GI"
 #'                                  )
 #'
 #' example_calls_parsons <- parsons_code(example_calls,
 #'                                       "Call",
 #'                                       "Global_head",
 #'                                       "Group_head",
-#'                                       "Individual_middle",
+#'                                       "Individual_head",
+#'                                      "Individual_tail",
+#'                                      "Individual_complete",
+#'                                      "Group_complete",
 #'                                       "Random_variation",
 #'                                       "Group_tail",
 #'                                       "Global_tail",
+#'                                      "String_structure",
 #'                                       list("A" = "up",
 #'                                            "B" = "down",
 #'                                            "C" = "constant")
-#'                                      )
+#'                                 )
 #'
 #' anchors <- frequency_anchors(example_calls_parsons,
 #'                              "Call_Parsons_Code",
@@ -63,10 +69,11 @@
 #'                              "Individual",
 #'                              "Call_ID",
 #'                              "Call",
+#'                             "String_structure",
 #'                              starting_frequency = 4000,
 #'                              frequency_shift = 1000,
-#'                              section_transition = "starting_frequency"
-#'                             )
+#'                              section_transition = "continuous_trajectory")
+#'
 #'
 #' path <- "~/Desktop" # Update this path to reflect your own directory structure
 #' tmp_dir <- "testing"

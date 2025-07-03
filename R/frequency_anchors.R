@@ -12,7 +12,7 @@
 #' @param call_string_col Character string. The name of the column in the data frame that contains the character string per vocalization.
 #' @param starting_frequency Numeric value. A numeric value in Hz that specifies the frequency value that will be used as a baseline for creating frequency anchors with Parsons code. For instance, if this value is 4000 Hz and the first Parsons code value is "constant", then the first frequency anchor will be 4000 Hz. The default value is 4000 Hz.
 #' @param frequency_shift Numeric value. A numeric value in Hz that specifies the frequency value that will be used to shift direction (or not). This is from the previous frequency anchor based on the Parsons code. For instance, if `frequency_shift` is 1000 Hz and the first Parsons code value is "up", then the first frequency anchor will be 5000 Hz. The default value is 1000 Hz. We have found that for total string lengths over 60 characters, it is better to use a smaller value (100 Hz). This avoids generating negative or zero values.
-#' @param section_transition Character string. The transition between sections in the Parsons code. The default value is "starting_frequency". The other option is "continuous_trajectory". In "starting_frequency" mode, the frequency value is reset to the `starting_frequency` value after each section. In "continuous_trajectory" mode, the frequency value is retained from the previous section. This can be useful for creating continuous frequency trajectories across vocalizations.
+#' @param section_transition Character string. The transition between sections in the Parsons code. The default value is "continuous_trajectory". The other option is "starting_frequency". In "starting_frequency" mode, the frequency value is reset to the `starting_frequency` value after each section. In "continuous_trajectory" mode, the frequency value is retained from the previous section. This can be useful for creating continuous frequency trajectories across vocalizations.
 #'
 #' @details `frequency_anchors()` returns the same data frame that was used as input with additional columns that hold frequency values in Hz. These columns will be used as anchors to guide frequency modulation patterns when creating synthetic audio files with the `soundgen` package. The starting frequency value is also used to end the frequency anchors. The number of frequency anchor columns in the data frame returned by the function depends on the length of each string. Currently, this function internally corrects frequency anchors that are negative or zero. It sets those values to the same value as the frequency shift (default of 1 kHz). While testing this function, we found that setting negative or zero values in the resulting data frame to 1000 Hz worked well. However, this change has not been thoroughly tested.
 #'
@@ -28,16 +28,23 @@
 #'                                    string_length = 16,
 #'                                    group_information = 8,
 #'                                    individual_information = 2,
-#'                                    random_variation = 2)
+#'                                    random_variation = 2,
+#'                                    alphabet = c("A", "B", "C"),
+#'                                    string_structure = "GI-II-RV-GI"
+#'                                  )
 #'
 #' example_calls_parsons <- parsons_code(example_calls,
 #'                                       "Call",
 #'                                       "Global_head",
 #'                                       "Group_head",
-#'                                       "Individual_middle",
+#'                                       "Individual_head",
+#'                                      "Individual_tail",
+#'                                      "Individual_complete",
+#'                                      "Group_complete",
 #'                                       "Random_variation",
 #'                                       "Group_tail",
 #'                                       "Global_tail",
+#'                                      "String_structure",
 #'                                       list("A" = "up",
 #'                                            "B" = "down",
 #'                                            "C" = "constant")
@@ -49,9 +56,10 @@
 #'                              "Individual",
 #'                              "Call_ID",
 #'                              "Call",
+#'                             "String_structure",
 #'                              starting_frequency = 4000,
 #'                              frequency_shift = 1000,
-#'                              section_transition = "starting_frequency")
+#'                              section_transition = "continuous_trajectory")
 #'
 #' glimpse(anchors)
 #'
@@ -216,6 +224,8 @@ frequency_anchors <- function(df, parsons_col, group_id_col, individual_id_col,
   final_df <- do.call(rbind, results)
   return(final_df)
 }
+
+# Helper function to get the section order based on the string structure
 get_section_order <- function(string_structure) {
   switch(string_structure,
     "GI-II-RV" = c("group_complete", "individual_complete", "random_variation"),
