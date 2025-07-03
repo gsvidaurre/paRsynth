@@ -65,15 +65,11 @@ generate_strings <- function(n_groups = 2, n_individuals = 5, n_calls = 10,
     stop("All arguments must be integers")
   }
   if (n_calls < 1 || n_groups < 1 || n_individuals < 1) {
-    stop("All arguments must be greater than 0")
+    stop("n_groups, n_individuals, and n_calls must be greater than 0")
   }
-  if (group_information %% 2 != 0 || individual_information %% 2 != 0) {
-    stop("group_information and individual_information must be even numbers")
+  if (group_information %% 2 != 0 || individual_information %% 2 != 0 || random_variation %% 2 != 0) {
+    stop("random_variation, group_information, and individual_information must be even numbers")
   }
-  if (random_variation %% 2 != 0) {
-    stop("random_variation must be an even number")
-  }
-
   valid_structures <- c(
     "GI-II-RV", "GI-RV-II",
     "II-GI-RV", "II-RV-GI",
@@ -87,6 +83,10 @@ generate_strings <- function(n_groups = 2, n_individuals = 5, n_calls = 10,
   if (!(string_structure %in% valid_structures)) {
   stop("Invalid string_structure. Must be one of: ", paste(valid_structures, collapse = ", "))
   }
+  if (alphabet %in% c("", NA) || length(alphabet) < 3 || length(unique(alphabet)) < 3 || length(alphabet) > 7) {
+    stop("alphabet must be a character vector with at least 3 unique characters, cannot be empty or NA, and cannot exceed 7 characters")
+  }
+
 
   # Create global header and tail strings. The length of these strings will vary depending on the length of the group-specific information (group_information) and the individual-specific information (individual_information)
   head_tail_length <- floor((string_length - group_information - individual_information - random_variation) / 2)

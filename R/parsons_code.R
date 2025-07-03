@@ -58,28 +58,30 @@ parsons_code <- function(df, string_col, global_head_col, group_head_col,
   if (!is.data.frame(df)) {
     stop("The 'df' argument must be a data frame.")
   }
-  if (!is.null(mapping) && !is.list(mapping)) {
-    stop("The 'mapping' argument must be a list if it is not NULL.")
+  if (is.null(mapping)) {
+    stop("The 'mapping' argument must not be NULL.")
+  }
+  if (!is.list(mapping)) {
+    stop("The 'mapping' argument must be a list.")
+  }
+  if (length(mapping) < 3) {
+    stop("The 'mapping' argument must contain at least three elements.")
+  }
+  if (!all(sapply(mapping, is.character))) {
+    stop("All elements in the 'mapping' list must be character strings.")
   }
   if (!is.character(string_col) || !is.character(global_head_col) | !is.character(group_head_col) ||
       !is.character(individual_head_col) || !is.character(individual_tail_col) || !is.character(random_variation_col) ||
-      !is.character(group_tail_col) || !is.character(global_tail_col)) {
-
+      !is.character(group_tail_col) || !is.character(global_tail_col) || !is.character(individual_complete_col) || !is.character(group_complete_col)) {
     stop("All vocalization columns argument must be a character string.")
   }
-
   if (nrow(df) == 0) {
     stop("Input data frame is empty")
   }
-  if (!string_col %in% colnames(df) || 
-        !global_head_col %in% colnames(df) ||
-        !group_head_col %in% colnames(df) ||
-        !individual_head_col %in% colnames(df) ||
-        !individual_tail_col %in% colnames(df) ||
-        !random_variation_col %in% colnames(df) ||
-        !group_tail_col %in% colnames(df) || 
-        !global_tail_col %in% colnames(df)) {
-    stop("One of the string columns provided does not exist in the data frame.")
+  if (!all(c(string_col, global_head_col, group_head_col, individual_head_col,
+             individual_tail_col, random_variation_col, group_tail_col, global_tail_col,
+             individual_complete_col, group_complete_col) %in% colnames(df))) {
+    stop("At least one of the string columns provided does not exist in the data frame.")
   }
 
   # Convert all character string columns to Parsons code if group and individual information were specified (not NA)
