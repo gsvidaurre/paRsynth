@@ -14,13 +14,17 @@
 #' @param group_information Integer. The number of characters that vary in the middle of the string across groups. The default is 8 characters. The user must provide an even value; negative values will result in unexpected behavior.
 #' @param individual_information Integer. The number of characters that vary in the middle of the string within groups. The default is 2 characters. The user must provide an even value; negative values will result in unexpected behavior.
 #' @param random_variation Integer. The number of characters that will vary randomly and will be appended after the individual information. The default is 2 characters. The user must provide an even value; negative values will result in unexpected behavior.
-#'
+#' @param alphabet Character vector. The set of unique characters used to generate the strings. The default is `c("A", "B", "C")`, which corresponds to the 1-base Parsons code. The minimum number of characters in the alphabet is 3, and the maximum is 7. The user can modify this to use different characters or symbols.
+#' @param string_structure Character. The structure of the string that will be generated. The default is "GI-II-RV-GI", which means that the string will start with the first half of the group information (group head), followed by the complete individual information (II), then random variation (RV), and end with the second part of the group information (group tail). The user can modify this to change the order of the components in the string. The valid options are "GI-II-RV", "GI-RV-II", "II-GI-RV", "II-RV-GI", "RV-II-GI", "RV-GI-II", "GI-II-RV-GI", "GI-RV-II-GI", "II-GI-RV-II", "II-RV-GI-II", "GI-RV-GI", "II-RV-II", "GI-RV", "RV-GI", "RV-II", and "II-RV".
+#' 
 #' @details The individual-specific and group-specific string components are combined to form the middle of a longer string. The individual-specific component of the string may not be unique to a single individual within a group, as individual distinctiveness  depends on the total number of individuals in the group, the length of the individually-specific string component, and the number of unique characters or symbols available for creating strings (which may vary depending on how users modify the function). For example, if the length of the individual-specific string component is 2 characters long and 3 unique characters are used, there will be 3^2 (or 9) possible unique individual signatures.
 #'
 #' The final string is composed of a global head (a short string of characters shared across all individuals), the group membership information, individual identity information, random variation, and a global tail (a short string of characters shared across all individuals). The global heads and tails are used to guide the start and end of frequency modulation patterns created after converting the character strings to Parsons code in later functions. The relative amount of group versus individual information across calls can be controlled by setting the length of `group_information` and `individual_information`, respectively. For example, when `group_information` is longer than `individual_information`, there will be more group membership information encoded in strings, and vice versa. The current version of the function does not facilitate varying string length within or across individuals. The random variation added to each string simulates the stochasticity in vocal production to facilitate variation within an individual.
 #'
 #' The length of the character string can influence visualizations of the synthetic vocalizations, depending on the duration of the synthetic vocalization (which is set in `write_audio()`). Long character strings that are converted to short synthetic vocalizations may have frequency contours that appear thick and blurry in spectrograms. A general rule of thumb to yield clearer frequency contours can be to increase the duration of the synthetic vocalization (although this will increase computational time for large datasets). We have found that vocalizations of 200 ms duration have clearer frequency contours when character string length in `generate_strings()` is set to 10 characters or fewer. For strings that are 12 to about 22 characters long, a 400 ms duration vocalization will have clearer contours.
 #'
+#' The various string structures allow users to control the order of the components in the string while they are wrapped within the global head and tail. The string structure can be modified to change the order of the components in the string, which may influence the frequency modulation patterns created after converting the character strings to Parsons code in later functions.
+#' 
 #' @return This function returns a data frame containing the call strings and metadata columns that contain unique numeric identifiers for the group, individual, and call for the given individual.
 #'
 #' @examples
@@ -33,7 +37,9 @@
 #'                                    string_length = 16,
 #'                                    group_information = 8,
 #'                                    individual_information = 2,
-#'                                    random_variation = 2
+#'                                    random_variation = 2,
+#'                                    alphabet = c("A", "B", "C"),
+#'                                   string_structure = "GI-II-RV-GI"
 #'                                  )
 #' glimpse(example_calls)
 #'
@@ -246,7 +252,6 @@ generate_strings <- function(n_groups = 2, n_individuals = 5, n_calls = 10,
     Group_tail = group_tail_calls,
     Global_tail = global_tail_calls,
     String_structure = rep(string_structure, length(calls))
-
   )
 }
 
@@ -256,6 +261,7 @@ generate_random_string <- function(length, alphabet) {
   paste(sample(alphabet, length, replace = TRUE), collapse = "")
 }
 
+# Helper function to build the string structure based on the specified order
 build_string_structure <- function(structure, GI_head, GI_tail, II_head, II_tail, RV) {
   res <- switch(structure,
     "GI-II-RV" = paste0(GI_head, GI_tail, II_head, II_tail, RV),

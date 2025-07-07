@@ -8,11 +8,15 @@
 #' @param string_col Character string. The name of the column in `df` that contains the strings.
 #' @param global_head_col Character string. The name of the column in `df` that contains the global head information.
 #' @param group_head_col Character string. The name of the column in `df` that contains the group head information.
-#' @param individual_middle_col Character string. The name of the column in `df` that contains the individual middle information.
+#' @param individual_head_col Character string. The name of the column in `df` that contains the individual head information.
+#' @param individual_tail_col Character string. The name of the column in `df` that contains the individual tail information.
+#' @param individual_complete_col Character string. The name of the column in `df` that contains the individual complete information.
+#' @param group_complete_col Character string. The name of the column in `df` that contains the group complete information.
 #' @param random_variation_col Character string. The name of the column in `df` that contains the random variation information.
 #' @param group_tail_col Character string. The name of the column in `df` that contains the group tail information.
 #' @param global_tail_col Character string. The name of the column in `df` that contains the global tail information.
-#' @param mapping List. A list for Parsons code mapping. Each list element contains each character value and its corresponding directionality in Parsons code. The default mapping are the first three letters of the alphabet in uppercase. This creates a mapping for 1-base Parsons code (three unique directions: up, down, and constant).
+#' @param string_structure_col Character string. The name of the column in `df` that contains the string structure information. 
+#' @param mapping List. A list for Parsons code mapping. Each list element contains each character value and its corresponding directionality in Parsons code. The default mapping are the first three letters of the alphabet in uppercase. This creates a mapping for 1-base Parsons code (three unique directions: up, down, and constant). You can change this mapping to create up to 7 unique directions in Parsons code. Directionality can be specified as "up", "down", "constant", "up_0.5", "down_1/2", "up_2/3" etc. 
 #' @importFrom magrittr %>%
 #' @importFrom rlang sym
 #' @importFrom dplyr mutate
@@ -32,16 +36,23 @@
 #'                                    string_length = 16,
 #'                                    group_information = 8,
 #'                                    individual_information = 2,
-#'                                    random_variation = 2)
+#'                                    random_variation = 2,
+#'                                    alphabet = c("A", "B", "C"),
+#'                                    string_structure = "GI-II-RV-GI"
+#'                                  )
 #'
 #' example_calls_parsons <- parsons_code(example_calls,
 #'                                       "Call",
 #'                                       "Global_head",
 #'                                       "Group_head",
-#'                                       "Individual_middle",
+#'                                       "Individual_head",
+#'                                      "Individual_tail",
+#'                                      "Individual_complete",
+#'                                      "Group_complete",
 #'                                       "Random_variation",
 #'                                       "Group_tail",
 #'                                       "Global_tail",
+#'                                      "String_structure",
 #'                                       list("A" = "up",
 #'                                            "B" = "down",
 #'                                            "C" = "constant")
