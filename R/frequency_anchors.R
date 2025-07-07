@@ -83,7 +83,8 @@ frequency_anchors <- function(df, parsons_col, group_id_col, individual_id_col,
              group_id_col,
              individual_id_col,
              call_id_col,
-             call_string_col) %in% colnames(df))) {
+             call_string_col,
+             string_structure_col) %in% colnames(df))) {
     stop("One or more columns were not found in the data frame")
   }
   if (section_transition != "starting_frequency" &&
@@ -101,7 +102,6 @@ frequency_anchors <- function(df, parsons_col, group_id_col, individual_id_col,
   call_string_col <- tolower(call_string_col)
   string_structure_col <- tolower(string_structure_col)
   string_structure <- unique(df[[string_structure_col]])
-
 
   # Initialize an empty list to store the results
   results <- list()
@@ -130,7 +130,6 @@ frequency_anchors <- function(df, parsons_col, group_id_col, individual_id_col,
     call_id <- df[[call_id_col]][i]
     call_string <- df[[call_string_col]][i]
     parsons_code <- df[[parsons_col]][i] # Extract the full Parsons code for each call 
-    # string_structure <- df[[string_structure_col]][i]
 
     frequencies <- numeric(0) #initiating an empty vector to store the frequencies later
     previous_value <- starting_frequency
