@@ -153,7 +153,7 @@ test_that("The function generates character-based vocal strings per catergory", 
     cat("Individual middle string is:", individual_middle, "\n")
     cat("Expected individual middle length is", individual_information, "\n")
     expect_equal(nchar(individual_middle), individual_information)
-    expect_equal(individual_middle, generated_strings$Individual_middle[i])
+    expect_equal(individual_middle, generated_strings$Individual_complete[i])
   }
 })
 
@@ -220,8 +220,10 @@ test_that("The function generates strings that have the correct given string str
   
   setequal(valid_structures, unique(all_generated_structures$String_structure))
   
-  cat("Expected Valid Structures:", valid_structures)
-  cat("String structures generated:", unique(all_generated_structures$String_structure))
+  cat("Expected Valid Structures:", valid_structures, "\n")
+  cat("String structures generated:", unique(all_generated_structures$String_structure), "\n")
+  expect_identical(valid_structures, unique(all_generated_structures$String_structure))
+  setequal(valid_structures, unique(all_generated_structures$String_structure))
   
  })
 
