@@ -66,7 +66,7 @@ test_that("Error handling for generate_strings", {
       group_information = 7,  # Not even
       individual_information = base_parameters$individual_information
     ),
-    "group_information and individual_information must be even numbers"
+    "random_variation, group_information, and individual_information must be even numbers"
   )
 
   # Test that individual information is even
@@ -79,7 +79,7 @@ test_that("Error handling for generate_strings", {
       group_information = base_parameters$group_information,
       individual_information = 3  # Not even
     ),
-    "group_information and individual_information must be even numbers"
+    "random_variation, group_information, and individual_information must be even numbers"
   )
 
   # Test that all arguments are integers (whole numbers)
@@ -105,7 +105,9 @@ test_that("Error handling for generate_strings", {
       group_information = base_parameters$group_information,
       individual_information = base_parameters$individual_information
     ),
-    "All arguments must be greater than 0"
+    "n_groups, n_individuals, and n_calls must be greater than 0"
+    
+  )
     
     # Test that strings are generated with valid structure argument
     expect_error(
@@ -120,6 +122,8 @@ test_that("Error handling for generate_strings", {
         alphabet = base_parameters$alphabet, 
         string_structure = "GI-GI-GI" # Invalid string structure
       ),
-      "String structure argument must use one of the 16 valid string structures"
-  )
+      "Invalid string_structure. Must be one of: GI-II-RV, GI-RV-II, II-GI-RV, II-RV-GI, RV-II-GI, RV-GI-II, GI-II-RV-GI, GI-RV-II-GI, II-GI-RV-II, II-RV-GI-II, GI-RV-GI, II-RV-II, GI-RV, RV-GI, RV-II, II-RV"
+      
+    )
+    
 })
