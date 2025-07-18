@@ -1,26 +1,61 @@
 # Author: Raneem Samman
 # Date created: November 15, 2024
 
+rm(list = ls())
+
+# make a list of packages to install
+pkgs <- c("testthat", "soundgen", "dplyr", "stringr", "rlang", "tidyverse", "lubridate", "pbapply", "data.table")
+
+# check if the packages are installed, if not, install them
+for (pkg in pkgs) {
+  if (!require(pkg, character.only = TRUE)) {
+    install.packages(pkg, dependencies = TRUE)
+  }
+}
+# load the packages (for software development purposes)
+# lapply(pkgs, library, character.only = TRUE)
+
+# Change the path for testing to reflect where the package is installed on your local machine
+# testing_path <- "/Users/raneemsamman/Documents/GitHub/paRsynth/R" #raneem's
+testing_path <- "~/Desktop/BIRDS/GitHub_repos/paRsynth/R" #alexandra's
+
+# Change the desktop path to reflect where temporary directories for testing will be created to save files generated during testing
+desktop_path <- "~/Desktop"
+
+# Load the paRsynth functions that will be tested below
+source(file.path(testing_path, "generate_strings.R"))
+source(file.path(testing_path, "parsons_code.R"))
+source(file.path(testing_path, "frequency_anchors.R"))
+
 # Helper function to generate test data
 generate_test_data <- function() {
-  Global_head <- "AABA"
-  Group_head <- "BBCC"
-  Individual_middle <- "CCBA"
+  Global_head <- "A"
+  Group_head <- "BB"
+  Individual_head <- "C"
+  Individual_tail <- "A"
+  Individual_complete <- "CA"
+  Group_complete <- "BBCC"
   Random_variation <- "BA"
-  Group_tail <- "BBAC"
-  Global_tail <- "BBAA"
+  Group_tail <- "CC"
+  Global_tail <- "D"
+  String_structure <- "GI-II-RV-GI"
+  mapping <- list("A" = "up", "B" = "down", "C" = "constant")
   
   data.frame(
     Group_ID = 1,
     Individual_ID = 1,
     Call_ID = 1,
-    Call = paste(Global_head, Group_head, Individual_middle, Random_variation, Group_tail, Global_tail, sep = ""),
+    Call = paste(Global_head, Group_head, Individual_complete, Random_variation, Group_tail, Global_tail, sep = ""),
     Global_head = Global_head,
     Group_head = Group_head,
-    Individual_middle = Individual_middle,
+    Individual_head = Individual_head,
+    Individual_tail = Individual_tail,
+    Individual_complete = Individual_complete,
+    Group_complete = Group_complete,
     Random_variation = Random_variation,
     Group_tail = Group_tail,
-    Global_tail = Global_tail
+    Global_tail = Global_tail,
+    String_structure = String_structure
   )
 }
 # Helper function to perform Parsons Code conversion
@@ -30,11 +65,15 @@ apply_parsons_code <- function(generated_strings) {
     string_col = "Call",
     global_head_col = "Global_head",
     group_head_col = "Group_head",
-    individual_middle_col = "Individual_middle",
+    individual_head_col = "Individual_head",
+    individual_tail_col = "Individual_tail",
+    individual_complete_col = "Individual_complete",
+    group_complete_col = "Group_complete",
     random_variation_col = "Random_variation",
     group_tail_col = "Group_tail",
     global_tail_col = "Global_tail",
-    list("A" = "up", "B" = "down", "C" = "constant")
+    string_structure_col = "String_structure",
+    mapping = list("A" = "up", "B" = "down", "C" = "constant")
   )
 }
 
@@ -51,7 +90,8 @@ test_that("The function generates a data frame with multiple rows", {
     group_id_col = "Group_ID", 
     individual_id_col = "Individual_ID", 
     call_id_col = "Call_ID", 
-    call_string_col = "Call", 
+    call_string_col = "Call",
+    string_structure_col = "String_structure",
     starting_frequency = 4000, 
     frequency_shift = 1000, 
     section_transition = "continuous_trajectory"
@@ -59,7 +99,7 @@ test_that("The function generates a data frame with multiple rows", {
   # glimpse(result)
 
   # Test that the returned df (result) has the expected columns
-  expect_true(all(c("Group", "Individual", "Call_ID", "Call", "Parsons_Code") %in% colnames(result)))
+  expect_true(all(c("Group_ID", "Individual_ID", "Call_ID", "Call", "Parsons_Code") %in% colnames(result)))
   expect_true(any(grepl("Frequency", colnames(result)))) # At least one column with the word "Frequency" in the name
 
   # Test the number of frequency columns, which should be equal to the character string length plus 1 for the starting frequency
