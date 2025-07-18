@@ -27,15 +27,17 @@ source(file.path(testing_path, "generate_strings.R"))
 source(file.path(testing_path, "parsons_code.R"))
 
 # Define parameters
-n_groups <- 2
-n_individuals <- 5
-n_calls <- 10
-string_length <- 16
-group_information <- 8
-individual_information <- 2
-random_variation <- 2
-alphabet <- c("A", "B", "C")
-string_structure <- "GI-II-RV-GI"
+base_parameters <- list(
+  n_groups <- 2,
+  n_individuals <- 5,
+  n_calls <- 10,
+  string_length <- 16,
+  group_information <- 8,
+  individual_information <- 2,
+  random_variation <- 2,
+  alphabet <- c("A", "B", "C"),
+  string_structure <- "GI-II-RV-GI"
+)
 
 generated_strings <- generate_strings(
   n_groups = n_groups, 
@@ -102,18 +104,31 @@ test_that("The function generates correct parsons code", {
   Random_variation <- "BA"
   Group_tail <- "BBAC"
   Global_tail <- "BBAA"
+  Individual_head <- gsub('CC', '', Individual_middle)
+  Individual_tail <- gsub('BA', '', Individual_middle)
+  Group_complete <- c(Group_head, Group_tail)
 
   generated_strings <- data.frame(
     Call = paste(Global_head, Group_head, Individual_middle, Random_variation, Group_tail, Global_tail, sep = ""),
-    Global_head = Global_head, Group_head = Group_head, Individual_middle = Individual_middle,
+    Global_head = Global_head, Group_head = Group_head, Individual_head = Individual_head, Individual_tail = Individual_tail, Individual_middle = Individual_middle, Group_complete = Group_complete,
     Random_variation = Random_variation, Group_tail = Group_tail, Global_tail = Global_tail
   )
 
   # Convert using parsons_code
   Conversion <- parsons_code(
-    generated_strings, string_col = "Call", global_head_col = "Global_head", group_head_col = "Group_head", individual_head_col = Individual_middle/2, individual 
-    individual_complete_col = "Individual_middle", random_variation_col = "Random_variation", 
-    group_tail_col = "Group_tail", global_tail_col = "Global_tail", mapping = list("A" = "up", "B" = "down", "C" = "constant")
+    generated_strings, 
+    string_col = "Call", 
+    global_head_col = "Global_head", 
+    group_head_col = "Group_head", 
+    individual_head_col = "Individual_head", 
+    individual_tail_col = "Individual_tail", 
+    individual_complete_col = "Individual_middle", 
+    group_complete_col = "Group_complete", 
+    random_variation_col = "Random_variation", 
+    group_tail_col = "Group_tail", 
+    global_tail_col = "Global_tail", 
+    string_structure_col = "String_structure",
+    mapping = list("A" = "up", "B" = "down", "C" = "constant")
   )
   
   # Check that the generated parsons code is the same as the expected parsons code ("A" = "up", "B" = "down", "C" = "constant")
