@@ -155,9 +155,9 @@ globals <- 8 # 4 characters for the global head, 4 for the global tail
 string_length <- group_information + individual_information + random_variation + globals
 
 # Initialize the values of the number of groups, individuals, and calls
-n_groups <- 5
+n_groups <- 2
 n_individuals <- 10
-n_calls <- 5
+n_calls <- 2
 
 ```
 
@@ -299,9 +299,9 @@ random_variation2 <- 2
 globals2 <- 8
 string_length2 <- group_information2 + individual_information2 + random_variation2 + globals2
 
-n_groups2 <- 5
+n_groups2 <- 2
 n_individuals2 <- 10
-n_calls2 <- 5
+n_calls2 <- 2
 
 ```
 
