@@ -358,48 +358,118 @@ Signal Datasets with paRsynth</h1>
 </div>
 
 
-<p>In this vignette, we will go through how to create synthetic identity
-signals by generating character strings, converting them into Parsons
-code, calculating frequency anchors, and creating synthetic audio files
-using the <code>paRsynth</code> package’s functions.
+<p>In this vignette, we will walk through the process of creating
+synthetic identity signals by using the <code>paRsynth</code> functions
+to randomly generate character strings, convert them into Parsons code,
+calculate frequency anchors, and create synthetic audio files. The
 <code>soundgen</code> and <code>warbleR</code> packages are used to
-create synthetic audio files and create spectrograms, respectively. We
-will create two distinct datasets: 1) more group information than
-individual and 2) more individual information than group information.
-This will be useful when conducting downstream bioacoustics
-analyses.</p>
+convert the calls created by <code>paRsynth</code> into audio files and
+spectrograms, respectively. We will create two distinct datasets: 1)
+more group information than individual, and 2) more individual
+information than group.</p>
 <h1>
 Set Up Working Environment
 </h1>
-<p>Before using the functions in the paRsynth package, there are some
+<p>Before using the <code>paRsynth</code> functions, there are some
 preliminary steps we must go through to create a directory where
 different types of generated data can be automatically stored (audios
 and images). This automatic organization of generated data will make it
-easier to streamline the process of using paRsynth’s functions.</p>
+easier to streamline the process of using the <code>paRsynth</code>
+functions.</p>
 <p><strong>Load packages and set path</strong></p>
 <p>It is good practice to clean your global environment before using
-functions from open-sourced packages. In order for paRsynth functions to
-run, they need specific external R packages as well. For example,
-‘write_audio’ generates and saves audio files in .wav format which
-requires the package <code>soundgen::soundgen()</code> to be installed
-and loaded.</p>
+functions from open-sourced packages. In order for the
+<code>paRsynth</code> functions to run, they need specific external R
+packages as well. For example, <code>write_audio</code> generates and
+saves audio files in .WAV format which requires the package
+<code>soundgen</code> to be installed and loaded.</p>
+<pre class="r"><code># Clean the global environment
+rm(list = ls())
+
+# Specify the required packages
+X &lt;- c(&quot;devtools&quot;, &quot;dplyr&quot;, &quot;stringdist&quot;, &quot;tidyverse&quot;, &quot;ggplot2&quot;, &quot;apcluster&quot;, &quot;soundgen&quot;, &quot;parallel&quot;, &quot;stringr&quot;, &quot;data.table&quot;, &quot;tuneR&quot;, &quot;pbapply&quot;, &quot;warbleR&quot;, &quot;magrittr&quot;)
+
+# Install the packages in X if not already installed
+is_installed &lt;- function(p) is.element(p, installed.packages()[,1])
+
+invisible(lapply(1:length(X), function(x){
+  if(!is_installed(X[x])){
+    install.packages(X[x], repos = &quot;http://lib.stat.cmu.edu/R/CRAN&quot;)
+  }
+}))
+
+# Install the paRsynth package from GitHub if you haven&#39;t installed it already
+devtools::install_github(&quot;gsvidaurre/paRsynth&quot;)
+
+# Add paRsynth to the list of packages to load
+X &lt;- c(X, &quot;paRsynth&quot;)
+
+# Change &quot;Desktop/.../GitHub_repos&quot; to where paRsynth is stored on your local machine
+# testing_path &lt;- &quot;C://Users/summe/OneDrive/Desktop/github_repo/paRsynth/R/&quot; # Summer&#39;s testing path
+testing_path &lt;- &quot;~/Desktop/BIRDS/GitHub_repos/paRsynth/R&quot; # Alexandra&#39;s testing path
+
+# Load all of the packages specified above
+invisible(lapply(X, library, character.only = TRUE))</code></pre>
 <p><strong>Initialize working directories for data on your local
 machine</strong></p>
 <p>It is important to have your files organized, especially when
 creating many different types of output data (audios and images).
 Therefore, initializing working directories in the beginning will be
-helpful in understanding the data you create with paRsynth and where
-they are stored.</p>
-<p><strong>Source the paRsynth functions directly from the GitHub
-repository</strong></p>
-<p>In order to use the paRsynth functions, you will need to source them
-into your enviornment.</p>
-<p><strong>Check out documentation for the paRsynth functions. These
-functions are written below in the order in which they should be
-used</strong></p>
+helpful in understanding the data you create with <code>paRsynth</code>
+and where they get stored.</p>
+<pre class="r"><code># Initialize a base path (this will need to be different per user)
+# path &lt;- &quot;/Users/raneemsamman/Desktop&quot; # Raneem&#39;s path
+# path &lt;- &quot;/Users/gracesmith-vidaurre/Desktop&quot; # Grace&#39;s path
+path &lt;- &quot;/Users/gretheljuarez/Desktop/BIRDS&quot; # Alexandra&#39;s path
+# path &lt;- &quot;/Users/summe/OneDrive/Desktop/&quot; # Summer&#39;s path
+
+# Initialize the directory for analysis on your local computer
+analysis_dir &lt;- &quot;paRsynth_methods_synthetic_dataset&quot;
+
+# Combine the base path and the newly created data directory into a single path
+analysis_path &lt;- file.path(path, analysis_dir)
+
+# Create the data directory if it doesn&#39;t already exist on your computer
+if(!dir.exists(analysis_path)){ 
+  dir.create(analysis_path)
+}
+
+# Specify a folder inside the analysis directory where audio will be written out/read in
+audio_dir &lt;- &quot;audio&quot;
+
+# Combine the base path, the analysis directory, and the audio directory into a single path
+audio_path &lt;- file.path(path, analysis_dir, audio_dir)
+
+# Create the audio directory if it doesn&#39;t already exist on your computer
+if(!dir.exists(audio_path)){ 
+  dir.create(audio_path)
+}
+
+# Specify a folder inside the analysis directory where images will be written out/read in
+images_dir &lt;- &quot;images&quot;
+
+# Combine the base path, the analysis directory, and the data directory into a single path
+images_path &lt;- file.path(path, analysis_dir, images_dir)
+
+# Create the data directory if it doesn&#39;t already exist on your computer
+if(!dir.exists(images_path)){ 
+  dir.create(images_path)
+}</code></pre>
+<p><strong>Source the <code>paRsynth</code> functions directly from the
+GitHub repository</strong></p>
+<p>In order to use the <code>paRsynth</code> functions, you will need to
+source them into your environment.</p>
+<pre class="r"><code># Load the paRsynth functions that will be tested below
+source(file.path(testing_path, &quot;generate_strings.R&quot;))
+source(file.path(testing_path, &quot;parsons_code.R&quot;))
+source(file.path(testing_path, &quot;frequency_anchors.R&quot;))
+source(file.path(testing_path, &quot;write_audio.R&quot;))</code></pre>
+<p><strong>Check out documentation for the <code>paRsynth</code>
+functions.</strong></p>
 <p>Before using the paRsynth package, it would be beneficial for you to
 go over the description, usage, arguments, extra details, and examples
-of each function.</p>
+of each function. These functions are written below in the order in
+which they should be used</p>
 <pre class="r"><code>?paRsynth::generate_strings
 ?paRsynth::parsons_code
 ?paRsynth::frequency_anchors
@@ -408,72 +478,188 @@ of each function.</p>
 paRsynth Workflow
 </h1>
 <p><strong>Step 1: Set parameters</strong></p>
-<p>After installing paRsynth and loading the relevant libraries, you
-will be able to take the first step of setting the parameters of the
-synthetic bird calls you will generate with paRsynth.</p>
+<p>After installing <code>paRsynth</code> and loading the relevant
+libraries, you will be able to take the first step in setting the
+parameters of the synthetic calls you will generate with
+<code>paRsynth</code>.</p>
+<pre class="r"><code># Set the seed for reproducibility
+set.seed(333)
+
+# Initialize the values of group_information and individual_information, which correspond to the length of the string that will be allocated to encoding group membership or individual identity information
+# Group information can outweigh individual information by a factor of at least 10 or higher
+# Random variation should be at least half or more compared to individual information
+individual_information &lt;- 2
+group_information &lt;- 4
+
+# Create variation within individuals
+random_variation &lt;- 2
+
+# globals refers to the number of characters in the the head and tail shared among all calls in the dataset to bound the variation. Number input here is split in half and those amount of characters are allocated to head and tail of string
+globals &lt;- 8 # 4 characters for the global head, 4 for the global tail
+
+# Calculate the string_length of the calls you will make by adding all the different segments of information
+string_length &lt;- group_information + individual_information + random_variation + globals
+
+# Initialize the values of the number of groups, individuals, and calls
+n_groups &lt;- 5
+n_individuals &lt;- 10
+n_calls &lt;- 5</code></pre>
 <p><strong>Step 2: Create character strings representing vocal signals
 with more group membership information encoded within the call than
 individual identity information</strong></p>
 <p>The second step is generating the character strings that represent
-vocalizations using the function generate_strings(). These strings
+calls using the function <code>generate_strings()</code>. These strings
 encode both group membership (characters that are shared across
 individuals within a group) and individual identity (characters that are
 unique to each individual in a group). The function allows you to
 specify the length of the string as well as how much of the string
 encodes group versus individual identity information. It also allows you
 to control the number of groups, individuals in each group and calls per
-individual. These variables that you can control are known as the
-parameters of the function.</p>
+individual.</p>
+<pre class="r"><code># Generate a data frame of randomly generated character strings with assigned levels of group and individual information using &#39;generate_strings&#39;
+calls &lt;- generate_strings(
+  n_groups = n_groups, 
+  n_individuals = n_individuals, 
+  n_calls = n_calls, 
+  string_length = string_length, 
+  group_information = group_information, 
+  individual_information = individual_information,
+  random_variation = random_variation
+  )
+
+dplyr::glimpse(calls)</code></pre>
+<pre><code>## Rows: 250
+## Columns: 10
+## $ Group             &lt;int&gt; 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1…
+## $ Individual        &lt;dbl&gt; 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 4, 4, 4…
+## $ Call_ID           &lt;dbl&gt; 1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3…
+## $ Call              &lt;chr&gt; &quot;BACBCCBABBCACBBC&quot;, &quot;BACBCCBAAACACBBC&quot;, &quot;BACBCCBAAAC…
+## $ Global_head       &lt;chr&gt; &quot;BACB&quot;, &quot;BACB&quot;, &quot;BACB&quot;, &quot;BACB&quot;, &quot;BACB&quot;, &quot;BACB&quot;, &quot;BAC…
+## $ Group_head        &lt;chr&gt; &quot;CC&quot;, &quot;CC&quot;, &quot;CC&quot;, &quot;CC&quot;, &quot;CC&quot;, &quot;CC&quot;, &quot;CC&quot;, &quot;CC&quot;, &quot;CC&quot;…
+## $ Individual_middle &lt;chr&gt; &quot;BA&quot;, &quot;BA&quot;, &quot;BA&quot;, &quot;BA&quot;, &quot;BA&quot;, &quot;AC&quot;, &quot;AC&quot;, &quot;AC&quot;, &quot;AC&quot;…
+## $ Random_variation  &lt;chr&gt; &quot;BB&quot;, &quot;AA&quot;, &quot;AA&quot;, &quot;CA&quot;, &quot;BA&quot;, &quot;AC&quot;, &quot;AC&quot;, &quot;BA&quot;, &quot;BA&quot;…
+## $ Group_tail        &lt;chr&gt; &quot;CA&quot;, &quot;CA&quot;, &quot;CA&quot;, &quot;CA&quot;, &quot;CA&quot;, &quot;CA&quot;, &quot;CA&quot;, &quot;CA&quot;, &quot;CA&quot;…
+## $ Global_tail       &lt;chr&gt; &quot;CBBC&quot;, &quot;CBBC&quot;, &quot;CBBC&quot;, &quot;CBBC&quot;, &quot;CBBC&quot;, &quot;CBBC&quot;, &quot;CBB…</code></pre>
 <p>The above chunk of code will generate a data frame called calls. Each
-row of the data frame represents a call, including the group,
-individual, and call identifiers, along with the vocalization string
+row represents a specific call, including information about the group,
+individual, and call identifiers, along with the character string
 itself.</p>
 <p><strong>Step 3: Convert strings to Parsons code</strong></p>
 <p>Now that you have a data frame of generated calls, you can use the
-parsons_code() function to convert the vocalization strings in the data
-frame example_calls into Parsons code. The goal of this step is to
+<code>parsons_code()</code> function to convert the character strings in
+the data frame calls into Parsons code. The goal of this step is to
 create a representation of the direction of frequency shifts (“up”,
 “down”, “constant”) that will be used to modulate the sound’s pitch when
 generating synthetic audio later on. This function has 3 parameters: the
 data frame (df), the name of the column containing the character strings
 (string_col), and the list that maps each character (“A”, “B”, “C”) to a
 direction in Parsons code (“up”, “down”, “constant”) (mapping).</p>
-<p>This will return a data frame with all the previous columns in
-example_calls in addition to one extra column called “Parsons_code”,
-which contains the Parsons code representation of each segment of the
-vocalization string.</p>
+<pre class="r"><code>calls_parsons &lt;- parsons_code(
+  df = calls, 
+  string_col = &quot;Call&quot;, 
+  global_head_col = &quot;Global_head&quot;,
+  group_head_col = &quot;Group_head&quot;,
+  individual_middle_col = &quot;Individual_middle&quot;,
+  group_tail_col = &quot;Group_tail&quot;,
+  global_tail_col = &quot;Global_tail&quot;,
+  random_variation_col = &quot;Random_variation&quot;,
+  mapping = list(&quot;A&quot; = &quot;up&quot;, &quot;B&quot; = &quot;down&quot;, &quot;C&quot; = &quot;constant&quot;)
+)
+
+glimpse(calls_parsons)</code></pre>
+<pre><code>## Rows: 250
+## Columns: 17
+## $ Group                          &lt;int&gt; 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, …
+## $ Individual                     &lt;dbl&gt; 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 3, 3, 3, …
+## $ Call_ID                        &lt;dbl&gt; 1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, …
+## $ Call                           &lt;chr&gt; &quot;BACBCCBABBCACBBC&quot;, &quot;BACBCCBAAACACBBC&quot;,…
+## $ Global_head                    &lt;chr&gt; &quot;BACB&quot;, &quot;BACB&quot;, &quot;BACB&quot;, &quot;BACB&quot;, &quot;BACB&quot;,…
+## $ Group_head                     &lt;chr&gt; &quot;CC&quot;, &quot;CC&quot;, &quot;CC&quot;, &quot;CC&quot;, &quot;CC&quot;, &quot;CC&quot;, &quot;CC…
+## $ Individual_middle              &lt;chr&gt; &quot;BA&quot;, &quot;BA&quot;, &quot;BA&quot;, &quot;BA&quot;, &quot;BA&quot;, &quot;AC&quot;, &quot;AC…
+## $ Random_variation               &lt;chr&gt; &quot;BB&quot;, &quot;AA&quot;, &quot;AA&quot;, &quot;CA&quot;, &quot;BA&quot;, &quot;AC&quot;, &quot;AC…
+## $ Group_tail                     &lt;chr&gt; &quot;CA&quot;, &quot;CA&quot;, &quot;CA&quot;, &quot;CA&quot;, &quot;CA&quot;, &quot;CA&quot;, &quot;CA…
+## $ Global_tail                    &lt;chr&gt; &quot;CBBC&quot;, &quot;CBBC&quot;, &quot;CBBC&quot;, &quot;CBBC&quot;, &quot;CBBC&quot;,…
+## $ Call_Parsons_Code              &lt;chr&gt; &quot;down-up-constant-down-constant-constan…
+## $ Global_Head_Parsons_Code       &lt;chr&gt; &quot;down-up-constant-down&quot;, &quot;down-up-const…
+## $ Group_Head_Parsons_Code        &lt;chr&gt; &quot;constant-constant&quot;, &quot;constant-constant…
+## $ Individual_Middle_Parsons_Code &lt;chr&gt; &quot;down-up&quot;, &quot;down-up&quot;, &quot;down-up&quot;, &quot;down-…
+## $ Random_Variation_Parsons_Code  &lt;chr&gt; &quot;down-down&quot;, &quot;up-up&quot;, &quot;up-up&quot;, &quot;constan…
+## $ Group_Tail_Parsons_Code        &lt;chr&gt; &quot;constant-up&quot;, &quot;constant-up&quot;, &quot;constant…
+## $ Global_Tail_Parsons_Code       &lt;chr&gt; &quot;constant-down-down-constant&quot;, &quot;constan…</code></pre>
+<p>This will return a data frame with all the previous columns in the
+previous dataframe, calls, in addition to extra columns with the Parsons
+Code conversions.</p>
 <p><strong>Step 4: Convert the Parsons code to frequency
 values</strong></p>
 <p>With the Parsons code in your data frame, you are now able to use the
-frequency_anchors() function to create frequency anchors that will guide
-the changes in pitch when creating synthetic audio files. Starting at a
-baseline frequency value, frequency values are calculated for each
-sequential character of the string using the Parsons code from the
-previous step. Therefore, the parameters of this function are the data
-frame with the parsons code, the names of the columns containing the
-parsons code (parsons_col), the numeric group identifiers
+<code>frequency_anchors()</code> function to create frequency anchors
+that will guide the changes in pitch when creating synthetic audio
+files. Starting at a baseline frequency value, frequency values are
+calculated for each sequential character of the string using the Parsons
+code from the previous step. Therefore, the parameters of this function
+are the data frame with the parsons code, the names of the columns
+containing the parsons code (parsons_col), the numeric group identifiers
 (group_id_col), the numeric individual identifiers (individual_id_col),
-unique numeric identifiers for each vocalization per individual
-(call_id_col), the character string per vocalization (call_string_col),
-the baseline frequency value (starting_frequency) which has a default of
-4000 Hz, and a value of frequency shift (frequency_shift) which has a
-default value of 1000.</p>
+unique numeric identifiers for each call per individual (call_id_col),
+the character string per call (call_string_col), the baseline frequency
+value (starting_frequency) which has a default of 4000 Hz, and a value
+of frequency shift (frequency_shift) which has a default value of 1000.
+The ‘section_transition’ dictates how the method on how the Parsons Code
+conversion gets read; either as a continous string or based on the
+different segments. Refer to Vignette 02b: Effect of Different Frequency
+Anchors Arguments on Spectrograms for more information about this
+argument.</p>
+<pre class="r"><code>calls_parsons_frequencies &lt;- frequency_anchors(
+  df = calls_parsons, 
+  parsons_col = &quot;Call_Parsons_Code&quot;, 
+  group_id_col = &quot;Group&quot;, 
+  individual_id_col = &quot;Individual&quot;, 
+  call_id_col = &quot;Call_ID&quot;, 
+  call_string_col = &quot;Call&quot;, 
+  starting_frequency = 4000, 
+  frequency_shift = 1000,
+  section_transition = &quot;continuous_trajectory&quot;
+  )
+
+glimpse(calls_parsons_frequencies)</code></pre>
+<pre><code>## Rows: 250
+## Columns: 22
+## $ Group        &lt;int&gt; 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, …
+## $ Individual   &lt;dbl&gt; 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 4, 4, 4, 4, …
+## $ Call_ID      &lt;dbl&gt; 1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, 4, …
+## $ Call         &lt;chr&gt; &quot;BACBCCBABBCACBBC&quot;, &quot;BACBCCBAAACACBBC&quot;, &quot;BACBCCBAAACACBBC…
+## $ Parsons_Code &lt;chr&gt; &quot;constant-down-down-constant&quot;, &quot;constant-down-down-consta…
+## $ Frequency1   &lt;dbl&gt; 4000, 4000, 4000, 4000, 4000, 4000, 4000, 4000, 4000, 400…
+## $ Frequency2   &lt;dbl&gt; 3000, 3000, 3000, 3000, 3000, 3000, 3000, 3000, 3000, 300…
+## $ Frequency3   &lt;dbl&gt; 4000, 4000, 4000, 4000, 4000, 4000, 4000, 4000, 4000, 400…
+## $ Frequency4   &lt;dbl&gt; 4000, 4000, 4000, 4000, 4000, 4000, 4000, 4000, 4000, 400…
+## $ Frequency5   &lt;dbl&gt; 3000, 3000, 3000, 3000, 3000, 3000, 3000, 3000, 3000, 300…
+## $ Frequency6   &lt;dbl&gt; 3000, 3000, 3000, 3000, 3000, 3000, 3000, 3000, 3000, 300…
+## $ Frequency7   &lt;dbl&gt; 3000, 3000, 3000, 3000, 3000, 3000, 3000, 3000, 3000, 300…
+## $ Frequency8   &lt;dbl&gt; 2000, 2000, 2000, 2000, 2000, 4000, 4000, 4000, 4000, 400…
+## $ Frequency9   &lt;dbl&gt; 3000, 3000, 3000, 3000, 3000, 4000, 4000, 4000, 4000, 400…
+## $ Frequency10  &lt;dbl&gt; 2000, 4000, 4000, 3000, 2000, 5000, 5000, 3000, 3000, 400…
+## $ Frequency11  &lt;dbl&gt; 1000, 5000, 5000, 4000, 3000, 5000, 5000, 4000, 4000, 500…
+## $ Frequency12  &lt;dbl&gt; 1000, 5000, 5000, 4000, 3000, 5000, 5000, 4000, 4000, 500…
+## $ Frequency13  &lt;dbl&gt; 2000, 6000, 6000, 5000, 4000, 6000, 6000, 5000, 5000, 600…
+## $ Frequency14  &lt;dbl&gt; 2000, 6000, 6000, 5000, 4000, 6000, 6000, 5000, 5000, 600…
+## $ Frequency15  &lt;dbl&gt; 1000, 5000, 5000, 4000, 3000, 5000, 5000, 4000, 4000, 500…
+## $ Frequency16  &lt;dbl&gt; 1000, 4000, 4000, 3000, 2000, 4000, 4000, 3000, 3000, 400…
+## $ Frequency17  &lt;dbl&gt; 1000, 4000, 4000, 3000, 2000, 4000, 4000, 3000, 3000, 400…</code></pre>
 <p>This will return an updated data frame that includes all of the
 previous columns in addition to new columns that represent each
-frequency anchor for each vocalization (the number of columns added in
-this step corresponds to the character length of your vocalization
-string).</p>
-<p><strong>Step 5: For each call or string, use these frequency anchor
-vectors to generate synthetic audio files with the soundgen
-package</strong></p>
+frequency anchor for each call (the number of columns added in this step
+corresponds to the character length of your call).</p>
+<p><strong>Step 5: For each call, use these frequency anchor vectors to
+generate synthetic audio files with <code>soundgen</code></strong></p>
 <p>Now, finally, you are equipped with all the necessary data to
 generate the audio files that will allow you to hear the synthetic bird
-calls we generated! To do that, we will use the function write_audio().
-This function creates a sound file (in .wav format) for each
-vocalization and saves it to your desired directory. Each file will
-represent one vocalization with its own unique frequency modulation
-pattern that was developed in step 3. This function has five parameters:
-the data frame with frequency anchors and string metadata (df), the
+calls we generated! To do that, we will use the function
+<code>write_audio()</code>. This function creates a sound file (in .WAV
+format) for each call and saves it to your desired directory. Each file
+will represent one call with its own unique frequency modulation pattern
+that was developed in step 3. This function has five parameters: the
+data frame with frequency anchors and string metadata (df), the
 directory where the audio files will be saved (save_path), the sampling
 rate for the audio files with a default of 150000 Hz (sampling_rate),
 the length of the syllable in milliseconds with a default of 200 ms
@@ -481,46 +667,344 @@ the length of the syllable in milliseconds with a default of 200 ms
 the prefix you use for the synthetic audio files should match the social
 level that should contain the most information (here it is the group
 level because the group information string is longer).</p>
-<p>This will create files with the extension .wav for each vocalization
+<pre class="r"><code>synthetic_call_metadata1 &lt;- write_audio(
+  df = calls_parsons_frequencies,
+  save_path = audio_path, 
+  sampling_rate = 44100,
+  sylLen = 200,
+  temperature = 0.025,  # default stochasticity in generating sound
+  pitch_sampling_rate = 44100,
+  smoothing = list(interpol = &quot;loess&quot;, loessSpan = 1, discontThres = 0, jumpThres = 0),
+  rolloffExact = c(0.25), # specify an amplitude value for the fundamental only, which will silence all harmonics
+  formants = NA,
+  vocalTract = NA,
+  vibratoFreq = 1,
+  prefix = &quot;GroupMembership&quot;,
+  invalidArgAction = &quot;ignore&quot;
+  )
+
+glimpse(synthetic_call_metadata1)</code></pre>
+<pre><code>## Rows: 250
+## Columns: 23
+## $ Group           &lt;int&gt; 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, …
+## $ Individual      &lt;dbl&gt; 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 4, 4, 4, …
+## $ Call_ID         &lt;dbl&gt; 1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, …
+## $ Call            &lt;chr&gt; &quot;BACBCCBABBCACBBC&quot;, &quot;BACBCCBAAACACBBC&quot;, &quot;BACBCCBAAACAC…
+## $ Parsons_Code    &lt;chr&gt; &quot;constant-down-down-constant&quot;, &quot;constant-down-down-con…
+## $ Frequency1      &lt;dbl&gt; 4000, 4000, 4000, 4000, 4000, 4000, 4000, 4000, 4000, …
+## $ Frequency2      &lt;dbl&gt; 3000, 3000, 3000, 3000, 3000, 3000, 3000, 3000, 3000, …
+## $ Frequency3      &lt;dbl&gt; 4000, 4000, 4000, 4000, 4000, 4000, 4000, 4000, 4000, …
+## $ Frequency4      &lt;dbl&gt; 4000, 4000, 4000, 4000, 4000, 4000, 4000, 4000, 4000, …
+## $ Frequency5      &lt;dbl&gt; 3000, 3000, 3000, 3000, 3000, 3000, 3000, 3000, 3000, …
+## $ Frequency6      &lt;dbl&gt; 3000, 3000, 3000, 3000, 3000, 3000, 3000, 3000, 3000, …
+## $ Frequency7      &lt;dbl&gt; 3000, 3000, 3000, 3000, 3000, 3000, 3000, 3000, 3000, …
+## $ Frequency8      &lt;dbl&gt; 2000, 2000, 2000, 2000, 2000, 4000, 4000, 4000, 4000, …
+## $ Frequency9      &lt;dbl&gt; 3000, 3000, 3000, 3000, 3000, 4000, 4000, 4000, 4000, …
+## $ Frequency10     &lt;dbl&gt; 2000, 4000, 4000, 3000, 2000, 5000, 5000, 3000, 3000, …
+## $ Frequency11     &lt;dbl&gt; 1000, 5000, 5000, 4000, 3000, 5000, 5000, 4000, 4000, …
+## $ Frequency12     &lt;dbl&gt; 1000, 5000, 5000, 4000, 3000, 5000, 5000, 4000, 4000, …
+## $ Frequency13     &lt;dbl&gt; 2000, 6000, 6000, 5000, 4000, 6000, 6000, 5000, 5000, …
+## $ Frequency14     &lt;dbl&gt; 2000, 6000, 6000, 5000, 4000, 6000, 6000, 5000, 5000, …
+## $ Frequency15     &lt;dbl&gt; 1000, 5000, 5000, 4000, 3000, 5000, 5000, 4000, 4000, …
+## $ Frequency16     &lt;dbl&gt; 1000, 4000, 4000, 3000, 2000, 4000, 4000, 3000, 3000, …
+## $ Frequency17     &lt;dbl&gt; 1000, 4000, 4000, 3000, 2000, 4000, 4000, 3000, 3000, …
+## $ audio_file_name &lt;chr&gt; &quot;GroupMembership_Group1_Indiv1_Call1.wav&quot;, &quot;GroupMembe…</code></pre>
+<p>This will create files with the extension .WAV for each vocalization
 and will save them in your desired and specified directory with a prefix
 of your preference.</p>
 <p><strong>Step 6: Save the metadata for the synthetic audio files to a
 CSV file</strong></p>
-<p>The data frames that you generate in R using paRsynth can be saved as
-physical files in your working directory. You can also save your
-paRsynth generated metadata into a CSV file. I recommend using this file
-type since it is compatible with R, Microsoft Word, and other software.
-You can use the function <code>write.csv()</code> to save data frames to
-.csv spreadsheets on your computer:</p>
-<p>You have generated a metadata with paRsyth and it has been saved as a
-CSV file!</p>
+<p>The data frames that you generated in R using ‘paRsynth’ can be saved
+as files in your working directory. You can also save your ‘paRsynth’
+generated metadata into a CSV file. I recommend using this file type
+since it is compatible with R, Microsoft Word, and other software. You
+can use the function <code>write.csv()</code> to save data frames to
+.CSV spreadsheets on your computer.</p>
+<pre class="r"><code># Add extra metadata for upcoming image files names and rearrange columns
+synthetic_call_metadata1 %&gt;%
+  write.csv(., file = file.path(analysis_path, &quot;synthetic_call_metadata1.csv&quot;), row.names = FALSE) </code></pre>
+<pre class="r"><code>synthetic_call_metadata1csv &lt;- read.csv(file.path(analysis_path, &quot;synthetic_call_metadata1.csv&quot;))
+
+glimpse(synthetic_call_metadata1csv)</code></pre>
+<pre><code>## Rows: 250
+## Columns: 23
+## $ Group           &lt;int&gt; 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, …
+## $ Individual      &lt;int&gt; 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 4, 4, 4, …
+## $ Call_ID         &lt;int&gt; 1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, …
+## $ Call            &lt;chr&gt; &quot;BACBCCBABBCACBBC&quot;, &quot;BACBCCBAAACACBBC&quot;, &quot;BACBCCBAAACAC…
+## $ Parsons_Code    &lt;chr&gt; &quot;constant-down-down-constant&quot;, &quot;constant-down-down-con…
+## $ Frequency1      &lt;int&gt; 4000, 4000, 4000, 4000, 4000, 4000, 4000, 4000, 4000, …
+## $ Frequency2      &lt;int&gt; 3000, 3000, 3000, 3000, 3000, 3000, 3000, 3000, 3000, …
+## $ Frequency3      &lt;int&gt; 4000, 4000, 4000, 4000, 4000, 4000, 4000, 4000, 4000, …
+## $ Frequency4      &lt;int&gt; 4000, 4000, 4000, 4000, 4000, 4000, 4000, 4000, 4000, …
+## $ Frequency5      &lt;int&gt; 3000, 3000, 3000, 3000, 3000, 3000, 3000, 3000, 3000, …
+## $ Frequency6      &lt;int&gt; 3000, 3000, 3000, 3000, 3000, 3000, 3000, 3000, 3000, …
+## $ Frequency7      &lt;int&gt; 3000, 3000, 3000, 3000, 3000, 3000, 3000, 3000, 3000, …
+## $ Frequency8      &lt;int&gt; 2000, 2000, 2000, 2000, 2000, 4000, 4000, 4000, 4000, …
+## $ Frequency9      &lt;int&gt; 3000, 3000, 3000, 3000, 3000, 4000, 4000, 4000, 4000, …
+## $ Frequency10     &lt;int&gt; 2000, 4000, 4000, 3000, 2000, 5000, 5000, 3000, 3000, …
+## $ Frequency11     &lt;int&gt; 1000, 5000, 5000, 4000, 3000, 5000, 5000, 4000, 4000, …
+## $ Frequency12     &lt;int&gt; 1000, 5000, 5000, 4000, 3000, 5000, 5000, 4000, 4000, …
+## $ Frequency13     &lt;int&gt; 2000, 6000, 6000, 5000, 4000, 6000, 6000, 5000, 5000, …
+## $ Frequency14     &lt;int&gt; 2000, 6000, 6000, 5000, 4000, 6000, 6000, 5000, 5000, …
+## $ Frequency15     &lt;int&gt; 1000, 5000, 5000, 4000, 3000, 5000, 5000, 4000, 4000, …
+## $ Frequency16     &lt;int&gt; 1000, 4000, 4000, 3000, 2000, 4000, 4000, 3000, 3000, …
+## $ Frequency17     &lt;int&gt; 1000, 4000, 4000, 3000, 2000, 4000, 4000, 3000, 3000, …
+## $ audio_file_name &lt;chr&gt; &quot;GroupMembership_Group1_Indiv1_Call1.wav&quot;, &quot;GroupMembe…</code></pre>
+<p>You have generated a complete dataset with more group membership
+information than individual identity with <code>paRsynth</code> and have
+saved it as a .CSV file in your established directory!</p>
 <h2>
 2nd Dataset: More Individual Information than Group Information
 </h2>
 <p>Let’s do a 2nd example where individual information is greater than
 group information. Repeat steps 1 - 6 but interchange
-‘individual_information’ and ’group_information in the code. Reassign
-factor_ratio to a smaller even integer starting from 2 - 10.</p>
-<p>The .wav files for this dataset have been added to the audio folder
-and a CSV file has been created for it. After running this code you will
-have two datasets: 1) reflects vocalizations with more group information
-than individual and 2) vice versa.</p>
+‘individual_information’ and ‘group_information’ in the code.</p>
+<pre class="r"><code># Set the seed for reproducibility
+set.seed(444)
+
+group_information2 &lt;- 2
+individual_information2 &lt;- 4
+
+random_variation2 &lt;- 2
+
+globals2 &lt;- 8
+string_length2 &lt;- group_information2 + individual_information2 + random_variation2 + globals2
+
+n_groups2 &lt;- 5
+n_individuals2 &lt;- 10
+n_calls2 &lt;- 5</code></pre>
+<pre class="r"><code>### Generate the string for each call
+calls2 &lt;- generate_strings(
+  n_groups = n_groups2, 
+  n_individuals = n_individuals2, 
+  n_calls = n_calls2, 
+  string_length = string_length2, 
+  group_information = group_information2, 
+  individual_information = individual_information2,
+  random_variation = random_variation2
+  )
+
+glimpse(calls2)</code></pre>
+<pre><code>## Rows: 250
+## Columns: 10
+## $ Group             &lt;int&gt; 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1…
+## $ Individual        &lt;dbl&gt; 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 4, 4, 4…
+## $ Call_ID           &lt;dbl&gt; 1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3…
+## $ Call              &lt;chr&gt; &quot;BCCAACCCACCCCBAC&quot;, &quot;BCCAACCCACBCCBAC&quot;, &quot;BCCAACCCAAB…
+## $ Global_head       &lt;chr&gt; &quot;BCCA&quot;, &quot;BCCA&quot;, &quot;BCCA&quot;, &quot;BCCA&quot;, &quot;BCCA&quot;, &quot;BCCA&quot;, &quot;BCC…
+## $ Group_head        &lt;chr&gt; &quot;A&quot;, &quot;A&quot;, &quot;A&quot;, &quot;A&quot;, &quot;A&quot;, &quot;A&quot;, &quot;A&quot;, &quot;A&quot;, &quot;A&quot;, &quot;A&quot;, &quot;A…
+## $ Individual_middle &lt;chr&gt; &quot;CCCA&quot;, &quot;CCCA&quot;, &quot;CCCA&quot;, &quot;CCCA&quot;, &quot;CCCA&quot;, &quot;BACA&quot;, &quot;BAC…
+## $ Random_variation  &lt;chr&gt; &quot;CC&quot;, &quot;CB&quot;, &quot;AB&quot;, &quot;AB&quot;, &quot;BC&quot;, &quot;AB&quot;, &quot;BB&quot;, &quot;BC&quot;, &quot;AC&quot;…
+## $ Group_tail        &lt;chr&gt; &quot;C&quot;, &quot;C&quot;, &quot;C&quot;, &quot;C&quot;, &quot;C&quot;, &quot;C&quot;, &quot;C&quot;, &quot;C&quot;, &quot;C&quot;, &quot;C&quot;, &quot;C…
+## $ Global_tail       &lt;chr&gt; &quot;CBAC&quot;, &quot;CBAC&quot;, &quot;CBAC&quot;, &quot;CBAC&quot;, &quot;CBAC&quot;, &quot;CBAC&quot;, &quot;CBA…</code></pre>
+<pre class="r"><code>### Convert each string to Parsons code
+calls_parsons2 &lt;- parsons_code(
+  df = calls2, 
+  string_col = &quot;Call&quot;, 
+  global_head_col = &quot;Global_head&quot;,
+  group_head_col = &quot;Group_head&quot;,
+  individual_middle_col = &quot;Individual_middle&quot;,
+  group_tail_col = &quot;Group_tail&quot;,
+  global_tail_col = &quot;Global_tail&quot;,
+  random_variation_col = &quot;Random_variation&quot;,
+  mapping = list(&quot;A&quot; = &quot;up&quot;, &quot;B&quot; = &quot;down&quot;, &quot;C&quot; = &quot;constant&quot;)
+)
+
+glimpse(calls_parsons2)</code></pre>
+<pre><code>## Rows: 250
+## Columns: 17
+## $ Group                          &lt;int&gt; 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, …
+## $ Individual                     &lt;dbl&gt; 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 3, 3, 3, …
+## $ Call_ID                        &lt;dbl&gt; 1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, …
+## $ Call                           &lt;chr&gt; &quot;BCCAACCCACCCCBAC&quot;, &quot;BCCAACCCACBCCBAC&quot;,…
+## $ Global_head                    &lt;chr&gt; &quot;BCCA&quot;, &quot;BCCA&quot;, &quot;BCCA&quot;, &quot;BCCA&quot;, &quot;BCCA&quot;,…
+## $ Group_head                     &lt;chr&gt; &quot;A&quot;, &quot;A&quot;, &quot;A&quot;, &quot;A&quot;, &quot;A&quot;, &quot;A&quot;, &quot;A&quot;, &quot;A&quot;,…
+## $ Individual_middle              &lt;chr&gt; &quot;CCCA&quot;, &quot;CCCA&quot;, &quot;CCCA&quot;, &quot;CCCA&quot;, &quot;CCCA&quot;,…
+## $ Random_variation               &lt;chr&gt; &quot;CC&quot;, &quot;CB&quot;, &quot;AB&quot;, &quot;AB&quot;, &quot;BC&quot;, &quot;AB&quot;, &quot;BB…
+## $ Group_tail                     &lt;chr&gt; &quot;C&quot;, &quot;C&quot;, &quot;C&quot;, &quot;C&quot;, &quot;C&quot;, &quot;C&quot;, &quot;C&quot;, &quot;C&quot;,…
+## $ Global_tail                    &lt;chr&gt; &quot;CBAC&quot;, &quot;CBAC&quot;, &quot;CBAC&quot;, &quot;CBAC&quot;, &quot;CBAC&quot;,…
+## $ Call_Parsons_Code              &lt;chr&gt; &quot;down-constant-constant-up-up-constant-…
+## $ Global_Head_Parsons_Code       &lt;chr&gt; &quot;down-constant-constant-up&quot;, &quot;down-cons…
+## $ Group_Head_Parsons_Code        &lt;chr&gt; &quot;up&quot;, &quot;up&quot;, &quot;up&quot;, &quot;up&quot;, &quot;up&quot;, &quot;up&quot;, &quot;up…
+## $ Individual_Middle_Parsons_Code &lt;chr&gt; &quot;constant-constant-constant-up&quot;, &quot;const…
+## $ Random_Variation_Parsons_Code  &lt;chr&gt; &quot;constant-constant&quot;, &quot;constant-down&quot;, &quot;…
+## $ Group_Tail_Parsons_Code        &lt;chr&gt; &quot;constant&quot;, &quot;constant&quot;, &quot;constant&quot;, &quot;co…
+## $ Global_Tail_Parsons_Code       &lt;chr&gt; &quot;constant-down-up-constant&quot;, &quot;constant-…</code></pre>
+<pre class="r"><code>### Convert each Parsons code to frequency values
+calls_parsons_frequencies2 &lt;- frequency_anchors(
+  df = calls_parsons2, 
+  parsons_col = &quot;Call_Parsons_Code&quot;, 
+  group_id_col = &quot;Group&quot;, 
+  individual_id_col = &quot;Individual&quot;, 
+  call_id_col = &quot;Call_ID&quot;, 
+  call_string_col = &quot;Call&quot;, 
+  starting_frequency = 4000, 
+  frequency_shift = 1000,
+  section_transition = &quot;continuous_trajectory&quot;
+  )
+
+glimpse(calls_parsons_frequencies2)</code></pre>
+<pre><code>## Rows: 250
+## Columns: 22
+## $ Group        &lt;int&gt; 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, …
+## $ Individual   &lt;dbl&gt; 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 4, 4, 4, 4, …
+## $ Call_ID      &lt;dbl&gt; 1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, 4, …
+## $ Call         &lt;chr&gt; &quot;BCCAACCCACCCCBAC&quot;, &quot;BCCAACCCACBCCBAC&quot;, &quot;BCCAACCCAABCCBAC…
+## $ Parsons_Code &lt;chr&gt; &quot;constant-down-up-constant&quot;, &quot;constant-down-up-constant&quot;,…
+## $ Frequency1   &lt;dbl&gt; 4000, 4000, 4000, 4000, 4000, 4000, 4000, 4000, 4000, 400…
+## $ Frequency2   &lt;dbl&gt; 3000, 3000, 3000, 3000, 3000, 3000, 3000, 3000, 3000, 300…
+## $ Frequency3   &lt;dbl&gt; 3000, 3000, 3000, 3000, 3000, 3000, 3000, 3000, 3000, 300…
+## $ Frequency4   &lt;dbl&gt; 3000, 3000, 3000, 3000, 3000, 3000, 3000, 3000, 3000, 300…
+## $ Frequency5   &lt;dbl&gt; 4000, 4000, 4000, 4000, 4000, 4000, 4000, 4000, 4000, 400…
+## $ Frequency6   &lt;dbl&gt; 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 500…
+## $ Frequency7   &lt;dbl&gt; 5000, 5000, 5000, 5000, 5000, 4000, 4000, 4000, 4000, 400…
+## $ Frequency8   &lt;dbl&gt; 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 500…
+## $ Frequency9   &lt;dbl&gt; 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 500…
+## $ Frequency10  &lt;dbl&gt; 6000, 6000, 6000, 6000, 6000, 6000, 6000, 6000, 6000, 600…
+## $ Frequency11  &lt;dbl&gt; 6000, 6000, 7000, 7000, 5000, 7000, 5000, 5000, 7000, 500…
+## $ Frequency12  &lt;dbl&gt; 6000, 5000, 6000, 6000, 5000, 6000, 4000, 5000, 7000, 600…
+## $ Frequency13  &lt;dbl&gt; 6000, 5000, 6000, 6000, 5000, 6000, 4000, 5000, 7000, 600…
+## $ Frequency14  &lt;dbl&gt; 6000, 5000, 6000, 6000, 5000, 6000, 4000, 5000, 7000, 600…
+## $ Frequency15  &lt;dbl&gt; 5000, 4000, 5000, 5000, 4000, 5000, 3000, 4000, 6000, 500…
+## $ Frequency16  &lt;dbl&gt; 6000, 5000, 6000, 6000, 5000, 6000, 4000, 5000, 7000, 600…
+## $ Frequency17  &lt;dbl&gt; 6000, 5000, 6000, 6000, 5000, 6000, 4000, 5000, 7000, 600…</code></pre>
+<pre class="r"><code>### For each call, use the frequency vectors to generate synthetic audio files with the soundgen package
+synthetic_call_metadata2 &lt;- write_audio(
+  df = calls_parsons_frequencies2,
+  save_path = audio_path, 
+  sampling_rate = 44100,
+  sylLen = 200,
+  temperature = 0.025,  # default stochasticity in generating sound
+  pitch_sampling_rate = 44100,
+  smoothing = list(interpol = &quot;loess&quot;, loessSpan = 1, discontThres = 0, jumpThres = 0),
+  rolloffExact = c(0.25), # specify an amplitude value for the fundamental only, which will silence all harmonics
+  formants = NA,
+  vocalTract = NA,
+  vibratoFreq = 1,
+  prefix = &quot;IndividualIdentity&quot;,
+  invalidArgAction = &quot;ignore&quot;
+  )
+
+glimpse(synthetic_call_metadata2)</code></pre>
+<pre><code>## Rows: 250
+## Columns: 23
+## $ Group           &lt;int&gt; 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, …
+## $ Individual      &lt;dbl&gt; 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 4, 4, 4, …
+## $ Call_ID         &lt;dbl&gt; 1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, …
+## $ Call            &lt;chr&gt; &quot;BCCAACCCACCCCBAC&quot;, &quot;BCCAACCCACBCCBAC&quot;, &quot;BCCAACCCAABCC…
+## $ Parsons_Code    &lt;chr&gt; &quot;constant-down-up-constant&quot;, &quot;constant-down-up-constan…
+## $ Frequency1      &lt;dbl&gt; 4000, 4000, 4000, 4000, 4000, 4000, 4000, 4000, 4000, …
+## $ Frequency2      &lt;dbl&gt; 3000, 3000, 3000, 3000, 3000, 3000, 3000, 3000, 3000, …
+## $ Frequency3      &lt;dbl&gt; 3000, 3000, 3000, 3000, 3000, 3000, 3000, 3000, 3000, …
+## $ Frequency4      &lt;dbl&gt; 3000, 3000, 3000, 3000, 3000, 3000, 3000, 3000, 3000, …
+## $ Frequency5      &lt;dbl&gt; 4000, 4000, 4000, 4000, 4000, 4000, 4000, 4000, 4000, …
+## $ Frequency6      &lt;dbl&gt; 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, …
+## $ Frequency7      &lt;dbl&gt; 5000, 5000, 5000, 5000, 5000, 4000, 4000, 4000, 4000, …
+## $ Frequency8      &lt;dbl&gt; 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, …
+## $ Frequency9      &lt;dbl&gt; 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, …
+## $ Frequency10     &lt;dbl&gt; 6000, 6000, 6000, 6000, 6000, 6000, 6000, 6000, 6000, …
+## $ Frequency11     &lt;dbl&gt; 6000, 6000, 7000, 7000, 5000, 7000, 5000, 5000, 7000, …
+## $ Frequency12     &lt;dbl&gt; 6000, 5000, 6000, 6000, 5000, 6000, 4000, 5000, 7000, …
+## $ Frequency13     &lt;dbl&gt; 6000, 5000, 6000, 6000, 5000, 6000, 4000, 5000, 7000, …
+## $ Frequency14     &lt;dbl&gt; 6000, 5000, 6000, 6000, 5000, 6000, 4000, 5000, 7000, …
+## $ Frequency15     &lt;dbl&gt; 5000, 4000, 5000, 5000, 4000, 5000, 3000, 4000, 6000, …
+## $ Frequency16     &lt;dbl&gt; 6000, 5000, 6000, 6000, 5000, 6000, 4000, 5000, 7000, …
+## $ Frequency17     &lt;dbl&gt; 6000, 5000, 6000, 6000, 5000, 6000, 4000, 5000, 7000, …
+## $ audio_file_name &lt;chr&gt; &quot;IndividualIdentity_Group1_Indiv1_Call1.wav&quot;, &quot;Individ…</code></pre>
+<pre class="r"><code>### Save the metadata for the synthetic audio files to a CSV file
+# Add extra metadata for upcoming image files names and rearrange columns
+synthetic_call_metadata2 %&gt;%
+  write.csv(., file = file.path(analysis_path, &quot;synthetic_call_metadata2.csv&quot;), row.names = FALSE)</code></pre>
+<pre class="r"><code>synthetic_call_metadata2csv &lt;- read.csv(file.path(analysis_path, &quot;synthetic_call_metadata2.csv&quot;))
+
+glimpse(synthetic_call_metadata2csv)</code></pre>
+<pre><code>## Rows: 250
+## Columns: 23
+## $ Group           &lt;int&gt; 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, …
+## $ Individual      &lt;int&gt; 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 4, 4, 4, …
+## $ Call_ID         &lt;int&gt; 1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, …
+## $ Call            &lt;chr&gt; &quot;BCCAACCCACCCCBAC&quot;, &quot;BCCAACCCACBCCBAC&quot;, &quot;BCCAACCCAABCC…
+## $ Parsons_Code    &lt;chr&gt; &quot;constant-down-up-constant&quot;, &quot;constant-down-up-constan…
+## $ Frequency1      &lt;int&gt; 4000, 4000, 4000, 4000, 4000, 4000, 4000, 4000, 4000, …
+## $ Frequency2      &lt;int&gt; 3000, 3000, 3000, 3000, 3000, 3000, 3000, 3000, 3000, …
+## $ Frequency3      &lt;int&gt; 3000, 3000, 3000, 3000, 3000, 3000, 3000, 3000, 3000, …
+## $ Frequency4      &lt;int&gt; 3000, 3000, 3000, 3000, 3000, 3000, 3000, 3000, 3000, …
+## $ Frequency5      &lt;int&gt; 4000, 4000, 4000, 4000, 4000, 4000, 4000, 4000, 4000, …
+## $ Frequency6      &lt;int&gt; 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, …
+## $ Frequency7      &lt;int&gt; 5000, 5000, 5000, 5000, 5000, 4000, 4000, 4000, 4000, …
+## $ Frequency8      &lt;int&gt; 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, …
+## $ Frequency9      &lt;int&gt; 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, …
+## $ Frequency10     &lt;int&gt; 6000, 6000, 6000, 6000, 6000, 6000, 6000, 6000, 6000, …
+## $ Frequency11     &lt;int&gt; 6000, 6000, 7000, 7000, 5000, 7000, 5000, 5000, 7000, …
+## $ Frequency12     &lt;int&gt; 6000, 5000, 6000, 6000, 5000, 6000, 4000, 5000, 7000, …
+## $ Frequency13     &lt;int&gt; 6000, 5000, 6000, 6000, 5000, 6000, 4000, 5000, 7000, …
+## $ Frequency14     &lt;int&gt; 6000, 5000, 6000, 6000, 5000, 6000, 4000, 5000, 7000, …
+## $ Frequency15     &lt;int&gt; 5000, 4000, 5000, 5000, 4000, 5000, 3000, 4000, 6000, …
+## $ Frequency16     &lt;int&gt; 6000, 5000, 6000, 6000, 5000, 6000, 4000, 5000, 7000, …
+## $ Frequency17     &lt;int&gt; 6000, 5000, 6000, 6000, 5000, 6000, 4000, 5000, 7000, …
+## $ audio_file_name &lt;chr&gt; &quot;IndividualIdentity_Group1_Indiv1_Call1.wav&quot;, &quot;Individ…</code></pre>
+<p>The .WAV files for this dataset have been added to the audio folder
+and a .CSV file has been created for it. After running this code you
+will have two datasets: 1) reflects vocalizations with more group
+information than individual and 2) vice versa.</p>
 <p><strong>Step 7: Save the metadata for the synthetic datasets in a CSV
 file</strong></p>
-<p>It may be beneficial to have a single csv file that combine
+<p>It may be beneficial to have a single csv file that combines
 information from both datasets.</p>
+<pre class="r"><code># Combine the metdata across datasets and add an extra column to indicate the call dataset generated
+synthetic_call_metadata1 %&gt;%
+  dplyr::mutate(
+    dataset = &quot;Group_Membership&quot;
+  ) %&gt;% 
+  bind_rows(
+    synthetic_call_metadata2 %&gt;% 
+      dplyr::mutate(
+        dataset = &quot;Individual_Identity&quot;
+      )
+  ) %&gt;%
+  write.csv(., file = file.path(analysis_path, &quot;synthetic_call_metadata.csv&quot;), row.names = FALSE)</code></pre>
+<pre class="r"><code>synthetic_call_metadatacsv &lt;- read.csv(file.path(analysis_path, &quot;synthetic_call_metadata.csv&quot;))
+
+glimpse(synthetic_call_metadatacsv)</code></pre>
+<pre><code>## Rows: 500
+## Columns: 24
+## $ Group           &lt;int&gt; 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, …
+## $ Individual      &lt;int&gt; 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 4, 4, 4, …
+## $ Call_ID         &lt;int&gt; 1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, …
+## $ Call            &lt;chr&gt; &quot;BACBCCBABBCACBBC&quot;, &quot;BACBCCBAAACACBBC&quot;, &quot;BACBCCBAAACAC…
+## $ Parsons_Code    &lt;chr&gt; &quot;constant-down-down-constant&quot;, &quot;constant-down-down-con…
+## $ Frequency1      &lt;int&gt; 4000, 4000, 4000, 4000, 4000, 4000, 4000, 4000, 4000, …
+## $ Frequency2      &lt;int&gt; 3000, 3000, 3000, 3000, 3000, 3000, 3000, 3000, 3000, …
+## $ Frequency3      &lt;int&gt; 4000, 4000, 4000, 4000, 4000, 4000, 4000, 4000, 4000, …
+## $ Frequency4      &lt;int&gt; 4000, 4000, 4000, 4000, 4000, 4000, 4000, 4000, 4000, …
+## $ Frequency5      &lt;int&gt; 3000, 3000, 3000, 3000, 3000, 3000, 3000, 3000, 3000, …
+## $ Frequency6      &lt;int&gt; 3000, 3000, 3000, 3000, 3000, 3000, 3000, 3000, 3000, …
+## $ Frequency7      &lt;int&gt; 3000, 3000, 3000, 3000, 3000, 3000, 3000, 3000, 3000, …
+## $ Frequency8      &lt;int&gt; 2000, 2000, 2000, 2000, 2000, 4000, 4000, 4000, 4000, …
+## $ Frequency9      &lt;int&gt; 3000, 3000, 3000, 3000, 3000, 4000, 4000, 4000, 4000, …
+## $ Frequency10     &lt;int&gt; 2000, 4000, 4000, 3000, 2000, 5000, 5000, 3000, 3000, …
+## $ Frequency11     &lt;int&gt; 1000, 5000, 5000, 4000, 3000, 5000, 5000, 4000, 4000, …
+## $ Frequency12     &lt;int&gt; 1000, 5000, 5000, 4000, 3000, 5000, 5000, 4000, 4000, …
+## $ Frequency13     &lt;int&gt; 2000, 6000, 6000, 5000, 4000, 6000, 6000, 5000, 5000, …
+## $ Frequency14     &lt;int&gt; 2000, 6000, 6000, 5000, 4000, 6000, 6000, 5000, 5000, …
+## $ Frequency15     &lt;int&gt; 1000, 5000, 5000, 4000, 3000, 5000, 5000, 4000, 4000, …
+## $ Frequency16     &lt;int&gt; 1000, 4000, 4000, 3000, 2000, 4000, 4000, 3000, 3000, …
+## $ Frequency17     &lt;int&gt; 1000, 4000, 4000, 3000, 2000, 4000, 4000, 3000, 3000, …
+## $ audio_file_name &lt;chr&gt; &quot;GroupMembership_Group1_Indiv1_Call1.wav&quot;, &quot;GroupMembe…
+## $ dataset         &lt;chr&gt; &quot;Group_Membership&quot;, &quot;Group_Membership&quot;, &quot;Group_Members…</code></pre>
 <p>After running this code you will have two datasets each with a single
 .csv file that includes all the details of the synthetic identity
 signals you generated with paRsynth and a combined one. The first
 dataset reflects synthetic identity signals with more group information
 than individual and the 2nd dataset vice versa. Navigate to Vignette 03:
 Bioacoustics Analysis to learn how to analyze these outputs you created
-using the paRsynth functions.</p>
+using the <code>paRsynth</code> functions.</p>
 <p>Or if you would like to learn more about how to create synthetic
-identity signals with paRsynth using different frequency_anchors
-settings and understand how the spectrogram gets affected, check out
-Vignette 02b: Effects of Different Frequency Anchors Settings on
-Spectrogram.</p>
+identity signals with <code>paRsynth</code> using different
+frequency_anchors arguments and understand how the spectrograms get
+affected, check out Vignette 02b: Effect of Different Frequency Anchors
+Arguments on Spectrograms.</p>
 
 
 
