@@ -9,15 +9,15 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-In this vignette, we will go through how to analyze the synthetic identity signals you generated using the paRsynth package in vignette 02 by creating spectrograms and acoustic plots to analyze their acoustic similarities.
+In this vignette, we will go through how to analyze the synthetic identity signals you generated using the `paRsynth` package in vignette 02 by creating spectrograms and acoustic space plots to analyze their acoustic similarities.
 
 <h1>Set Up Working Environment</h1>
 
-Before using the functions in the paRsynth package, there are some preliminary steps we must go through to create a directory where different types of generated data can be automatically stored (audios and images). This automatic organization of generated data will make it easier to streamline the process of using paRsynth's functions.
+Before using the `paRsynth` functions, there are some preliminary steps we must go through to create a directory where different types of generated data can be automatically stored (audios and images). This automatic organization of generated data will make it easier to streamline the process of using the `paRsynth` functions.
 
 **Re-load packages and reset path**
 
-It is good practice to clean your global environment before using functions from open-sourced packages. In order for paRsynth functions to run, they need specific external R packages as well. For example, 'write_audio' generates and saves audio files in .wav format which requires the package `soundgen::soundgen()` to be installed and loaded. 
+It is good practice to clean your global environment before using functions from open-sourced packages. In order for the `paRsynth` functions to run, they need specific external R packages as well. For example, `write_audio` generates and saves audio files in .WAV format which requires the package `soundgen` to be installed and loaded.  
 
 ```{r message = FALSE, warning = FALSE}
 
@@ -53,7 +53,7 @@ invisible(lapply(X, library, character.only = TRUE))
 
 **Re-initialize working directories for data on your local machine**
 
-It is important to have your files organized, especially when creating many different types of output data (audios and images). Therefore, initializing working directories in the beginning will be helpful in understanding the data you create with paRsynth and where they are stored.
+It is important to have your files organized, especially when creating many different types of output data (audios and images). Therefore, initializing working directories in the beginning will be helpful in understanding the data you create with `paRsynth` and where they get stored.
 
 ```{r}
 
@@ -111,7 +111,7 @@ if(!dir.exists(figures_path)){
 
 **Read in the synthetic call metadata and set cores for parallel processing**
 
-For vignette 3 to run it will need to read in the metadata collected in a CSV file that you created in vignette 2. By setting your cores for parallel processing, this will make running this code more streamlined and attain results faster.
+For vignette 3 to run it will need to read in the metadata collected in a .CSV file that you created in vignette 2. By setting your cores for parallel processing, this will make running this code more streamlined and attain results faster.
 
 ```{r}
 
@@ -137,7 +137,7 @@ max_freq
 
 **Step 1: Create a warbleR selection table**
 
-To organize all the paRsynth generated outputs you created in the previous vignettes, you will have to create a warbleR selection table. The warbleR package is very useful to streamline bioacustics analysis. First you will list all the .wav files and then organize them in a selection table.
+To organize all the paRsynth generated outputs you created in the previous vignettes, you will have to create a selection table using `warbleR`. This package is very useful to streamline bioacustics analysis. First you will list all the .WAV files and then organize them in a selection table.
 
 ```{r}
 
@@ -203,13 +203,13 @@ unique(sel_tbl$sampling_rate)
 
 ```
 
-This will output a neatly organized selection table of the uniquely generated vocalizations and their corresponding metadata.
+This will output a neatly organized selection table of the uniquely generated calls and their corresponding metadata.
 
 **Step 2: Create spectrogram image files of each audio file**
 
-Using the warbleR package, spectrogram images can be created from each synthetic identity signals you generated with paRsynth. Using a spectrogram is beneficial to analyze vocalizations because it provides precise information on frequency over time. First, you will use warbleR to create spectrograms of the generated vocalization in the selection table. Then you will rename the spectrogram image files saved in your images_path. 
+Using the `warbleR` package, spectrograms can be created from each synthetic identity signals you generated with `paRsynth`. Using a spectrogram is beneficial to analyze vocalizations because it provides precise information on its frequency over time. First, you will use `warbleR` to create spectrograms of the generated calls in the selection table you made in the previous step. Then you will rename the spectrogram files saved in your designated directory. 
 
-In the following example, we are creating spectrograms from the first dataset we created, where more group information is encoded in the vocalization than individual identity information.
+In the following example, we are creating spectrograms from the first dataset we created, where more group information is encoded in the call than individual identity information.
 
 ```{r}
 
@@ -231,13 +231,13 @@ invisible(file.rename(file.path(images_path, imgs), file.path(images_path, new_n
 
 This will output appropriately named spectrograms for the synthetically generated vocalizations in the selection table created previously. Refer to the image below for an example of a spectrogram (GroupMembership_Group1_Ind1_Call1).
 
-![Example Spectrogram of GroupMembership_Group1_Ind1_Call1](./images/GroupMembership_Group1_Indiv1_Call1_vignettes.png)
+![Example Spectrogram of GroupMembership_Group1_Ind1_Call1](./images/GroupMembership_Group1_Indiv1_Call1.png)
 
 <br>
 
 **Step 3: Perform spectrogrphic cross-correlation (SPCC) to measure acoustic similarity of all calls in dataset (pairwise similarity matrix)**
 
-Now, we are getting to the key analysis step. By using the spectrograms created using the `warbleR` package, spectrographic cross-correlation (SPCC) can be performed to find acoustic similarities between each spectrograms created to the others in the same dataset. The output is a single similarity measurement for every unique vocalization compared to the dataset. 
+Now, we are getting to the key analysis step. By using the spectrograms created using the `warbleR` package, spectrographic cross-correlation (SPCC) can be performed to find acoustic similarities between each spectrogram created to the others in the same dataset. The output is a single similarity measurement for every unique vocalization compared to the dataset. 
 
 If the `temperature` argument used by `soundgen` is set to 0 (for no stochasticity in sound generation), then you will need to filter out any calls that have duplicated strings prior to running cross-correlation. Otherwise you will have values of 1 outside of the diagonal representing comparisons among calls of exactly the same structure or duplicates, and multidimensional scaling will fail.
 
@@ -256,41 +256,11 @@ str(xc_mat)
 dim(xc_mat)
 
 # Get the percentage of values that are negative
-<<<<<<< Updated upstream
-        neg_values <- ((length(xc_mat[xc_mat < 0])/length(xc_mat))) * 100
-=======
 neg_values <- ((length(xc_mat[xc_mat < 0])/length(xc_mat))) * 100
->>>>>>> Stashed changes
 
 # Set all negative values to the minimum positive value in the SPCC matrix to represent the fact that these calls are very structurally different from one another
         if(neg_values > 0){
           
-<<<<<<< Updated upstream
-          xc_mat[xc_mat < 0] <- round(min(xc_mat[xc_mat > 0]), 8)
-          
-        }
-        
-          # Continue with downstream analyses only if there are no 1's off of the diagonal, otherwise MDS will fail. Record NA values if there are 1's off of the diagonal (e.g. two calls of the same structure will present values of 1 as if the same call were compared to itself)
-        
-        # Make sure to calculate the true number of values in the symmetric matrix (multiply the number of unique values that are 1 by 2)
-        ones <- ((length(which(xc_mat[lower.tri(xc_mat)] == 1))*2)/length(xc_mat)) * 100
-        
-        if(ones > 0){
-          
-          # Get the maximum similarity value after 1 in the matrix
-          max_vals <- xc_mat[lower.tri(xc_mat)]
-          
-          # Use a value just under one to catch floating point numbers that are visually represented as 1
-          sec_max_val <- max(max_vals[max_vals < 0.9999999])
-          
-          # Then set the values of 1 off of the diagonal (in both the upper and lower triangle) to the next highest similarity value in this matrix
-          xc_mat[lower.tri(xc_mat)][xc_mat[lower.tri(xc_mat)] == 1] <- round(sec_max_val, 8)
-          xc_mat[upper.tri(xc_mat)][xc_mat[upper.tri(xc_mat)] == 1] <- round(sec_max_val, 8)
-          
-        }
-
-# Update the dimension names of the matrix to include the sound file names from the selection table to keep track of the vocalizations
-=======
           # Initialize a record of what was changed to save to the final results
           neg_notes <- paste(round(neg_values, 8), "% of all SPCC cells or", length(xc_mat[xc_mat < 0])/2,"unique comparisons were negative and were changed to the minimum positive SPCC value of", round(min(xc_mat[xc_mat > 0]), 8), sep = " ")
           
@@ -304,7 +274,6 @@ neg_values <- ((length(xc_mat[xc_mat < 0])/length(xc_mat))) * 100
 
 # Check that negative values have been changed
 xc_mat[xc_mat < 0]
-
 
 # Make sure to calculate the true number of values in the symmetric matrix (multiply the number of unique values that are 1 by 2)
 ones <- ((length(which(xc_mat[lower.tri(xc_mat)] == 1))*2)/length(xc_mat)) * 100
@@ -331,7 +300,6 @@ ones <- ((length(which(xc_mat[lower.tri(xc_mat)] == 1))*2)/length(xc_mat)) * 100
         }
 
 # Update the dimension names of the matrix
->>>>>>> Stashed changes
 dimnames(xc_mat) <- list(GroupMembership_sel_tbl$sound.files, GroupMembership_sel_tbl$sound.files)
 
 # Save this matrix since it can take a long time to generate when there are many vocalizations
@@ -339,11 +307,11 @@ saveRDS(xc_mat, file.path(analysis_path, "xc_mat.RDS"))
 
 ```
 
-This will output data about the measured acoustic similarities of all the vocalizations in the dataset using the previously created spectrograms.
+This will output data about the measured acoustic similarities of all the vslld in the dataset using the previously created spectrograms.
 
 **Step 4: Create acoustic space plots for the vocalizations**
 
-Using the results from the SPCC, acoustic space plots can be used as a figure to represent the acoustic similarity of all the calls in the dataset. We can then apply an unsupervised machine learning approach, multidemnsional scaling (mds). By creating convex hulls for each group in the dataset, polygons are created to outline all the similarity measurement of each call from each group. This will allow us to visually see how similar each group is to each other; seeing if they overlap or not. Here we will use the vocalizations where more group information is encoded within the calls.
+Using the results from the SPCC, acoustic space plots can be used as a figure to represent the acoustic similarity of all the calls in the dataset. We can then apply an unsupervised machine learning approach, multidemnsional scaling (mds). By creating convex hulls for each group in the dataset, polygons are created to outline all the similarity measurement of each call from each group. This will allow us to visually see how similar each group is to each other; seeing if they overlap or not. Here we will use the calls where more group information is encoded.
 
 ```{r}
 
@@ -384,7 +352,7 @@ levels(mds_df$individual_ID)
 levels(mds_df$unique_individuals)
 
 # Colors by group
-cols <- scales::alpha(c("navy", "orange"), 0.65)
+cols <- scales::alpha(c("blue", "orange"), 0.65)
 
 # Shapes by individual within groups
 shps <- c(0, 1, 2, 5, 6, 15, 19, 17, 18, 14)
@@ -427,7 +395,7 @@ ggsave("GroupMembership.png", plot = GroupMembership, path = figures_path)
 
 <br>
 
-This will output an acoustic space plot to represent the acoustic similarity of the paRsynth generated vocalizations using the spectrograms created in vignette 02. In this case, we generated space plots for the first dataset that has more group information encoded in the vocalizations. It will not look the same as the plot you generated because paRsynth randomly generates vocalizations strings, but the overall trends should be similar
+This will output an acoustic space plot to represent the acoustic similarity of the `paRsynth` generated calls using the spectrograms created in vignette 02. In this case, we generated space plots for the first dataset that has more group information encoded in the vocalizations. The image shown aboved will not look the same as the plot you generated because `paRsynth` randomly generates vocalizations strings, but the overall trends should be similar
 
 
 <h1>2nd Example: Individual Information > Group Information</h1>
@@ -466,17 +434,27 @@ str(xc_mat2)
 dim(xc_mat2)
 
 # Get the percentage of values that are negative
-        neg_values2 <- ((length(xc_mat2[xc_mat2 < 0])/length(xc_mat2))) * 100
+neg_values2 <- ((length(xc_mat2[xc_mat2 < 0])/length(xc_mat2))) * 100
 
 # Set all negative values to the minimum positive value in the SPCC matrix to represent the fact that these calls are very structurally different from one another
         if(neg_values2 > 0){
           
+          # Initialize a record of what was changed to save to the final results
+          neg_notes2 <- paste(round(neg_values2, 8), "% of all SPCC cells or", length(xc_mat2[xc_mat2 < 0])/2,"unique comparisons were negative and were changed to the minimum positive SPCC value of", round(min(xc_mat2[xc_mat2 > 0]), 8), sep = " ")
+          
           xc_mat2[xc_mat2 < 0] <- round(min(xc_mat2[xc_mat2 > 0]), 8)
+          
+        } else {
+          
+          neg_notes2 <- ""
           
         }
 
+# Check that negative values have been changed
+xc_mat2[xc_mat2 < 0]
+
 # Make sure to calculate the true number of values in the symmetric matrix (multiply the number of unique values that are 1 by 2)
-        ones2 <- ((length(which(xc_mat2[lower.tri(xc_mat2)] == 1))*2)/length(xc_mat2)) * 100
+ones2 <- ((length(which(xc_mat2[lower.tri(xc_mat2)] == 1))*2)/length(xc_mat2)) * 100
         
         if(ones2 > 0){
           
@@ -486,9 +464,16 @@ dim(xc_mat2)
           # Use a value just under one to catch floating point numbers that are visually represented as 1
           sec_max_val2 <- max(max_vals2[max_vals2 < 0.9999999])
           
+          # Initialize a record of what was changed to save to the final results
+          one_notes2 <- paste(round(ones2, 8), "% of all SPCC cells or", length(which(xc_mat2[lower.tri(xc_mat2)] == 1)), "unique comparisons were had an original SPCC value of 1 and were changed to the next maximum SPCC value of", round(sec_max_val2, 8), sep = " ")
+          
           # Then set the values of 1 off of the diagonal (in both the upper and lower triangle) to the next highest similarity value in this matrix
           xc_mat2[lower.tri(xc_mat2)][xc_mat2[lower.tri(xc_mat2)] == 1] <- round(sec_max_val2, 8)
           xc_mat2[upper.tri(xc_mat2)][xc_mat2[upper.tri(xc_mat2)] == 1] <- round(sec_max_val2, 8)
+          
+        } else {
+          
+          one_notes2 <- ""
           
         }
 
@@ -496,7 +481,7 @@ dim(xc_mat2)
 dimnames(xc_mat2) <- list(IndividualIdentity_sel_tbl$sound.files, IndividualIdentity_sel_tbl$sound.files)
 
 # Save this matrix since it can take a long time to generate when there are many vocalizations
-saveRDS(xc_mat, file.path(analysis_path, "xc_mat2.RDS"))
+saveRDS(xc_mat2, file.path(analysis_path, "xc_mat2.RDS"))
 
 ```
 
@@ -575,16 +560,16 @@ ggsave("IndividualIdentity.png", plot = IndividualIdentity, path = figures_path)
 
 <br>
 
-This will output an acoustic space plot to represent the acoustic similarity of the paRsynth generated vocalizations using the spectrograms created in vignette 02 for the second data set that has more individual information.
+This will output an acoustic space plot to represent the acoustic similarity of the `paRsynth` generated calls using the spectrograms created in vignette 02 for the second data set that has more individual information.
 
 This last vignette has showed you how to conduct downstream bioacoustics analysis on two datasets: 1) more group information than individual information and 2) vice versa. You created acoustic space plots for each data sets. You have completed the final vignette of the paRsynth package, well done!:smile:
 
 <h2>Extreme Group-level Variation Example</h2>
 
-You may create vocalization that have much greater group information than individual information to the point when you make the acoustic space plot it result in all the individuals of one group to be clustered on top of each other and each group are a outstandingly great distance from each other. 
+You may create vocalization that have much greater group information than individual information to the point that when you make the acoustic space plot, it results in all the individuals of one group to be clustered on top of each other and each group are a outstandingly great distance from each other. See below for a visiual reference.
 
 ![Acoustic Space Plot: Extreme Group-level Variation ](./images/ExtraExample_vignettes.png)
 
 <br>
 
-This is an example of an acoustic plot of a dataset that has too much group information compared to individual information. Two unique dots can be seen at opposite ends of the plot - meaning there is not a lot of relevant information here to conduct acoustic analyses. To solve this, try changing the parameters so that the difference between them are not as striking.
+This is an example of an acoustic plot of a dataset that has *too much* group information compared to individual information. Two unique dots can be seen at opposite ends of the plot - meaning there is a lot of acoustic differences between the groups. However, this leads us to the problem of not having a lot of relevant information here to conduct acoustic analyses with. To solve this, try changing the parameters so that the difference between them are not as striking.
