@@ -10,7 +10,7 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE, eval = TRUE)
 ```
 
-This vignette will go through how to set up the paRsynth package appropriately before utilizing it for your research purposes, outlining its functions and purpose.
+This vignette will guide you through the setup of the paRsynth package, introduce its purpose and functions before demonstrating how to utilize it for your research.
 
 <h2>Install R and RStudio</h2>
 
@@ -68,7 +68,7 @@ You will need to install GitHub Desktop to later clone the paRsynth package on y
 
 * Open the [paRsynth GitHub repository](https://github.com/gsvidaurre/paRsynth) on your internet browser
 
-* Click on the arrow of the green "Code" button on the top left 
+* Click on the arrow of the green "Code" button on the top right 
 
 * Click on the copy link icon
 
@@ -82,13 +82,13 @@ You will need to install GitHub Desktop to later clone the paRsynth package on y
 
 * Check to see that the paRsynth package is located in the appropriate local path of your machine that you assigned it to
 
-<h2> Package Introduction</h2>
+<h2>Purpose</h2>
 
-paRsynth uses Parsons code to convert character strings to frequency modulated vocalizations with different amounts of individual identity and group membership information. The functions in this package were developed for the sonification of character strings that represent vocal signals with varying amounts of social information. The resulting audio files (created using the soundgen package) can be used in downstream bioacoustics analyses.
+paRsynth uses Parsons code to convert randomly generated character strings to frequency modulated vocalizations with different amounts of individual identity and group membership information. The functions in this package were developed for the sonification of character strings that represent vocal signals with varying amounts of social information. The resulting audio files (created using the soundgen package) can be used in downstream bioacoustics analyses. By using widely accepted bioacoustic analysis tools on these vocalizations, those tools can be evaluated for accuracy on social information detection.
 
 Please read the README.rmd file for more information on the package, code collaborators, code collaboration guidelines and package usage/maintenance. Refer to that file if you have trouble-shooting errors or would like to know how to report a bug on GitHub.
 
-<h2>Purpose</h2>
+<h2>Functions</h2>
 
 paRsynth provides four functions for the simulation of vocalizations with representation of both individual identity and group membership information. These vocalizations are encoded as strings that can be used for generating synthetic audio signals for bioacoustic analysis. The next vignette (Vignette 02: Create Vocal Identity Signals with paRsynth) will demonstrate how to use the package's functions to generate vocalizations strings, convert them into Parsons code, calculate frequency anchors, and generate synthetic audio files.
 
