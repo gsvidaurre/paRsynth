@@ -37,7 +37,7 @@ generate_test_data <- function() {
   Group_complete <- "BBCC"
   Random_variation <- "BA"
   Group_tail <- "CC"
-  Global_tail <- "D"
+  Global_tail <- "B"
   String_structure <- "GI-II-RV-GI"
   mapping <- list("A" = "up", "B" = "down", "C" = "constant")
   
@@ -99,7 +99,7 @@ test_that("The function generates a data frame with multiple rows", {
   # glimpse(result)
 
   # Test that the returned df (result) has the expected columns
-  expect_true(all(c("Group_ID", "Individual_ID", "Call_ID", "Call", "Parsons_Code") %in% colnames(result)))
+  expect_true(all(c("Group", "Individual", "Call_ID", "Call", "Parsons_Code") %in% colnames(result)))
   expect_true(any(grepl("Frequency", colnames(result)))) # At least one column with the word "Frequency" in the name
 
   # Test the number of frequency columns, which should be equal to the character string length plus 1 for the starting frequency
@@ -122,38 +122,45 @@ test_that("This function shifts up, constant, and down directions frequency corr
     individual_id_col = "Individual_ID",
     call_id_col = "Call_ID",
     call_string_col = "Call",
+    string_structure_col = "String_structure",
     starting_frequency = 4000,
     frequency_shift = 1000,
     section_transition = "continuous_trajectory"
   )
   # Check the first row's frequencies (the starting frequency is 4 kHz)
-  expected_anchors <- c(4, 5, 6, 5, 6, 5, 4, 4, 4, 4, 4, 3, 4, 3, 4, 3, 2, 3, 3, 2, 1, 2, 3) * 1000
+  expected_anchors <- c(4, 5, 4, 3, 3, 4, 3, 4, 4, 4, 3) * 1000
   expect_equal(as.vector(t(result[, grep("Frequency", names(result))])), expected_anchors)
 })
 
 # 3. Unit test to check that there are no negative or zero frequencies created when generating many calls
 test_that("The function corrects negative or zero frequencies", {
   # generate strings
-  generated_strings <- generate_strings(
+  generated_strings <- suppressWarnings(generate_strings(
     n_groups = 2,
     n_individuals = 5,
     n_calls = 10,
     string_length = 40,
     group_information = 8,
     individual_information = 2,
-    random_variation = 4
-  )
+    random_variation = 4,
+    alphabet = c("A", "B", "C"),
+    string_structure = "GI-II-RV-GI"
+  ))
   # convert strings to parsons code
   parsons_results <- parsons_code(
     generated_strings,
     string_col = "Call",
     global_head_col = "Global_head",
     group_head_col = "Group_head",
-    individual_middle_col = "Individual_middle",
+    individual_head_col = "Individual_head",
+    individual_tail_col = "Individual_tail",
+    individual_complete_col = "Individual_complete",
+    group_complete_col = "Group_complete",
     random_variation_col = "Random_variation",
     group_tail_col = "Group_tail",
     global_tail_col = "Global_tail",
-    list("A" = "up", "B" = "down", "C" = "constant")
+    string_structure_col = "String_structure",
+    mapping = list("A" = "up", "B" = "down", "C" = "constant")
   )
   # generate frequency anchors with the test df
   anchors <- frequency_anchors(
@@ -163,6 +170,7 @@ test_that("The function corrects negative or zero frequencies", {
     individual_id_col = "Individual",
     call_id_col = "Call_ID",
     call_string_col = "Call",
+    string_structure_col = "String_structure",
     starting_frequency = 4000,
     frequency_shift = 1000,
     section_transition = "continuous_trajectory"
