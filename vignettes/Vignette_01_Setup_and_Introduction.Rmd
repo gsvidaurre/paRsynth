@@ -10,7 +10,7 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE, eval = TRUE)
 ```
 
-This vignette will guide you through the setup of the paRsynth package, introduce its purpose and functions before demonstrating how to utilize it for your research.
+This vignette will guide you through the setup of the `paRsynth` package, introduce its purpose and functions before demonstrating how to utilize it for your research.
 
 <h2>Install R and RStudio</h2>
 
@@ -58,15 +58,15 @@ You can also change the font size, font color, and background color of your RStu
 
 <h2>Install GitHub</h2>
 
-You will need to install GitHub Desktop to later clone the paRsynth package on your local machine.
+You will need to install GitHub Desktop to later clone the `paRsynth` package on your local machine.
 
 * Go to the [GitHub Desktop website](https://github.com/apps/desktop) and click "Download now" to install GitHub Desktop on your computer
 
 * Open GitHub Desktop by clicking on the software icon after downloaded 
 
-<h2>Clone paRsynth</h2>
+<h2>Clone `paRsynth`</h2>
 
-* Open the [paRsynth GitHub repository](https://github.com/gsvidaurre/paRsynth) on your internet browser
+* Open the [`paRsynth` GitHub repository](https://github.com/gsvidaurre/paRsynth) on your internet browser
 
 * Click on the arrow of the green "Code" button on the top right 
 
@@ -74,34 +74,36 @@ You will need to install GitHub Desktop to later clone the paRsynth package on y
 
 * Navigate to the top left toolbar of GitHub Desktop, click on File > Clone Repository
 
-* Paste the URL from the paRsynth GitHub repository
+* Paste the URL from the `paRsynth` GitHub repository
 
-* Ensure the "Local Path" is where you want the paRsynth repository to be located on your local machine
+* Ensure the "Local Path" is where you want the `paRsynth` repository to be located on your local machine
 
 * Click on the blue "Clone" button 
 
-* Check to see that the paRsynth package is located in the appropriate local path of your machine that you assigned it to
+* Check to see that the `paRsynth` package is located in the appropriate local path of your machine that you assigned it to
 
 <h2>Purpose</h2>
 
-paRsynth uses Parsons code to convert randomly generated character strings to frequency modulated vocalizations with different amounts of individual identity and group membership information. The functions in this package were developed for the sonification of character strings that represent vocal signals with varying amounts of social information. The resulting audio files (created using the soundgen package) can be used in downstream bioacoustics analyses. By using widely accepted bioacoustic analysis tools on these vocalizations, those tools can be evaluated for accuracy on social information detection.
+`paRsynth` uses Parsons code to convert randomly generated character strings to frequency modulated vocalizations with different amounts of individual identity and group membership information. The functions in this package were developed for the sonification of character strings that represent vocal signals with varying amounts of social information. The resulting audio files (created using the soundgen package) can be used in downstream bioacoustics analyses. By using widely accepted bioacoustic analysis tools on these vocalizations, those tools can be evaluated for accuracy on social information detection.
 
 Please read the README.rmd file for more information on the package, code collaborators, code collaboration guidelines and package usage/maintenance. Refer to that file if you have trouble-shooting errors or would like to know how to report a bug on GitHub.
 
 <h2>Functions</h2>
 
-paRsynth provides four functions for the simulation of vocalizations with representation of both individual identity and group membership information. These vocalizations are encoded as strings that can be used for generating synthetic audio signals for bioacoustic analysis. The next vignette (Vignette 02: Create Vocal Identity Signals with paRsynth) will demonstrate how to use the package's functions to generate vocalizations strings, convert them into Parsons code, calculate frequency anchors, and generate synthetic audio files.
+`paRsynth` provides four functions for the simulation of vocalizations with representation of both individual identity and group membership information. These vocalizations are encoded as strings that can be used for generating synthetic audio signals for bioacoustic analysis. The next vignette (*Vignette 02: Create Vocal Identity Signals with `paRsynth`*) will demonstrate how to use the package's functions to generate vocalizations strings, convert them into Parsons code, calculate frequency anchors, and generate synthetic audio files.
 
-1. generate_strings(): generates strings that encode group membership information and individual identity information.
+1. `generate_strings()`: generates strings that encode group membership information and individual identity information.
 
-2. parsons_code(): converts the generated strings (characters) into Parsons code (musical up-down-constant connotation) for frequency modulation.
+2. `parsons_code()`: converts the generated strings (characters) into Parsons code (musical up-down-constant connotation) for frequency modulation.
 
-3. frequency_anchors(): calculates frequency anchors (numeric values that correspond to each segment of the Parsons code string) from Parsons code to guide the creation of synthetic audio.
+3. `frequency_anchors()`: calculates frequency anchors (numeric values that correspond to each segment of the Parsons code string) from Parsons code to guide the creation of synthetic audio.
 
-4. write_audio(): uses frequency anchors and the 'soundgen' package to generate and save synthetic audio files.
-
-![paRsynth Functions Workflow](./images/paRsynth_methods_workflow_horizontal_vignette.png)
+4. `write_audio()`: uses frequency anchors and the 'soundgen' package to generate and save synthetic audio files.
 
 <br>
 
-Navigate to Vignette 02: Create Vocal Identity Signals with paRsynth to learn how to use the package described above for your projects.
+![Figure 1. `paRsynth` functions workflow](./images/paRsynth_methods_workflow_horizontal_vignette.png)
+
+<br>
+
+Navigate to *Vignette 02: Create Vocal Identity Signals with `paRsynth`* to learn how to use the package described above for your projects.
