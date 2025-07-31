@@ -25,7 +25,7 @@ It is good practice to clean your global environment before using functions from
 rm(list = ls())
 
 # Specify the required packages
-X <- c("devtools", "dplyr", "stringdist", "tidyverse", "ggplot2", "apcluster", "soundgen", "parallel", "stringr", "data.table", "tuneR", "pbapply", "warbleR", "magrittr", "MASS")
+X <- c("devtools", "dplyr", "stringdist", "tidyverse", "ggplot2", "apcluster", "soundgen", "parallel", "stringr", "data.table", "tuneR", "pbapply", "warbleR", "magrittr")
 
 # Install the packages in X if not already installed
 is_installed <- function(p) is.element(p, installed.packages()[,1])
@@ -37,14 +37,13 @@ invisible(lapply(1:length(X), function(x){
 }))
 
 # Install the paRsynth package from GitHub if you haven't installed it already
-# devtools::install_github("gsvidaurre/paRsynth")
+devtools::install_github("gsvidaurre/paRsynth")
 
 # Add paRsynth to the list of packages to load
-# X <- c(X, "paRsynth")
+X <- c(X, "paRsynth")
 
-# Change "Desktop/.../GitHub_repos" based on where paRsynth is stored on your local machine
-# testing_path <- "/Users/summe/OneDrive/Desktop/github_repo/paRsynth/R/"
-testing_path <- "~/Desktop/BIRDS/GitHub_repos/paRsynth/R/" # Alexandra's testing path
+# Change "Desktop/.../GitHub_repos" to where paRsynth is stored on your local machine
+testing_path <- "~/Desktop/BIRDS/GitHub_repos/paRsynth/R" # example
 
 # Load all of the packages specified above
 invisible(lapply(X, library, character.only = TRUE))
@@ -58,15 +57,13 @@ It is important to have your files organized, especially when creating many diff
 ```{r}
 
 # Initialize a base path (this will need to be different per user)
-# path <- "/Users/raneemsamman/Desktop" # Raneem's path
-# path <- "/Users/gracesmith-vidaurre/Desktop" # Grace's path
-path <- "/Users/gretheljuarez/Desktop/BIRDS/" # Alexandra's path
-# path <- "/Users/summe/OneDrive/Desktop/"
+# example
+path <- "/Users/gretheljuarez/Desktop/BIRDS/"
 
-# Initialize the directory for analysis on your local computer (this is likely the name of the folder all of you data is being stored in)
+# Initialize the directory for analysis on your local computer
 analysis_dir <- "paRsynth_methods_synthetic_dataset"
 
-# Combine the base path and the data directory into a single path
+# Combine the base path and the newly created data directory into a single path
 analysis_path <- file.path(path, analysis_dir)
 
 # Create the data directory if it doesn't already exist on your computer
@@ -196,7 +193,7 @@ sel_tbl <- data.table::rbindlist(pblapply(1:length(wavs), function(w){
 }))
 
 # See the selection table in warbleR format with useful metadata for acoustic space plots
-glimpse(sel_tbl)
+view(sel_tbl)
 
 # Check the selection table for all the unique sampling rates
 unique(sel_tbl$sampling_rate)
@@ -216,7 +213,7 @@ In the following example, we are creating spectrograms from the first dataset we
 # To make spectrograms of dataset 1 (more group info), you will need to filter it out from the selection table you made above.
 GroupMembership_sel_tbl <- sel_tbl %>%
     dplyr::filter(grepl("GroupMembership", sound.files))
-
+GroupMembership_sel_tbl
 # Create spectrograms for filtered calls
 warbleR::spectrograms(GroupMembership_sel_tbl, wl = 512, flim = c(0, 12), wn = "hanning", pal = reverse.gray.colors.2,ovlp = 90, inner.mar = c(5, 4, 4, 2), outer.mar = c(0, 0, 0, 0), picsize = 1, res = 100, cexlab = 1, propwidth = FALSE, xl = 1, osci = FALSE, gr = FALSE, sc = FALSE, line = FALSE, mar = 0.05, it = "jpeg", parallel = 1, path = audio_path, pb = TRUE, fast.spec = FALSE, by.song = NULL, sel.labels = NULL, title.labels = NULL, dest.path = images_path, box = TRUE, axis = TRUE)
 
@@ -231,7 +228,7 @@ invisible(file.rename(file.path(images_path, imgs), file.path(images_path, new_n
 
 This will output appropriately named spectrograms for the synthetically generated vocalizations in the selection table created previously. Refer to the image below for an example of a spectrogram (GroupMembership_Group1_Ind1_Call1).
 
-![Example Spectrogram of GroupMembership_Group1_Ind1_Call1](./images/GroupMembership_Group1_Indiv1_Call1.png)
+![Figure 1. Example Spectrogram of GroupMembership_Group1_Ind1_Call1](./images/GroupMembership_Group1_Indiv1_Call1.png)
 
 <br>
 
@@ -391,7 +388,7 @@ ggsave("GroupMembership.png", plot = GroupMembership, path = figures_path)
 
 ```
 
-![Example Acoustic Space Plot: Group Membership ](./images/GroupMembership_vignettes.png)
+![Figure 2. Example acoustic space plot for group membership treatment ](./images/GroupMembership_vignettes.png)
 
 <br>
 
@@ -425,80 +422,80 @@ invisible(file.rename(file.path(images_path, imgs), file.path(images_path, new_n
 ```{r}
 
 # Perform SPCC to measure acoustic similarity of all calls in dataset IndividualIdentity_sel_tbl
-xc_mat2 <- warbleR::cross_correlation(IndividualIdentity_sel_tbl, wl = 512, ovlp = 90, bp = c(0, 20), wn = "hanning", cor.method = "pearson", parallel = 1, na.rm = FALSE, type = "spectrogram", path = audio_path)
+xc_mat_inddom <- warbleR::cross_correlation(IndividualIdentity_sel_tbl, wl = 512, ovlp = 90, bp = c(0, 20), wn = "hanning", cor.method = "pearson", parallel = 1, na.rm = FALSE, type = "spectrogram", path = audio_path)
 
 # Check the structure of xc_mat
-str(xc_mat2)
+str(xc_mat_inddom)
 
 # Check the dimensions of xc_mat
-dim(xc_mat2)
+dim(xc_mat_inddom)
 
 # Get the percentage of values that are negative
-neg_values2 <- ((length(xc_mat2[xc_mat2 < 0])/length(xc_mat2))) * 100
+neg_values_inddom <- ((length(xc_mat_inddom[xc_mat_inddom < 0])/length(xc_mat_inddom))) * 100
 
 # Set all negative values to the minimum positive value in the SPCC matrix to represent the fact that these calls are very structurally different from one another
-        if(neg_values2 > 0){
+        if(neg_values_inddom > 0){
           
           # Initialize a record of what was changed to save to the final results
-          neg_notes2 <- paste(round(neg_values2, 8), "% of all SPCC cells or", length(xc_mat2[xc_mat2 < 0])/2,"unique comparisons were negative and were changed to the minimum positive SPCC value of", round(min(xc_mat2[xc_mat2 > 0]), 8), sep = " ")
+          neg_notes_inddom <- paste(round(neg_values_inddom, 8), "% of all SPCC cells or", length(xc_mat_inddom[xc_mat_inddom < 0])/2,"unique comparisons were negative and were changed to the minimum positive SPCC value of", round(min(xc_mat_inddom[xc_mat_inddom > 0]), 8), sep = " ")
           
-          xc_mat2[xc_mat2 < 0] <- round(min(xc_mat2[xc_mat2 > 0]), 8)
+          xc_mat_inddom[xc_mat_inddom < 0] <- round(min(xc_mat_inddom[xc_mat_inddom > 0]), 8)
           
         } else {
           
-          neg_notes2 <- ""
+          neg_notes_inddom <- ""
           
         }
 
 # Check that negative values have been changed
-xc_mat2[xc_mat2 < 0]
+xc_mat_inddom[xc_mat_inddom < 0]
 
 # Make sure to calculate the true number of values in the symmetric matrix (multiply the number of unique values that are 1 by 2)
-ones2 <- ((length(which(xc_mat2[lower.tri(xc_mat2)] == 1))*2)/length(xc_mat2)) * 100
+ones_inddom <- ((length(which(xc_mat_inddom[lower.tri(xc_mat_inddom)] == 1))*2)/length(xc_mat_inddom)) * 100
         
-        if(ones2 > 0){
+        if(ones_inddom > 0){
           
           # Get the maximum similarity value after 1 in the matrix
-          max_vals2 <- xc_mat2[lower.tri(xc_mat2)]
+          max_vals_inddom <- xc_mat_inddom[lower.tri(xc_mat_inddom)]
           
           # Use a value just under one to catch floating point numbers that are visually represented as 1
-          sec_max_val2 <- max(max_vals2[max_vals2 < 0.9999999])
+          sec_max_val_inddom <- max(max_vals_inddom[max_vals_inddom < 0.9999999])
           
           # Initialize a record of what was changed to save to the final results
-          one_notes2 <- paste(round(ones2, 8), "% of all SPCC cells or", length(which(xc_mat2[lower.tri(xc_mat2)] == 1)), "unique comparisons were had an original SPCC value of 1 and were changed to the next maximum SPCC value of", round(sec_max_val2, 8), sep = " ")
+          one_notes_inddom <- paste(round(ones_inddom, 8), "% of all SPCC cells or", length(which(xc_mat_inddom[lower.tri(xc_mat_inddom)] == 1)), "unique comparisons were had an original SPCC value of 1 and were changed to the next maximum SPCC value of", round(sec_max_val_inddom, 8), sep = " ")
           
           # Then set the values of 1 off of the diagonal (in both the upper and lower triangle) to the next highest similarity value in this matrix
-          xc_mat2[lower.tri(xc_mat2)][xc_mat2[lower.tri(xc_mat2)] == 1] <- round(sec_max_val2, 8)
-          xc_mat2[upper.tri(xc_mat2)][xc_mat2[upper.tri(xc_mat2)] == 1] <- round(sec_max_val2, 8)
+          xc_mat_inddom[lower.tri(xc_mat_inddom)][xc_mat_inddom[lower.tri(xc_mat_inddom)] == 1] <- round(sec_max_val_inddom, 8)
+          xc_mat_inddom[upper.tri(xc_mat_inddom)][xc_mat_inddom[upper.tri(xc_mat_inddom)] == 1] <- round(sec_max_val_inddom, 8)
           
         } else {
           
-          one_notes2 <- ""
+          one_notes_inddom <- ""
           
         }
 
 # Update the dimension names of the matrix to include the sound file names from the selection table to keep track of the vocalizations
-dimnames(xc_mat2) <- list(IndividualIdentity_sel_tbl$sound.files, IndividualIdentity_sel_tbl$sound.files)
+dimnames(xc_mat_inddom) <- list(IndividualIdentity_sel_tbl$sound.files, IndividualIdentity_sel_tbl$sound.files)
 
 # Save this matrix since it can take a long time to generate when there are many vocalizations
-saveRDS(xc_mat2, file.path(analysis_path, "xc_mat2.RDS"))
+saveRDS(xc_mat_inddom, file.path(analysis_path, "xc_mat_inddom.RDS"))
 
 ```
 
 ```{r}
 
 # Convert to a distance matrix and dist object for isoMDS (helps visualize the data in a simplified way)
-dist_mat2 <- stats::as.dist(1 - xc_mat2, diag = TRUE, upper = TRUE)
+dist_mat_inddom <- stats::as.dist(1 - xc_mat_inddom, diag = TRUE, upper = TRUE)
 
 # Perform isoMDS to reduce the dimensionality of the data to 2 dimensions
-iso2 <- invisible(MASS::isoMDS(dist_mat2, k = 2, maxit = 1000, trace = FALSE))
-str(iso2)
+iso_inddom <- invisible(MASS::isoMDS(dist_mat_inddom, k = 2, maxit = 1000, trace = FALSE))
+str(iso_inddom)
 
 # Create a data frame with the MDS coordinates and the group and individual IDs
-mds_df2 <- data.frame(
-  sound.files = dimnames(xc_mat2)[[1]],
-  X = as.vector(iso2$points[, 1]), 
-  Y = as.vector(iso2$points[, 2])
+mds_df_inddom <- data.frame(
+  sound.files = dimnames(xc_mat_inddom)[[1]],
+  X = as.vector(iso_inddom$points[, 1]), 
+  Y = as.vector(iso_inddom$points[, 2])
 ) %>% 
   # inner join the data frame with the selection table to include group and individual IDs
   inner_join( 
@@ -515,22 +512,22 @@ mds_df2 <- data.frame(
   )
 
 # 'levels' provides the unique values of a factor. This is useful for checking the unique values of the group and individual IDs.
-levels(mds_df2$group_ID)
-levels(mds_df2$individual_ID)
-levels(mds_df2$unique_individuals)
+levels(mds_df_inddom$group_ID)
+levels(mds_df_inddom$individual_ID)
+levels(mds_df_inddom$unique_individuals)
 
 cols <- scales::alpha(c("navy", "orange"), 0.65)
 
 shps <- c(0, 1, 2, 5, 6, 15, 19, 17, 18, 14)
 
-hulls2 <- plyr::ddply(mds_df2, "group_ID", function(x){
+hulls_inddom <- plyr::ddply(mds_df_inddom, "group_ID", function(x){
   x[chull(x$X, x$Y), ]
 })
 
 # piping the data frame into ggplot to create the acoustic space plot
-IndividualIdentity <- mds_df2 %>%
+IndividualIdentity <- mds_df_inddom %>%
   ggplot(aes(x = X, y = Y, color = group_ID)) + 
-  geom_polygon(data = hulls2, aes(x = X, y = Y, fill = group_ID, color = group_ID), alpha = 0.2, size = 0.2, show.legend = FALSE) +
+  geom_polygon(data = hulls_inddom, aes(x = X, y = Y, fill = group_ID, color = group_ID), alpha = 0.2, size = 0.2, show.legend = FALSE) +
   geom_point(aes(fill = group_ID, color = group_ID, shape = individual_ID), size = 2, stroke = 0.5) +
   scale_shape_manual(values = shps) +
   scale_color_manual(values = cols) +
@@ -556,7 +553,7 @@ ggsave("IndividualIdentity.png", plot = IndividualIdentity, path = figures_path)
 
 ```
 
-![Example Acoustic Space Plot: Individual Identity ](./images/IndividualIdentity_vignettes.png)
+![Figure 3. Example acoustic space plot for individual identity treatment ](./images/IndividualIdentity_vignettes.png)
 
 <br>
 
@@ -568,7 +565,7 @@ This last vignette has showed you how to conduct downstream bioacoustics analysi
 
 You may create vocalization that have much greater group information than individual information to the point that when you make the acoustic space plot, it results in all the individuals of one group to be clustered on top of each other and each group are a outstandingly great distance from each other. See below for a visiual reference.
 
-![Acoustic Space Plot: Extreme Group-level Variation ](./images/ExtraExample_vignettes.png)
+![Figure 4. Acoustic space plot for extreme group-level variation treatment ](./images/ExtraExample_vignettes.png)
 
 <br>
 
