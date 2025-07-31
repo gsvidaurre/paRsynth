@@ -13,7 +13,7 @@
 
 <meta name="date" content="2024-12-02" />
 
-<title>Vignette 02: Create Vocal Identity Signals with paRsynth</title>
+<title>Vignette 02b: Effect of Different Frequency Anchors Arguments on Spectrograms</title>
 
 <script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
 // be compatible with the behavior of Pandoc < 2.8).
@@ -350,33 +350,31 @@ display: none;
 
 
 
-<h1 class="title toc-ignore">Vignette 02: Create Vocal Identity Signals
-with paRsynth</h1>
+<h1 class="title toc-ignore">Vignette 02b: Effect of Different Frequency
+Anchors Arguments on Spectrograms</h1>
 <h4 class="author">GAJ</h4>
 <h4 class="date">2024-12-02</h4>
 
 </div>
 
 
-<p>In this vignette, we will go through how to create vocalization
-strings, convert them into Parsons code, calculate frequency anchors,
-and generate synthetic audio files using the paRsynth package for
-downstream bioacoustics analyses.</p>
+<p>This vignette is very similar to Vignette 02 <em>BUT</em> with added
+steps exploring the effects of the two different
+<code>frequency_anchors</code> <code>section_transition</code> argument
+settings: “continuous_trajectory” and “starting_frequency”. In
+“starting_frequency” mode, the frequency value is reset to the
+<code>starting_frequency</code> value after each section. In
+“continuous_trajectory” mode, the frequency value is retained from the
+previous section. This means that using “continuous_trajectory” mode
+would make the ending frequency of the last section to influence the
+starting frequency of the following one; almost like a domino effect. On
+the other hand, using “starting_frequency” mode would force the
+beginning of each section to reset back to the starting_frequency
+value.</p>
 <h1>
 Set Up Working Environment
 </h1>
-<p>Before using the functions in the paRsynth package, there are some
-preliminary steps we must go through to create a directory where
-different types of generated data can be automatically stored (audios
-and images). This automatic organization of generated data will make it
-easier to streamline process of using the paRsynth functions.</p>
 <p><strong>Load packages and set path</strong></p>
-<p>It is good practice to clean your global environment before using
-functions from open-sourced packages. In order for paRsynth functions to
-run, they need specific external R packages as well. For example,
-‘write_audio’ generates and saves audio files in .WAV format which
-requires the package <code>soundgen::soundgen()</code> to be installed
-and loaded.</p>
 <pre class="r"><code># Clean the global environment
 rm(list = ls())
 
@@ -399,32 +397,19 @@ invisible(lapply(1:length(X), function(x){
 # X &lt;- c(X, &quot;paRsynth&quot;)
 
 # Change &quot;Desktop/.../GitHub_repos&quot; based on where paRsynth is stored on your local machine
-# testing_path &lt;- &quot;C://Users/summe/OneDrive/Desktop/github_repo/paRsynth/R/&quot; # Summer&#39;s testing path
-testing_path &lt;- &quot;~/Desktop/BIRDS/GitHub_repos/paRsynth/R&quot; # Alexandra&#39;s testing path
-
-# Load the paRsynth functions that will be tested below
-source(file.path(testing_path, &quot;generate_strings.R&quot;))
-source(file.path(testing_path, &quot;parsons_code.R&quot;))
-source(file.path(testing_path, &quot;frequency_anchors.R&quot;))
-source(file.path(testing_path, &quot;write_audio.R&quot;))
+# example
+testing_path &lt;- &quot;~/Desktop/BIRDS/GitHub_repos/paRsynth/R&quot;
 
 # Load all of the packages specified above
 invisible(lapply(X, library, character.only = TRUE))</code></pre>
 <p><strong>Initialize working directories for data on your local
 machine</strong></p>
-<p>It is important to have your files organized, especially when
-creating many different types of output data. Therefore, initializing
-working directories in the beginning will be helpful in knowing and
-understanding the data you create with paRsynth and where they are
-stored.</p>
 <pre class="r"><code># Initialize a base path (this will need to be different per user)
-# path &lt;- &quot;/Users/raneemsamman/Desktop&quot; # Raneem&#39;s path
-# path &lt;- &quot;/Users/gracesmith-vidaurre/Desktop&quot; # Grace&#39;s path
-path &lt;- &quot;/Users/gretheljuarez/Desktop/BIRDS/&quot; # Alexandra&#39;s path
-# path &lt;- &quot;/Users/summe/OneDrive/Desktop/&quot; # Summer&#39;s path
+# example
+path &lt;- &quot;/Users/gretheljuarez/Desktop/BIRDS/&quot;
 
 # Initialize the directory for analysis on your local computer
-analysis_dir &lt;- &quot;paRsynth_methods_synthetic_dataset&quot;
+analysis_dir &lt;- &quot;paRsynth_frequency_anchors_settings_comparison&quot;
 
 # Combine the base path and the newly created data directory into a single path
 analysis_path &lt;- file.path(path, analysis_dir)
@@ -455,369 +440,450 @@ images_path &lt;- file.path(path, analysis_dir, images_dir)
 if(!dir.exists(images_path)){ 
   dir.create(images_path)
 }</code></pre>
-<p><strong>Check out documentation for the paRsynth functions. These
-functions are written below in the order in which they should be
-used</strong></p>
-<p>Before using the paRsynth package, it would be beneficial for you to
-go over the description, usage, arguments, extra details, and examples
-of each function.</p>
-<pre class="r"><code># ?paRsynth::generate_strings
-# ?paRsynth::parsons_code
-# ?paRsynth::frequency_anchors
-# ?paRsynth::write_audio</code></pre>
+<p><strong>Source the paRsynth functions directly from the GitHub
+repository</strong></p>
+<pre class="r"><code># Load the paRsynth functions that will be tested below
+source(file.path(testing_path, &quot;generate_strings.R&quot;))
+source(file.path(testing_path, &quot;parsons_code.R&quot;))
+source(file.path(testing_path, &quot;frequency_anchors.R&quot;))
+source(file.path(testing_path, &quot;write_audio.R&quot;))</code></pre>
 <h1>
 paRsynth Workflow
 </h1>
-<p><strong>Step 1: Create character strings representing vocal signals
-with more group membership information encoded within the call than
-individual identity information</strong></p>
-<p>After installing paRsynth and loading the relevant libraries, you
-will be able to take the first step into creating synthetic bird calls.
-The first step is generating the character strings that represent
-vocalizations using the function generate_strings(). These strings
-encode both group membership (characters that are shared across
-individuals within a group) and individual identity (characters that are
-unique to each individual in a group). The function allows you to
-specify the length of the string as well as how much of the string
-encodes group versus individual identity information. It also allows you
-to control the number of groups, individuals in each group and calls per
-individual. These variables that you can control are known as the
-parameters of the function.</p>
+<p><strong>Step 1: Set parameters</strong></p>
 <pre class="r"><code># Set the seed for reproducibility
-set.seed(44)
+set.seed(222)
 
 # Initialize the values of group_information and individual_information, which correspond to the length of the string that will be allocated to encoding group membership or individual identity information
 # Group information can outweigh individual information by a factor of at least 10 or higher
-factor_ratio &lt;- 4
+# Random variation should be at least half or more compared to individual information
 individual_information &lt;- 2
-group_information &lt;- individual_information * factor_ratio
+group_information &lt;- 4
+random_variation &lt;- 2
 
-# Initialize the values of the number of groups, individuals, calls, and string length
-n_groups &lt;- 2
+# globals refers to the number of characters in the the head and tail shared among all calls in the dataset to bound the variation. Number input here is split in half and those amount of characters are allocated to head and tail of string
+globals &lt;- 8 # 4 characters for the global head, 4 for the global tail
+
+# Calculate the string_length of the calls you will make by adding all the different segments of information
+string_length &lt;- group_information + individual_information + random_variation + globals
+
+# Initialize the values of the number of groups, individuals, and calls
+n_groups &lt;- 5
 n_individuals &lt;- 10
-n_calls &lt;- 2
-
-# The global_strings refers to the number of characters in the the head and tail shared among all calls in the dataset to bound the variation. Number input here is split in half and those amount of characters are allocated to head and tail of string
-global_strings &lt;- 4 
-string_length &lt;- (group_information + individual_information) + global_strings
-
-### Generate the string for each call
+n_calls &lt;- 5</code></pre>
+<p><strong>Step 2: Create character strings representing vocal signals
+with more group membership information encoded within the call than
+individual identity information</strong></p>
+<pre class="r"><code>### Generate the string for each call
 calls &lt;- generate_strings(
   n_groups = n_groups, 
   n_individuals = n_individuals, 
   n_calls = n_calls, 
   string_length = string_length, 
   group_information = group_information, 
-  individual_information = individual_information
+  individual_information = individual_information,
+  random_variation = random_variation
   )
 
 dplyr::glimpse(calls)</code></pre>
-<pre><code>## Rows: 40
-## Columns: 4
-## $ Group      &lt;int&gt; 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,…
-## $ Individual &lt;dbl&gt; 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10, 1…
-## $ Call_ID    &lt;dbl&gt; 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2,…
-## $ Call       &lt;chr&gt; &quot;ACBAAABCACBCCA&quot;, &quot;ACBAAABCACBCCA&quot;, &quot;ACBAAABCACBCCA&quot;, &quot;ACBA…</code></pre>
-<p>The above chunk of code will generate a data frame called calls. Each
-row of the data frame represents a call, including the group,
-individual, and call identifiers, along with the vocalization string
-itself.</p>
-<p><strong>Step 2: Convert strings to Parsons code</strong></p>
-<p>Now that you have a data frame of generated calls, you can use the
-parsons_code() function to convert the vocalization strings in the data
-frame example_calls into Parsons code. The goal of this step is to
-create a representation of the direction of frequency shifts (“up”,
-“down”, “constant”) that will be used to modulate the sound’s pitch when
-generating synthetic audio later on. This function has 3 parameters: the
-data frame (df), the name of the column containing the character strings
-(string_col), and the list that maps each character (“A”, “B”, “C”) to a
-direction in Parsons code (“up”, “down”, “constant”) (mapping).</p>
+<pre><code>## Rows: 250
+## Columns: 10
+## $ Group             &lt;int&gt; 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1…
+## $ Individual        &lt;dbl&gt; 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 4, 4, 4…
+## $ Call_ID           &lt;dbl&gt; 1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3…
+## $ Call              &lt;chr&gt; &quot;ABCBBAABBCBACBBA&quot;, &quot;ABCBBAABBABACBBA&quot;, &quot;ABCBBAABCAB…
+## $ Global_head       &lt;chr&gt; &quot;ABCB&quot;, &quot;ABCB&quot;, &quot;ABCB&quot;, &quot;ABCB&quot;, &quot;ABCB&quot;, &quot;ABCB&quot;, &quot;ABC…
+## $ Group_head        &lt;chr&gt; &quot;BA&quot;, &quot;BA&quot;, &quot;BA&quot;, &quot;BA&quot;, &quot;BA&quot;, &quot;BA&quot;, &quot;BA&quot;, &quot;BA&quot;, &quot;BA&quot;…
+## $ Individual_middle &lt;chr&gt; &quot;AB&quot;, &quot;AB&quot;, &quot;AB&quot;, &quot;AB&quot;, &quot;AB&quot;, &quot;CB&quot;, &quot;CB&quot;, &quot;CB&quot;, &quot;CB&quot;…
+## $ Random_variation  &lt;chr&gt; &quot;BC&quot;, &quot;BA&quot;, &quot;CA&quot;, &quot;CC&quot;, &quot;AB&quot;, &quot;BC&quot;, &quot;CB&quot;, &quot;BC&quot;, &quot;BB&quot;…
+## $ Group_tail        &lt;chr&gt; &quot;BA&quot;, &quot;BA&quot;, &quot;BA&quot;, &quot;BA&quot;, &quot;BA&quot;, &quot;BA&quot;, &quot;BA&quot;, &quot;BA&quot;, &quot;BA&quot;…
+## $ Global_tail       &lt;chr&gt; &quot;CBBA&quot;, &quot;CBBA&quot;, &quot;CBBA&quot;, &quot;CBBA&quot;, &quot;CBBA&quot;, &quot;CBBA&quot;, &quot;CBB…</code></pre>
+<p><strong>Step 3: Convert strings to Parsons code</strong></p>
 <pre class="r"><code>calls_parsons &lt;- parsons_code(
   df = calls, 
   string_col = &quot;Call&quot;, 
+  global_head_col = &quot;Global_head&quot;,
+  group_head_col = &quot;Group_head&quot;,
+  individual_middle_col = &quot;Individual_middle&quot;,
+  group_tail_col = &quot;Group_tail&quot;,
+  global_tail_col = &quot;Global_tail&quot;,
+  random_variation_col = &quot;Random_variation&quot;,
   mapping = list(&quot;A&quot; = &quot;up&quot;, &quot;B&quot; = &quot;down&quot;, &quot;C&quot; = &quot;constant&quot;)
 )
 
 glimpse(calls_parsons)</code></pre>
-<pre><code>## Rows: 40
-## Columns: 5
-## $ Group        &lt;int&gt; 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, …
-## $ Individual   &lt;dbl&gt; 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10,…
-## $ Call_ID      &lt;dbl&gt; 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, …
-## $ Call         &lt;chr&gt; &quot;ACBAAABCACBCCA&quot;, &quot;ACBAAABCACBCCA&quot;, &quot;ACBAAABCACBCCA&quot;, &quot;AC…
-## $ Parsons_Code &lt;chr&gt; &quot;up-constant-down-up-up-up-down-constant-up-constant-down…</code></pre>
-<p>This will return a data frame with all the previous columns in
-example_calls in addition to one extra column called “Parsons_code”,
-which contains the Parsons code representation of each segment of the
-vocalization string.</p>
-<p><strong>Step 3: Convert the Parsons code to frequency
+<pre><code>## Rows: 250
+## Columns: 17
+## $ Group                          &lt;int&gt; 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, …
+## $ Individual                     &lt;dbl&gt; 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 3, 3, 3, …
+## $ Call_ID                        &lt;dbl&gt; 1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, …
+## $ Call                           &lt;chr&gt; &quot;ABCBBAABBCBACBBA&quot;, &quot;ABCBBAABBABACBBA&quot;,…
+## $ Global_head                    &lt;chr&gt; &quot;ABCB&quot;, &quot;ABCB&quot;, &quot;ABCB&quot;, &quot;ABCB&quot;, &quot;ABCB&quot;,…
+## $ Group_head                     &lt;chr&gt; &quot;BA&quot;, &quot;BA&quot;, &quot;BA&quot;, &quot;BA&quot;, &quot;BA&quot;, &quot;BA&quot;, &quot;BA…
+## $ Individual_middle              &lt;chr&gt; &quot;AB&quot;, &quot;AB&quot;, &quot;AB&quot;, &quot;AB&quot;, &quot;AB&quot;, &quot;CB&quot;, &quot;CB…
+## $ Random_variation               &lt;chr&gt; &quot;BC&quot;, &quot;BA&quot;, &quot;CA&quot;, &quot;CC&quot;, &quot;AB&quot;, &quot;BC&quot;, &quot;CB…
+## $ Group_tail                     &lt;chr&gt; &quot;BA&quot;, &quot;BA&quot;, &quot;BA&quot;, &quot;BA&quot;, &quot;BA&quot;, &quot;BA&quot;, &quot;BA…
+## $ Global_tail                    &lt;chr&gt; &quot;CBBA&quot;, &quot;CBBA&quot;, &quot;CBBA&quot;, &quot;CBBA&quot;, &quot;CBBA&quot;,…
+## $ Call_Parsons_Code              &lt;chr&gt; &quot;up-down-constant-down-down-up-up-down-…
+## $ Global_Head_Parsons_Code       &lt;chr&gt; &quot;up-down-constant-down&quot;, &quot;up-down-const…
+## $ Group_Head_Parsons_Code        &lt;chr&gt; &quot;down-up&quot;, &quot;down-up&quot;, &quot;down-up&quot;, &quot;down-…
+## $ Individual_Middle_Parsons_Code &lt;chr&gt; &quot;up-down&quot;, &quot;up-down&quot;, &quot;up-down&quot;, &quot;up-do…
+## $ Random_Variation_Parsons_Code  &lt;chr&gt; &quot;down-constant&quot;, &quot;down-up&quot;, &quot;constant-u…
+## $ Group_Tail_Parsons_Code        &lt;chr&gt; &quot;down-up&quot;, &quot;down-up&quot;, &quot;down-up&quot;, &quot;down-…
+## $ Global_Tail_Parsons_Code       &lt;chr&gt; &quot;constant-down-down-up&quot;, &quot;constant-down…</code></pre>
+<p><strong>Step 4: Convert the Parsons code to frequency
 values</strong></p>
-<p>With the Parsons code in your data frame, you are now able to use the
-frequency_anchors() function to create frequency anchors that will guide
-the changes in pitch when creating synthetic audio files. Starting at a
-baseline frequency value, frequency values are calculated for each
-sequential character of the string using the Parsons code from the
-previous step. Therefore, the parameters of this function are the data
-frame with the parsons code, the names of the columns containing the
-parsons code (parsons_col), the numeric group identifiers
-(group_id_col), the numeric individual identifiers (individual_id_col),
-unique numeric identifiers for each vocalization per individual
-(call_id_col), the character string per vocalization (call_string_col),
-the baseline frequency value (starting_frequency) which has a default of
-4000 Hz, and a value of frequency shift (frequency_shift) which has a
-default value of 1000.</p>
-<pre class="r"><code>calls_parsons_frequencies &lt;- frequency_anchors(
+<p>From this step onward, two datasets will be made and used to explore
+the effects of the two different <code>frequency_anchors</code>
+arguments of <code>section_transition</code> = “continuous_trajectory”
+versus <code>section_transition</code> = “starting_frequency” on the
+spectrograms of the <code>paRsynth</code> generated calls.</p>
+<p><strong>Dataset A</strong>: <code>section_transition</code> =
+“continuous_trajectory”</p>
+<pre class="r"><code>calls_parsons_frequencies_ct &lt;- frequency_anchors(
   df = calls_parsons, 
-  parsons_col = &quot;Parsons_Code&quot;, 
+  parsons_col = &quot;Call_Parsons_Code&quot;, 
   group_id_col = &quot;Group&quot;, 
   individual_id_col = &quot;Individual&quot;, 
   call_id_col = &quot;Call_ID&quot;, 
   call_string_col = &quot;Call&quot;, 
   starting_frequency = 4000, 
-  frequency_shift = 1000
+  frequency_shift = 1000,
+  section_transition = &quot;continuous_trajectory&quot; # This setting will be changed
   )
 
-glimpse(calls_parsons_frequencies)</code></pre>
-<pre><code>## Rows: 40
-## Columns: 21
+glimpse(calls_parsons_frequencies_ct)</code></pre>
+<pre><code>## Rows: 250
+## Columns: 22
 ## $ Group        &lt;int&gt; 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, …
-## $ Individual   &lt;dbl&gt; 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10,…
-## $ Call_ID      &lt;dbl&gt; 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, …
-## $ Call         &lt;chr&gt; &quot;ACBAAABCACBCCA&quot;, &quot;ACBAAABCACBCCA&quot;, &quot;ACBAAABCACBCCA&quot;, &quot;AC…
-## $ Parsons_Code &lt;chr&gt; &quot;up-constant-down-up-up-up-down-constant-up-constant-down…
+## $ Individual   &lt;dbl&gt; 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 4, 4, 4, 4, …
+## $ Call_ID      &lt;dbl&gt; 1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, 4, …
+## $ Call         &lt;chr&gt; &quot;ABCBBAABBCBACBBA&quot;, &quot;ABCBBAABBABACBBA&quot;, &quot;ABCBBAABCABACBBA…
+## $ Parsons_Code &lt;chr&gt; &quot;constant-down-down-up&quot;, &quot;constant-down-down-up&quot;, &quot;consta…
 ## $ Frequency1   &lt;dbl&gt; 4000, 4000, 4000, 4000, 4000, 4000, 4000, 4000, 4000, 400…
 ## $ Frequency2   &lt;dbl&gt; 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 500…
-## $ Frequency3   &lt;dbl&gt; 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 500…
+## $ Frequency3   &lt;dbl&gt; 4000, 4000, 4000, 4000, 4000, 4000, 4000, 4000, 4000, 400…
 ## $ Frequency4   &lt;dbl&gt; 4000, 4000, 4000, 4000, 4000, 4000, 4000, 4000, 4000, 400…
-## $ Frequency5   &lt;dbl&gt; 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 500…
-## $ Frequency6   &lt;dbl&gt; 6000, 6000, 6000, 6000, 6000, 6000, 6000, 6000, 6000, 600…
-## $ Frequency7   &lt;dbl&gt; 7000, 7000, 7000, 7000, 7000, 7000, 7000, 7000, 7000, 700…
-## $ Frequency8   &lt;dbl&gt; 6000, 6000, 6000, 6000, 8000, 8000, 8000, 8000, 8000, 800…
-## $ Frequency9   &lt;dbl&gt; 6000, 6000, 6000, 6000, 7000, 7000, 9000, 9000, 7000, 700…
-## $ Frequency10  &lt;dbl&gt; 7000, 7000, 7000, 7000, 8000, 8000, 10000, 10000, 8000, 8…
-## $ Frequency11  &lt;dbl&gt; 7000, 7000, 7000, 7000, 8000, 8000, 10000, 10000, 8000, 8…
-## $ Frequency12  &lt;dbl&gt; 6000, 6000, 6000, 6000, 7000, 7000, 9000, 9000, 7000, 700…
-## $ Frequency13  &lt;dbl&gt; 6000, 6000, 6000, 6000, 7000, 7000, 9000, 9000, 7000, 700…
-## $ Frequency14  &lt;dbl&gt; 6000, 6000, 6000, 6000, 7000, 7000, 9000, 9000, 7000, 700…
-## $ Frequency15  &lt;dbl&gt; 7000, 7000, 7000, 7000, 8000, 8000, 10000, 10000, 8000, 8…
-## $ Frequency16  &lt;dbl&gt; 4000, 4000, 4000, 4000, 4000, 4000, 4000, 4000, 4000, 400…</code></pre>
-<p>This will return an updated data frame that includes all of the
-previous columns in addition to new columns that represent each
-frequency anchor for each vocalization (the number of columns added in
-this step corresponds to the character length of your vocalization
-string).</p>
-<p><strong>Step 4: For each call or string, use these frequency anchor
-vectors to generate synthetic audio files with the soundgen
-package</strong></p>
-<p>Now, finally, you are equipped with all the necessary data to
-generate the audio files that will allow you to hear the synthetic bird
-calls we generated! To do that, we will use the function write_audio().
-This function creates a sound file (in .wav format) for each
-vocalization and saves it to your desired directory. Each file will
-represent one vocalization with its own unique frequency modulation
-pattern that was developed in step 3. This function has five parameters:
-the data frame with frequency anchors and string metadata (df), the
-directory where the audio files will be saved (save_path), the sampling
-rate for the audio files with a default of 150000 Hz (sampling_rate),
-the length of the syllable in milliseconds with a default of 200 ms
-(sylLen), and the prefix for the audio file names (prefix). Note that
-the prefix you use for the synthetic audio files should match the social
-level that should contain the most information (here it is the group
-level because the group information string is longer).</p>
-<pre class="r"><code>synthetic_call_metadata1 &lt;- write_audio(
-  df = calls_parsons_frequencies, 
-  save_path = audio_path, 
-  sampling_rate = 150000, 
-  sylLen = 400, 
-  prefix = &quot;GroupMembership&quot;
-  )
-
-glimpse(synthetic_call_metadata1)</code></pre>
-<pre><code>## Rows: 40
-## Columns: 22
-## $ Group           &lt;int&gt; 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, …
-## $ Individual      &lt;dbl&gt; 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, …
-## $ Call_ID         &lt;dbl&gt; 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, …
-## $ Call            &lt;chr&gt; &quot;ACBAAABCACBCCA&quot;, &quot;ACBAAABCACBCCA&quot;, &quot;ACBAAABCACBCCA&quot;, …
-## $ Parsons_Code    &lt;chr&gt; &quot;up-constant-down-up-up-up-down-constant-up-constant-d…
-## $ Frequency1      &lt;dbl&gt; 4000, 4000, 4000, 4000, 4000, 4000, 4000, 4000, 4000, …
-## $ Frequency2      &lt;dbl&gt; 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, …
-## $ Frequency3      &lt;dbl&gt; 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, …
-## $ Frequency4      &lt;dbl&gt; 4000, 4000, 4000, 4000, 4000, 4000, 4000, 4000, 4000, …
-## $ Frequency5      &lt;dbl&gt; 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, …
-## $ Frequency6      &lt;dbl&gt; 6000, 6000, 6000, 6000, 6000, 6000, 6000, 6000, 6000, …
-## $ Frequency7      &lt;dbl&gt; 7000, 7000, 7000, 7000, 7000, 7000, 7000, 7000, 7000, …
-## $ Frequency8      &lt;dbl&gt; 6000, 6000, 6000, 6000, 8000, 8000, 8000, 8000, 8000, …
-## $ Frequency9      &lt;dbl&gt; 6000, 6000, 6000, 6000, 7000, 7000, 9000, 9000, 7000, …
-## $ Frequency10     &lt;dbl&gt; 7000, 7000, 7000, 7000, 8000, 8000, 10000, 10000, 8000…
-## $ Frequency11     &lt;dbl&gt; 7000, 7000, 7000, 7000, 8000, 8000, 10000, 10000, 8000…
-## $ Frequency12     &lt;dbl&gt; 6000, 6000, 6000, 6000, 7000, 7000, 9000, 9000, 7000, …
-## $ Frequency13     &lt;dbl&gt; 6000, 6000, 6000, 6000, 7000, 7000, 9000, 9000, 7000, …
-## $ Frequency14     &lt;dbl&gt; 6000, 6000, 6000, 6000, 7000, 7000, 9000, 9000, 7000, …
-## $ Frequency15     &lt;dbl&gt; 7000, 7000, 7000, 7000, 8000, 8000, 10000, 10000, 8000…
-## $ Frequency16     &lt;dbl&gt; 4000, 4000, 4000, 4000, 4000, 4000, 4000, 4000, 4000, …
-## $ audio_file_name &lt;chr&gt; &quot;GroupMembership_Group1_Ind1_Call1.wav&quot;, &quot;GroupMembers…</code></pre>
-<p>This will create files with the extension .wav for each vocalization
-and will save them in your desired and specified directory with a prefix
-of your preference.</p>
-<p><strong>Step 5: Save the metadata for the synthetic audio files to a
-CSV file</strong></p>
-<p>The data frames that you generate in R using paRsynth can be saved as
-physical files in your working directory. You can also save your
-paRsynth generated metadata into a CSV file. I recommend using this file
-type since it is compatible with R, Microsoft Word, and other software.
-You can use the function <code>write.csv()</code> to save data frames to
-.csv spreadsheets on your computer:</p>
-<pre class="r"><code># Add extra metadata for upcoming image files names and rearrange columns
-synthetic_call_metadata1 %&gt;%
-  write.csv(., file = file.path(analysis_path, &quot;synthetic_call_metadata1.csv&quot;), row.names = FALSE) </code></pre>
-<p>Now that you have generated your metadata with paRsyth and it has
-been saved as a CSV file, navigate to Vignette 03 Analysis to learn how
-to use the generated outputs of the package described above for
-downstream bioacoustics analysis.</p>
-<h2>
-2nd Example: Individual Information &gt; Group Information
-</h2>
-<p>Let’s do a 2nd example where individual information is greater than
-group information. Run the same steps above, but interchange
-‘individual_information’ and ’group_information in the code. Make sure
-to reassign group_information to an even integer larger than 8 and
-reassign factor_ratio to a smaller even integer starting from 2 -
-10.</p>
-<pre class="r"><code># Set the seed for reproducibility
-set.seed(456)
-
-# Interchange individual_information with group_information
-factor_ratio2 &lt;- 4
-group_information2 &lt;- 2
-individual_information2 &lt;- group_information2 * factor_ratio2
-n_groups2 &lt;- 2
-n_individuals2 &lt;- 10
-n_calls2 &lt;- 2
-global_strings &lt;- 4
-string_length2 &lt;- (group_information2 + individual_information2) + global_strings
-
-### Generate the string for each call
-calls2 &lt;- generate_strings(
-  n_groups = n_groups2, 
-  n_individuals = n_individuals2, 
-  n_calls = n_calls2, 
-  string_length = string_length2, 
-  group_information = group_information2, 
-  individual_information = individual_information2
-  )
-
-### Convert each string to Parsons code
-calls_parsons2 &lt;- parsons_code(
-  df = calls2, 
-  string_col = &quot;Call&quot;, 
-  mapping = list(&quot;A&quot; = &quot;up&quot;, &quot;B&quot; = &quot;down&quot;, &quot;C&quot; = &quot;constant&quot;)
-)
-
-### Convert each Parsons code to frequency values
-calls_parsons_frequencies2 &lt;- frequency_anchors(
-  df = calls_parsons2, 
-  parsons_col = &quot;Parsons_Code&quot;, 
+## $ Frequency5   &lt;dbl&gt; 3000, 3000, 3000, 3000, 3000, 3000, 3000, 3000, 3000, 300…
+## $ Frequency6   &lt;dbl&gt; 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 200…
+## $ Frequency7   &lt;dbl&gt; 3000, 3000, 3000, 3000, 3000, 3000, 3000, 3000, 3000, 300…
+## $ Frequency8   &lt;dbl&gt; 4000, 4000, 4000, 4000, 4000, 3000, 3000, 3000, 3000, 300…
+## $ Frequency9   &lt;dbl&gt; 3000, 3000, 3000, 3000, 3000, 2000, 2000, 2000, 2000, 200…
+## $ Frequency10  &lt;dbl&gt; 2000, 2000, 3000, 3000, 4000, 1000, 2000, 1000, 1000, 100…
+## $ Frequency11  &lt;dbl&gt; 2000, 3000, 4000, 3000, 3000, 1000, 1000, 1000, 1000, 200…
+## $ Frequency12  &lt;dbl&gt; 1000, 2000, 3000, 2000, 2000, 1000, 1000, 1000, 1000, 100…
+## $ Frequency13  &lt;dbl&gt; 2000, 3000, 4000, 3000, 3000, 2000, 2000, 2000, 2000, 200…
+## $ Frequency14  &lt;dbl&gt; 2000, 3000, 4000, 3000, 3000, 2000, 2000, 2000, 2000, 200…
+## $ Frequency15  &lt;dbl&gt; 1000, 2000, 3000, 2000, 2000, 1000, 1000, 1000, 1000, 100…
+## $ Frequency16  &lt;dbl&gt; 1000, 1000, 2000, 1000, 1000, 1000, 1000, 1000, 1000, 100…
+## $ Frequency17  &lt;dbl&gt; 2000, 2000, 3000, 2000, 2000, 2000, 2000, 2000, 2000, 200…</code></pre>
+<p><strong>Dataset B</strong>: <code>section_transition</code> =
+“starting_frequency”</p>
+<pre class="r"><code>calls_parsons_frequencies_sf &lt;- frequency_anchors(
+  df = calls_parsons, 
+  parsons_col = &quot;Call_Parsons_Code&quot;, 
   group_id_col = &quot;Group&quot;, 
   individual_id_col = &quot;Individual&quot;, 
   call_id_col = &quot;Call_ID&quot;, 
   call_string_col = &quot;Call&quot;, 
   starting_frequency = 4000, 
-  frequency_shift = 1000
+  frequency_shift = 1000,
+  section_transition = &quot;starting_frequency&quot; # This setting has been changed
   )
 
-### For each call, use the frequency vectors to generate synthetic audio files with the soundgen package
-synthetic_call_metadata2 &lt;- write_audio(
-  df = calls_parsons_frequencies2, 
+glimpse(calls_parsons_frequencies_sf)</code></pre>
+<pre><code>## Rows: 250
+## Columns: 22
+## $ Group        &lt;int&gt; 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, …
+## $ Individual   &lt;dbl&gt; 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 4, 4, 4, 4, …
+## $ Call_ID      &lt;dbl&gt; 1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, 4, …
+## $ Call         &lt;chr&gt; &quot;ABCBBAABBCBACBBA&quot;, &quot;ABCBBAABBABACBBA&quot;, &quot;ABCBBAABCABACBBA…
+## $ Parsons_Code &lt;chr&gt; &quot;constant-down-down-up&quot;, &quot;constant-down-down-up&quot;, &quot;consta…
+## $ Frequency1   &lt;dbl&gt; 4000, 4000, 4000, 4000, 4000, 4000, 4000, 4000, 4000, 400…
+## $ Frequency2   &lt;dbl&gt; 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 500…
+## $ Frequency3   &lt;dbl&gt; 4000, 4000, 4000, 4000, 4000, 4000, 4000, 4000, 4000, 400…
+## $ Frequency4   &lt;dbl&gt; 4000, 4000, 4000, 4000, 4000, 4000, 4000, 4000, 4000, 400…
+## $ Frequency5   &lt;dbl&gt; 3000, 3000, 3000, 3000, 3000, 3000, 3000, 3000, 3000, 300…
+## $ Frequency6   &lt;dbl&gt; 3000, 3000, 3000, 3000, 3000, 3000, 3000, 3000, 3000, 300…
+## $ Frequency7   &lt;dbl&gt; 4000, 4000, 4000, 4000, 4000, 4000, 4000, 4000, 4000, 400…
+## $ Frequency8   &lt;dbl&gt; 5000, 5000, 5000, 5000, 5000, 4000, 4000, 4000, 4000, 400…
+## $ Frequency9   &lt;dbl&gt; 4000, 4000, 4000, 4000, 4000, 3000, 3000, 3000, 3000, 300…
+## $ Frequency10  &lt;dbl&gt; 3000, 3000, 4000, 4000, 5000, 3000, 4000, 3000, 3000, 300…
+## $ Frequency11  &lt;dbl&gt; 3000, 4000, 5000, 4000, 4000, 3000, 3000, 3000, 2000, 400…
+## $ Frequency12  &lt;dbl&gt; 3000, 3000, 3000, 3000, 3000, 3000, 3000, 3000, 3000, 300…
+## $ Frequency13  &lt;dbl&gt; 4000, 4000, 4000, 4000, 4000, 4000, 4000, 4000, 4000, 400…
+## $ Frequency14  &lt;dbl&gt; 4000, 4000, 4000, 4000, 4000, 4000, 4000, 4000, 4000, 400…
+## $ Frequency15  &lt;dbl&gt; 3000, 3000, 3000, 3000, 3000, 3000, 3000, 3000, 3000, 300…
+## $ Frequency16  &lt;dbl&gt; 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 200…
+## $ Frequency17  &lt;dbl&gt; 3000, 3000, 3000, 3000, 3000, 3000, 3000, 3000, 3000, 300…</code></pre>
+<p>Now we have two datasets created by two different frequency_anchors
+settings. We are going to create audio files for the calls to generate
+spectrograms for them to see how they differ.</p>
+<p><strong>Step 5: For each call or string, use these frequency anchor
+vectors to generate synthetic audio files with the soundgen
+package</strong></p>
+<p><strong>Dataset A</strong>: <code>section_transition</code> =
+“continuous_trajectory”</p>
+<pre class="r"><code>synthetic_call_metadata_ct &lt;- write_audio(
+  df = calls_parsons_frequencies_ct,
   save_path = audio_path, 
-  sampling_rate = 150000, 
-  sylLen = 400, 
-  prefix = &quot;IndividualIdentity&quot;
+  sampling_rate = 44100,
+  sylLen = 200,
+  temperature = 0.025,  # default stochasticity in generating sound
+  pitch_sampling_rate = 44100,
+  smoothing = list(interpol = &quot;loess&quot;, loessSpan = 1, discontThres = 0, jumpThres = 0),
+  rolloffExact = c(0.25), # specify an amplitude value for the fundamental only, which will silence all harmonics
+  formants = NA,
+  vocalTract = NA,
+  vibratoFreq = 1,
+  prefix = &quot;CT&quot;,
+  invalidArgAction = &quot;ignore&quot;
   )
 
-### Save the metadata for the synthetic audio files to a CSV file
-# Add extra metadata for upcoming image files names and rearrange columns
-synthetic_call_metadata2 %&gt;%
-  write.csv(., file = file.path(analysis_path, &quot;synthetic_call_metadata2.csv&quot;), row.names = FALSE)</code></pre>
-<p>Read in the spreadsheet you created.</p>
-<pre class="r"><code>synthetic_call_metadata2 &lt;- read.csv(file.path(analysis_path, &quot;synthetic_call_metadata2.csv&quot;))
-
-glimpse(synthetic_call_metadata2)</code></pre>
-<pre><code>## Rows: 40
-## Columns: 22
+glimpse(synthetic_call_metadata_ct)</code></pre>
+<pre><code>## Rows: 250
+## Columns: 23
 ## $ Group           &lt;int&gt; 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, …
-## $ Individual      &lt;int&gt; 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, …
-## $ Call_ID         &lt;int&gt; 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, …
-## $ Call            &lt;chr&gt; &quot;AAACBACBCCCCCB&quot;, &quot;AAACBACBCCCCCB&quot;, &quot;AAABBAABCAACCB&quot;, …
-## $ Parsons_Code    &lt;chr&gt; &quot;up-up-up-constant-down-up-constant-down-constant-cons…
-## $ Frequency1      &lt;int&gt; 4000, 4000, 4000, 4000, 4000, 4000, 4000, 4000, 4000, …
-## $ Frequency2      &lt;int&gt; 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, …
-## $ Frequency3      &lt;int&gt; 6000, 6000, 6000, 6000, 6000, 6000, 6000, 6000, 6000, …
-## $ Frequency4      &lt;int&gt; 7000, 7000, 7000, 7000, 7000, 7000, 7000, 7000, 7000, …
-## $ Frequency5      &lt;int&gt; 7000, 7000, 6000, 6000, 6000, 6000, 8000, 8000, 7000, …
-## $ Frequency6      &lt;int&gt; 6000, 6000, 5000, 5000, 7000, 7000, 7000, 7000, 6000, …
-## $ Frequency7      &lt;int&gt; 7000, 7000, 6000, 6000, 8000, 8000, 8000, 8000, 6000, …
-## $ Frequency8      &lt;int&gt; 7000, 7000, 7000, 7000, 7000, 7000, 8000, 8000, 6000, …
-## $ Frequency9      &lt;int&gt; 6000, 6000, 6000, 6000, 6000, 6000, 7000, 7000, 7000, …
-## $ Frequency10     &lt;int&gt; 6000, 6000, 6000, 6000, 6000, 6000, 7000, 7000, 8000, …
-## $ Frequency11     &lt;int&gt; 6000, 6000, 7000, 7000, 5000, 5000, 6000, 6000, 9000, …
-## $ Frequency12     &lt;int&gt; 6000, 6000, 8000, 8000, 5000, 5000, 5000, 5000, 8000, …
-## $ Frequency13     &lt;int&gt; 6000, 6000, 8000, 8000, 5000, 5000, 5000, 5000, 8000, …
-## $ Frequency14     &lt;int&gt; 6000, 6000, 8000, 8000, 5000, 5000, 5000, 5000, 8000, …
-## $ Frequency15     &lt;int&gt; 5000, 5000, 7000, 7000, 4000, 4000, 4000, 4000, 7000, …
-## $ Frequency16     &lt;int&gt; 4000, 4000, 4000, 4000, 4000, 4000, 4000, 4000, 4000, …
-## $ audio_file_name &lt;chr&gt; &quot;IndividualIdentity_Group1_Ind1_Call1.wav&quot;, &quot;Individua…</code></pre>
-<p>The .wav files for this dataset have been added to the audio folder
-and a CSV file has been created for it. After running this code you will
-have two datasets: 1) reflects vocalizations with more group information
-than individual and 2) vice versa.</p>
-<p><strong>Additional Step 6: Combine datasets into one single CSV
+## $ Individual      &lt;dbl&gt; 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 4, 4, 4, …
+## $ Call_ID         &lt;dbl&gt; 1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, …
+## $ Call            &lt;chr&gt; &quot;ABCBBAABBCBACBBA&quot;, &quot;ABCBBAABBABACBBA&quot;, &quot;ABCBBAABCABAC…
+## $ Parsons_Code    &lt;chr&gt; &quot;constant-down-down-up&quot;, &quot;constant-down-down-up&quot;, &quot;con…
+## $ Frequency1      &lt;dbl&gt; 4000, 4000, 4000, 4000, 4000, 4000, 4000, 4000, 4000, …
+## $ Frequency2      &lt;dbl&gt; 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, …
+## $ Frequency3      &lt;dbl&gt; 4000, 4000, 4000, 4000, 4000, 4000, 4000, 4000, 4000, …
+## $ Frequency4      &lt;dbl&gt; 4000, 4000, 4000, 4000, 4000, 4000, 4000, 4000, 4000, …
+## $ Frequency5      &lt;dbl&gt; 3000, 3000, 3000, 3000, 3000, 3000, 3000, 3000, 3000, …
+## $ Frequency6      &lt;dbl&gt; 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, …
+## $ Frequency7      &lt;dbl&gt; 3000, 3000, 3000, 3000, 3000, 3000, 3000, 3000, 3000, …
+## $ Frequency8      &lt;dbl&gt; 4000, 4000, 4000, 4000, 4000, 3000, 3000, 3000, 3000, …
+## $ Frequency9      &lt;dbl&gt; 3000, 3000, 3000, 3000, 3000, 2000, 2000, 2000, 2000, …
+## $ Frequency10     &lt;dbl&gt; 2000, 2000, 3000, 3000, 4000, 1000, 2000, 1000, 1000, …
+## $ Frequency11     &lt;dbl&gt; 2000, 3000, 4000, 3000, 3000, 1000, 1000, 1000, 1000, …
+## $ Frequency12     &lt;dbl&gt; 1000, 2000, 3000, 2000, 2000, 1000, 1000, 1000, 1000, …
+## $ Frequency13     &lt;dbl&gt; 2000, 3000, 4000, 3000, 3000, 2000, 2000, 2000, 2000, …
+## $ Frequency14     &lt;dbl&gt; 2000, 3000, 4000, 3000, 3000, 2000, 2000, 2000, 2000, …
+## $ Frequency15     &lt;dbl&gt; 1000, 2000, 3000, 2000, 2000, 1000, 1000, 1000, 1000, …
+## $ Frequency16     &lt;dbl&gt; 1000, 1000, 2000, 1000, 1000, 1000, 1000, 1000, 1000, …
+## $ Frequency17     &lt;dbl&gt; 2000, 2000, 3000, 2000, 2000, 2000, 2000, 2000, 2000, …
+## $ audio_file_name &lt;chr&gt; &quot;CT_Group1_Indiv1_Call1.wav&quot;, &quot;CT_Group1_Indiv1_Call2.…</code></pre>
+<p><strong>Dataset B</strong>: <code>section_transition</code> =
+“starting_frequency”</p>
+<pre class="r"><code>synthetic_call_metadata_sf &lt;- write_audio(
+  df = calls_parsons_frequencies_sf,
+  save_path = audio_path, 
+  sampling_rate = 44100,
+  sylLen = 200,
+  temperature = 0.025,  # default stochasticity in generating sound
+  pitch_sampling_rate = 44100,
+  smoothing = list(interpol = &quot;loess&quot;, loessSpan = 1, discontThres = 0, jumpThres = 0),
+  rolloffExact = c(0.25), # specify an amplitude value for the fundamental only, which will silence all harmonics
+  formants = NA,
+  vocalTract = NA,
+  vibratoFreq = 1,
+  prefix = &quot;SF&quot;,
+  invalidArgAction = &quot;ignore&quot;
+  )
+
+glimpse(synthetic_call_metadata_sf)</code></pre>
+<pre><code>## Rows: 250
+## Columns: 23
+## $ Group           &lt;int&gt; 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, …
+## $ Individual      &lt;dbl&gt; 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 4, 4, 4, …
+## $ Call_ID         &lt;dbl&gt; 1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, …
+## $ Call            &lt;chr&gt; &quot;ABCBBAABBCBACBBA&quot;, &quot;ABCBBAABBABACBBA&quot;, &quot;ABCBBAABCABAC…
+## $ Parsons_Code    &lt;chr&gt; &quot;constant-down-down-up&quot;, &quot;constant-down-down-up&quot;, &quot;con…
+## $ Frequency1      &lt;dbl&gt; 4000, 4000, 4000, 4000, 4000, 4000, 4000, 4000, 4000, …
+## $ Frequency2      &lt;dbl&gt; 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, …
+## $ Frequency3      &lt;dbl&gt; 4000, 4000, 4000, 4000, 4000, 4000, 4000, 4000, 4000, …
+## $ Frequency4      &lt;dbl&gt; 4000, 4000, 4000, 4000, 4000, 4000, 4000, 4000, 4000, …
+## $ Frequency5      &lt;dbl&gt; 3000, 3000, 3000, 3000, 3000, 3000, 3000, 3000, 3000, …
+## $ Frequency6      &lt;dbl&gt; 3000, 3000, 3000, 3000, 3000, 3000, 3000, 3000, 3000, …
+## $ Frequency7      &lt;dbl&gt; 4000, 4000, 4000, 4000, 4000, 4000, 4000, 4000, 4000, …
+## $ Frequency8      &lt;dbl&gt; 5000, 5000, 5000, 5000, 5000, 4000, 4000, 4000, 4000, …
+## $ Frequency9      &lt;dbl&gt; 4000, 4000, 4000, 4000, 4000, 3000, 3000, 3000, 3000, …
+## $ Frequency10     &lt;dbl&gt; 3000, 3000, 4000, 4000, 5000, 3000, 4000, 3000, 3000, …
+## $ Frequency11     &lt;dbl&gt; 3000, 4000, 5000, 4000, 4000, 3000, 3000, 3000, 2000, …
+## $ Frequency12     &lt;dbl&gt; 3000, 3000, 3000, 3000, 3000, 3000, 3000, 3000, 3000, …
+## $ Frequency13     &lt;dbl&gt; 4000, 4000, 4000, 4000, 4000, 4000, 4000, 4000, 4000, …
+## $ Frequency14     &lt;dbl&gt; 4000, 4000, 4000, 4000, 4000, 4000, 4000, 4000, 4000, …
+## $ Frequency15     &lt;dbl&gt; 3000, 3000, 3000, 3000, 3000, 3000, 3000, 3000, 3000, …
+## $ Frequency16     &lt;dbl&gt; 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, …
+## $ Frequency17     &lt;dbl&gt; 3000, 3000, 3000, 3000, 3000, 3000, 3000, 3000, 3000, …
+## $ audio_file_name &lt;chr&gt; &quot;SF_Group1_Indiv1_Call1.wav&quot;, &quot;SF_Group1_Indiv1_Call2.…</code></pre>
+<p><strong>Step 6: Save the metadata for the synthetic audio files to a
+.CSV file</strong></p>
+<p><strong>Dataset A</strong>: <code>section_transition</code> =
+“continuous_trajectory”</p>
+<pre class="r"><code># Add extra metadata for upcoming image files names and rearrange columns
+synthetic_call_metadata_ct %&gt;%
+  write.csv(., file = file.path(analysis_path, &quot;synthetic_call_metadata_ct.csv&quot;), row.names = FALSE) </code></pre>
+<pre class="r"><code>synthetic_call_metadata_ct_csv &lt;- read.csv(file.path(analysis_path, &quot;synthetic_call_metadata_ct.csv&quot;))
+
+glimpse(synthetic_call_metadata_ct_csv)</code></pre>
+<p><strong>Dataset B</strong>: <code>section_transition</code> =
+“starting_frequency”</p>
+<pre class="r"><code># Add extra metadata for upcoming image files names and rearrange columns
+synthetic_call_metadata_sf %&gt;%
+  write.csv(., file = file.path(analysis_path, &quot;synthetic_call_metadata_sf.csv&quot;), row.names = FALSE) </code></pre>
+<pre class="r"><code>synthetic_call_metadata_sf_csv &lt;- read.csv(file.path(analysis_path, &quot;synthetic_call_metadata_sf.csv&quot;))
+
+glimpse(synthetic_call_metadata_sf_csv)</code></pre>
+<p>You have generated two metadatas with paRsyth and it has been saved
+as a .CSV file for each argument setting!</p>
+<p><strong>Step 7: Save the metadata for the synthetic datasets in a CSV
 file</strong></p>
-<p>It may be helpful for downstream bioacoustic analysis to create a CSV
-file including both datasets.</p>
-<pre class="r"><code># Read the CSV file of each dataset
-# group &lt;- read.csv(&quot;/Users/summe/OneDrive/Desktop/paRsynth_methods_synthetic_dataset/synthetic_call_metadata1.csv&quot;)
-# individual &lt;- read.csv(&quot;/Users/summe/OneDrive/Desktop/paRsynth_methods_synthetic_dataset/synthetic_call_metadata2.csv&quot;) # Summer&#39;s CSV files
-group &lt;- read.csv(&quot;/Users/gretheljuarez/Desktop/BIRDS/paRsynth_methods_synthetic_dataset/synthetic_call_metadata1.csv&quot;)
-individual &lt;- read.csv(&quot;/Users/gretheljuarez/Desktop/BIRDS/paRsynth_methods_synthetic_dataset/synthetic_call_metadata2.csv&quot;)
+<pre class="r"><code># Combine the metdata across datasets and add an extra column to indicate the call dataset generated
+synthetic_call_metadata_ct_csv %&gt;%
+  dplyr::mutate(
+    dataset = &quot;CT&quot;
+  ) %&gt;% 
+  bind_rows(
+    synthetic_call_metadata_sf_csv %&gt;% 
+      dplyr::mutate(
+        dataset = &quot;SF&quot;
+      )
+  ) %&gt;%
+  write.csv(., file = file.path(analysis_path, &quot;synthetic_call_metadata.csv&quot;), row.names = FALSE) 
 
-# Combine the CSV files of each dataset
-synthetic_call_metadata &lt;- rbind(group, individual)
+synthetic_call_metadatacsv &lt;- read.csv(file.path(analysis_path, &quot;synthetic_call_metadata.csv&quot;))
 
-# Write out the CSV file containing both datasets
-synthetic_call_metadata %&gt;%
-  write.csv(., file = file.path(analysis_path, &quot;synthetic_call_metadata.csv&quot;), row.names = FALSE)</code></pre>
-<p>Read in the spreadsheet you created.</p>
-<pre class="r"><code>synthetic_call_metadata &lt;- read.csv(file.path(analysis_path, &quot;synthetic_call_metadata.csv&quot;))
+glimpse(synthetic_call_metadatacsv)</code></pre>
+<h1>
+Bioacoustics Analysis Workflow
+</h1>
+<p><strong>Step 1: Create a warbleR selection table</strong></p>
+<p>To organize all the <code>paRsynth</code> generated outputs you
+created in the previous vignettes, you will have to create a
+<code>warbleR</code> selection table. The <code>warbleR</code> package
+is very useful to streamline bioacoustic analysis. First you will list
+all the .WAV files and then organize them in a selection table.</p>
+<pre class="r"><code># Create a vector of all of the audio files in the analysis path
+wavs &lt;- list.files(path = audio_path, pattern = &quot;.wav$&quot;, full.names = FALSE)
+length(wavs)
+head(wavs)
+tail(wavs)
 
-glimpse(synthetic_call_metadata)</code></pre>
-<pre><code>## Rows: 80
-## Columns: 22
-## $ Group           &lt;int&gt; 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, …
-## $ Individual      &lt;int&gt; 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, …
-## $ Call_ID         &lt;int&gt; 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, …
-## $ Call            &lt;chr&gt; &quot;ACBAAABCACBCCA&quot;, &quot;ACBAAABCACBCCA&quot;, &quot;ACBAAABCACBCCA&quot;, …
-## $ Parsons_Code    &lt;chr&gt; &quot;up-constant-down-up-up-up-down-constant-up-constant-d…
-## $ Frequency1      &lt;int&gt; 4000, 4000, 4000, 4000, 4000, 4000, 4000, 4000, 4000, …
-## $ Frequency2      &lt;int&gt; 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, …
-## $ Frequency3      &lt;int&gt; 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, …
-## $ Frequency4      &lt;int&gt; 4000, 4000, 4000, 4000, 4000, 4000, 4000, 4000, 4000, …
-## $ Frequency5      &lt;int&gt; 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, …
-## $ Frequency6      &lt;int&gt; 6000, 6000, 6000, 6000, 6000, 6000, 6000, 6000, 6000, …
-## $ Frequency7      &lt;int&gt; 7000, 7000, 7000, 7000, 7000, 7000, 7000, 7000, 7000, …
-## $ Frequency8      &lt;int&gt; 6000, 6000, 6000, 6000, 8000, 8000, 8000, 8000, 8000, …
-## $ Frequency9      &lt;int&gt; 6000, 6000, 6000, 6000, 7000, 7000, 9000, 9000, 7000, …
-## $ Frequency10     &lt;int&gt; 7000, 7000, 7000, 7000, 8000, 8000, 10000, 10000, 8000…
-## $ Frequency11     &lt;int&gt; 7000, 7000, 7000, 7000, 8000, 8000, 10000, 10000, 8000…
-## $ Frequency12     &lt;int&gt; 6000, 6000, 6000, 6000, 7000, 7000, 9000, 9000, 7000, …
-## $ Frequency13     &lt;int&gt; 6000, 6000, 6000, 6000, 7000, 7000, 9000, 9000, 7000, …
-## $ Frequency14     &lt;int&gt; 6000, 6000, 6000, 6000, 7000, 7000, 9000, 9000, 7000, …
-## $ Frequency15     &lt;int&gt; 7000, 7000, 7000, 7000, 8000, 8000, 10000, 10000, 8000…
-## $ Frequency16     &lt;int&gt; 4000, 4000, 4000, 4000, 4000, 4000, 4000, 4000, 4000, …
-## $ audio_file_name &lt;chr&gt; &quot;GroupMembership_Group1_Ind1_Call1.wav&quot;, &quot;GroupMembers…</code></pre>
-<p>After running this code you will have two datasets combined into a
-single CSV: 1) reflects vocalizations with more group information than
-individual and 2) vice versa. Navigate to Vignette 03 to learn how to
+# Recall .csv file that has information from both datasets
+synthetic_call_metadata &lt;- read.csv(file.path(analysis_path, &quot;synthetic_call_metadata.csv&quot;))
+
+# Iterate over the audio files to create one row of the selection table at a time. warbleR selection tables have a very specific format that must be used for downstream analysis.
+sel_tbl &lt;- data.table::rbindlist(pblapply(1:length(wavs), function(w){
+  
+  tmp &lt;- tuneR::readWave(file.path(audio_path, wavs[w]))
+  
+  # Return the metadata for the given call using the synthetic metadata generated during audio file generation above
+  metadats_tmp &lt;- synthetic_call_metadata %&gt;%
+    dplyr::filter(grepl(wavs[w], audio_file_name))
+  
+  # Create a row for the selection table in warbleR format if the audio file exists and metadata for that file also exists
+  if(nrow(metadats_tmp) &gt; 0){
+    
+    # Use 0.1s as a margin to indicate where the vocalization starts and ends in the audio file
+    # soundgen::soundgen() adds 100ms of silence before and after the synthetic vocalization by default 
+    res &lt;- data.frame(
+      sound.files = wavs[w], 
+      selec = 1,
+      start = 0.1, 
+      end = seewave::duration(tmp) - 0.1,
+      sampling_rate = tmp@samp.rate,
+      group_ID = metadats_tmp[[&quot;Group&quot;]],
+      individual_ID = metadats_tmp[[&quot;Individual&quot;]],
+      call = metadats_tmp[[&quot;Call&quot;]],
+      call_ID = metadats_tmp[[&quot;Call_ID&quot;]],
+      dataset = metadats_tmp[[&quot;dataset&quot;]]
+    )
+    
+  } else {
+    
+    res &lt;- data.frame(
+      sound.files = wavs[w], 
+      selec = 1, 
+      start = 0.1, 
+      end = seewave::duration(tmp) + 0.1,
+      sampling_rate = NA,
+      group_ID = NA,
+      individual_ID = NA,
+      call = NA,
+      call_ID = NA,
+      dataset = NA
+    )
+    
+  }
+  
+  return(res)
+  
+}))
+
+# See the selection table in warbleR format with useful metadata for acoustic space plots
+glimpse(sel_tbl)
+
+# Check the selection table for all the unique sampling rates
+unique(sel_tbl$sampling_rate)</code></pre>
+<p>This will output a neatly organized selection table of the uniquely
+generated vocalizations and their corresponding metadata.</p>
+<p><strong>Step 2: Create spectrogram image files of each audio
+file</strong></p>
+<p>Using the <code>warbleR</code> package, spectrograms can be created
+from each synthetic call you generated with <code>paRsynth</code>. A
+spectrogram is useful when analyzing vocalizations because it provides
+precise information on frequency over time. First, you will use
+<code>warbleR</code> to create spectrograms of the generated calls in
+the selection table. Then, you will rename the spectrogram files saved
+in your <code>images_path</code>.</p>
+<p><strong>Dataset A</strong>: <code>section_transition</code> =
+“continuous_trajectory”</p>
+<pre class="r"><code># To make spectrograms of dataset A (continuous_trajectory), you will need to filter it out from the selection table you made above.
+ct_sel_tbl &lt;- sel_tbl %&gt;%
+    dplyr::filter(grepl(&quot;CT&quot;, sound.files))
+
+# Create spectrograms for filtered calls
+warbleR::spectrograms(ct_sel_tbl, wl = 512, flim = c(0, 12), wn = &quot;hanning&quot;, pal = reverse.gray.colors.2,ovlp = 90, inner.mar = c(5, 4, 4, 2), outer.mar = c(0, 0, 0, 0), picsize = 1, res = 100, cexlab = 1, propwidth = FALSE, xl = 1, osci = FALSE, gr = FALSE, sc = FALSE, line = FALSE, mar = 0.05, it = &quot;jpeg&quot;, parallel = 1, path = audio_path, pb = TRUE, fast.spec = FALSE, by.song = NULL, sel.labels = NULL, title.labels = NULL, dest.path = images_path, box = TRUE, axis = TRUE)
+
+# Rename the image files
+imgs &lt;- list.files(images_path)
+
+new_nms &lt;- gsub(&quot;.wav-1&quot;, &quot;&quot;, imgs)
+
+invisible(file.rename(file.path(images_path, imgs), file.path(images_path, new_nms)))</code></pre>
+<p><strong>Dataset B</strong>: <code>section_transition</code> =
+“starting_frequency”</p>
+<pre class="r"><code># To make spectrograms of dataset B (starting_frequency), you will need to filter it out from the selection table you made above.
+sf_sel_tbl &lt;- sel_tbl %&gt;%
+    dplyr::filter(grepl(&quot;SF&quot;, sound.files))
+
+# Create spectrograms for filtered calls
+warbleR::spectrograms(sf_sel_tbl, wl = 512, flim = c(0, 12), wn = &quot;hanning&quot;, pal = reverse.gray.colors.2,ovlp = 90, inner.mar = c(5, 4, 4, 2), outer.mar = c(0, 0, 0, 0), picsize = 1, res = 100, cexlab = 1, propwidth = FALSE, xl = 1, osci = FALSE, gr = FALSE, sc = FALSE, line = FALSE, mar = 0.05, it = &quot;jpeg&quot;, parallel = 1, path = audio_path, pb = TRUE, fast.spec = FALSE, by.song = NULL, sel.labels = NULL, title.labels = NULL, dest.path = images_path, box = TRUE, axis = TRUE)
+
+# Rename the image files
+imgs &lt;- list.files(images_path)
+
+new_nms &lt;- gsub(&quot;.wav-1&quot;, &quot;&quot;, imgs)
+
+invisible(file.rename(file.path(images_path, imgs), file.path(images_path, new_nms)))</code></pre>
+<p>This will output appropriately named spectrograms for the
+synthetically generated calls in the selection table created
+previously.</p>
+<h1>
+Comparing spectrograms of calls made with different frequency_anchors
+setting (continuous_trajectory versus starting_frequency)
+</h1>
+<div class="line-block"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAZAAAAGQCAAAAACl1GkQAAAACXBIWXMAAAs2AAALNgG/CNh6AAAAEXRFWHRUaXRsZQBQREYgQ3JlYXRvckFevCgAAAATdEVYdEF1dGhvcgBQREYgVG9vbHMgQUcbz3cwAAAALXpUWHREZXNjcmlwdGlvbgAACJnLKCkpsNLXLy8v1ytISdMtyc/PKdZLzs8FAG6fCPGXryy4AAA1OUlEQVR42u2dd3yUVfb/nyQUARWlCYiKuiqu5bc2SgBZV9fVtYsFFERpQoBQUkhCQg2999B7b4JU6SBFIQEEpHcCUkMSksw8957z+f1xn0mdJDPJpLDfe16r7AufZ+bO837Oufeee4oBLcVKDP0INBAtGogGokUD0UC0aCAaiBYNRAPRooFo0UA0EC0aiAaiRQPRQLRoIBqIFg1EiwaigWjRQDQQLRqIBqJFA9FAtGggWjQQDUSLBqKBaNFANBAtGogGokUD0aKBaCBaNBANRIsGooFo0UA0EC0aiBYNRAPRooFoIFo0EA1EiwaigWjRQLRoIBqIFg1EA9GigWggWjQQDUSLBqJFA9FAtGggGogWDUQD0VIcgDAYIICsP20wATBLEIMAMEmACJDE+sFmEQkiTwIh9S+2A2CLhDDJ+g8wiQAwq39c++7/W8IAyOY5IAyYSGoYCBBd8X+2fJ15sAEkAZBdOC5yANHi5JVOfXs9Y7IISG5tdGeCfKNy2IKPjAkAARIMSIIEC+vrSDAka8kglpEhDwLh6KcfKhlIEEuMWZB47XFwqjHjzDZKm6zMUwgBRJ4EIvjJt89UCAXxHr8kE9LvPgIJkARMa8pnkfovTSCLzZcuPRZ35pCDApW6SjWHQ1aqa03zaskFwWBACIDBQgPI/D6DSVHx2D6EAKocBAiYAIK8trJj5YX9PUPCQsPDQnoFNG4c0CskLDw0TEtGOSQgXXnK7uxDiFEpECYAcHdjCDEgU4H0CIsI7hkU8egjEYE9gyM0EYf06NGje0RIeP0wuGbIXQZiQoK5YhDAAneb+YxmgG2QqSbLDgDmmw0kAJh6EnFM5gySSInwOBAIBvBQCAFI+KjMUrLsVeqkDkACb7xuLbs0irTJl4AQjwOxAyBUCoEEv/3QbjAkhCnTLXtNyZLfbAgBsutlbyoPFgDJAtAQaQJm5QAw5pb4KipqwrSxdgDCsTG03oQ6tVMHokXtCIkA6u55IAQQKgcw+J+G4WMYXiXiWS0clOtEAnZwg4aAAKQ2WakWS5IAengcCAOWIWJrrQsQRKpzUflqbL717dDbkPTPTQDM3KMATJba3kAAUi2uGGA43O9CKVF9XxDUyktLqu2GDPM8EJe0iH19Wa+wshoXaCAaiAaigWggGogGooFoIBqIBqKBaCAaiAaigWggGogGooFoIBqIBnIvAJEqtBqAFfQOBjJmgmgghQnEDiAJIJKsIn8EwKQ1pAhNFksQMVRoAwGQMuNRrQZSiEAcxokgwY6YBtZAilBDBDNSrMmEreQTqU1WUQGRalYnJit01M4ApNBAinKVJaFy2CQTWSFBGkhRASEwzPohzGD75Leqf3oCVryiBlJkJsvexKcbA5hcetSKNx85B0BCQJDKvBUCkuvXdy0vRQPJ/6ROu158oHQYJF0o35eR9HAohPUVEoCp9ou160JCFw4oDCA21HrzVMVuAGZ5nSOgVQ0BBoNNZgErB1vU94UOtS4cICyjwZWCIdGtBAEceR8EbI4vYaFm/Ya1oXOiC2unbgcqBAigTWWAMdH4K3V6WVTr6Rcef/7J5558rszLUrIGUhhABAAqHwIhfqzBkBhvXIQAM0EiOfrwvoPRMYcP7X/xNXZUp9FSwBoiQagUJIFe5VhCjPSOs3JFiB0uFIGG9dMGoaWATZYEKgZBYqJ3HIDODylNoFQNYhDq+UJn6xTWsheMSsEAznjNZ8ZTX2SxS3pjWJgbQwkJqhDEABo/+usN//IXYEJqb2/RaYgNhCpdwURxH3l5115OElpDitJ1oiYMAgTTnVgJkKreoIEUCRCViS4A01F8UWb5Ag2kcDXEzgBL2AgSEDCldZqrgRSN60Sk2+5RqhnTQIoIiGBAwkyzVdKyYhqIp4FIVZ9PcmpJXsqj60MD8QQQdRYbO6H9W48826DLDgbl2XuugXgACIOJEnuVLlv7ox8/qVXeeH0/yCplooEUDRCJiVV/WGcSIIV5qOP931zMa2FqDcQjQHC8zSXAUT1G3AwbJfP4TDUQDwAhE7AziCAhIQFBKvJKAymiSZ1ZppbAYuUtZAkNpKiACFUzcVgPggRtKq3KUrOe1ItMQ6SABJp6vx8PYLORv2/WQDyyUydCi48rv3aesNFLAynqSZ1YArJJwNm/PbYP60tqIEWvIQwTzYP59ptlVu3VJqsY7NSZCV93ZZhflWxeSgMpDhoC8X0IJBDgpTWkyJe96gFujyFIYOZnGkhRawgxQxAAkRrNroEUKRDwtx9/8PGHn3zwxYeffvxJ7reYsDocycwpVBqIRyZ1iJcff/Sp6iUqVn2s6lNVc7tBqm08pX6VBuJhDRFMIJDNe4Zrx4QmCdghISBlpkwQDcQjqywCAdJuzHLp4JZZVdZgwFFiQwPxJBAJgJkhjZk2uIJEAglhNR5+c5dE5v54GohHNEQywJTk7aKGAOZXZSIW+ZY9IKCBeB4IAQKSkeIz3Q7XMmjjjEAT8V5+EJnc9BqIJzSE1ZM0jZlWrFVun04J3n0gk6q00/uQAtmpQ/Czlas8UtkoX6lqtUqPuLIP+ar6shN+pXcqdRIgTjx0cN+R6AMHYmL+YSV96pS2fGiIrU3Tr75s/NkXXzX+vMnnud1AAGQjw8dYKVSjI0hg1t+feuHxWjX//rdaJV+06wyq/AGRUu32wCQYd1z4/Dv1nhmytmm5OUywA6w2IyYEiNGgDpA1xlQDcW+nDuKoJJgAr3sy90/nJT4bBJv/eUIVlQMzTNP6OvKtD22v8qkhLAho8X4iKLHFfbVyvUNwu0oSQJRxSpXQYEptgyxRu3ZaKzctedQQQCK60ofJm2s+EJKS+75Q9PW6SBJNSycqDzEcOARAb6oubayB5H1jqIKxDld+3rt2tAt3CFwr32BP7MBSHWBCAGBpKQqD2FdXA8q3hqgIOT722JPSlYfJ4N9f9vEqEZREYFj+E1YeYAnfeiDLimnJGxAmBHXx8+/S/n3j3Y7+Ha0guZzvlTdPOjNKemPoEZMFvPTIE9Wq1aheo0aNajUEg0Eih30IE6uKmBpIAc0hNusUUKRzneR4b3ZTtgbiASAEht1RXtQ0wTBljsHvpArOaCAFBgSX2ly1W02HIejGgEkip4ydHELjNRCPmCzTHPq3Dr/aVB7b6aDyX5zM9UZyXlVRA/EAEMkAbnT1rvJ2k4Amr97v9eom5Oj8EDL7bAUNxDOrLAZwfsh3dco9+mKntYKtIB+3p3QNxFNAyNp4sET+XB4aiEeACMBOsJLZoIEUA5Ml02YNUwMpYiAmiMAsAcH5PcjQQDyhIRJSwjGRs9RAit5kSRDuqqv1HFIMgNhBEE0bTUiEXQMpBkAEGOAd/y1b9uvt+bNYGohnNMQGGxgcN6y28VjECQLyfOangXgACDsqxNmA0z1L+TSaKxm6gFmRrrJIAERIWfJhuQebNiv1/u2cDqg0kAIGQpBAisCm9uWM2hNuAkeMWchjjxwNxBMaQiAGWhkVuqtzcvPhibrmYhG7Thg8aY0pgbsQwNUsPW41kEIEokJ/JG+tD9yuMUG5tYSuuViEGkKAxA7jv4lI6Fr2B0gC51FFNBBPADEJIPh/DgHwXK94tQ3J9l4Jhlj4VqUmywHJKm7e+h+B2be+DrXO7yqLwcBbkYAduGCcSQYgczgVZMJko8Oyr733QoXzWkHwMCUEfOvqUNL8ARGqJkP7vyUCUkaWTkGu28KEiq0A+L4LO9jq402ONOkG9bSG5HOnLgEIRJf9fNnBnZHlOsPhjc9O7JjjEwcTiTarbTRbCT8gCdSpDz2J5G8OYZgA5M7qhuHj3SlRNTHK/i2XsPf+W8LQT9udVM2Jia1lgAqy9q2jgeR/H6L+ufjzrutWCZOcgtcl2tZ69bGvyt63U6WuEYgO9AwJDw0JDA8Or/GP3IhqILmYLJWURki6eP7c+cvnyQRycp0wi8+N7+y4Vf0FkGQGWCA6LDQsrHdoz5Cgx19Rt2og+diHMEMm/9fby/DyNrzUEjbH59nee58k+JW4ybAKNBHAkBBAnTqaRr5NlgQo1AicunjeooULc/906mfcImCUcU21edEbQ08DIdhRtwPsqrBc7p8ebSwFcaNnQLpLWwEAkSQh8Vl7FwswMBj/rrAmtmfJCZw5jEsD8dCkDmB+1TsEErnHyUkIJH9Twqg00K5brxaMyTKJITa/XOW7rh2CunR1gQhg2k6BkHkK0UA8AcTKYutQ7dGK1ao9UsOF4jNIAiBAsEFA98L1uIYIJElHI247u/T5JFXtMqHb5hWE60Sk3iddu0c4Ak8p0yyigXhmY6jigA5P7Wb7XeQ1viEvQBhQTgJrL0n8v7mndDsui8EwQ0oa3vHvvXQUABEXfFMwYqsgCjvKQyFfL8P/joYQEcALSw3dYdw9+MrnUh3fFviZOlupisoXadGRpIGAAWJ85c/HSiSaWyuagEmFFHViFfGwm6nj1nOIYb2Yrw/hk8ZdnDbOJztMesEDASDuXjh+9PiZS4lWCXPWQGAHIFq9iD+NRPQsnQIQFUKnT6WE4uaBjcsWLVm5OfpK8v+sl9j98kwERJeoM7D0oq9LdbPKZnBhAGG+dWT9kqkTx42fvWLnyURiDQSG1SBdrnzcMAzvNjZV271w+hiS/cLWZZMHDe4TNGDK/K0XbNAmC0ZqRf27+xevuQTkJ1XdLQ0BA7eiN/60dNnyaSMGh09ctjVW1Zz9n5vh3fRlESAEkm7cuX399q0bN6xPKAQNYdBf0du3Hbwet3/RmMDBk376I/5/c7Xl9gGVHZDNDaO04WUYPlbFPhQGEPvFA9EHrwCxW+cOGzhs5voTNj2HGBAEZmydPmX8jEFN758NElwo0e/MSL7w5+kryRIpR1bOHDd8/PydV6UGQtaChwC2Y1BdmQ+z4S6QlCsXb6aAgFu7FowfMmDC8ph4DURtz8Cqwf0Jr5uMPJcUdQ8IYN65kyLBxBS7YeqIvsNnrD9v/9+b090trcFSTSMCUorFXjeES7EOHgFCdmGVK0g58NPUYYPGLvrtumStIQSBRd3DwoOCm9/3OoM4r4nRbvuyAIAkGObFDTOGhfWOWnHUlP/HgZAqRdq6wv0PP1j+8cbn2bJe2Yup7iDOEsWbpwMqZoClPXpJ1KAuo6dvvCQg2FEeld3wyFueSqVyxarUuds9qCSs6tYSlrnKrcQ1MUEyIE3PAAHLS5sXjO4XOn7ZwTsZ/wvc2atSsWwE4KYvi2ACSEi4cfXanWs34+Jv3UjK6a2U6iTd6clF3o5wrXf68M/jQ7/oNWntaQFOPSFTXgRXgDiuKYZVzt0vxs8mmhpePiUNwzAML5+fkJyj45Vg2gGwHfBE1Im6XFzfNmdU5MAxC/beYqjS/uleepeX0qlY7l0NUfvyP2u9PG71oi6l2k6bNuUi5TCLCBVULRlZL8ojEIvIn2un9WnWf9KKIwnW2TqTW/7fNBjF7ODR7ZqLDHCPRiDAHvaEHZAyx3QESAHz5tODbVCddfILBMzMDLq7e8HY1i2GTt5wOind4Imki1iYOJ8F2IrHKkudfjSaIQHgYolLJlEuyyyCxCdGuJXRln8gCrMdF9dMGhzcZ/jsbRdsAMiWbDOFFRuZ+4NmAFII+80bNxPsxSsUye2WR5AwW/oxILDcJwk5FwNimGA545HSYVYkVz6BpF3MSX8sGNszqPfw2buuJJnxF/Zv2bBx06Ytu49cTnCprYntrz/3bP1l/Zp1v564Le9hDQGBmdaUaLfrUvSQBzqqm3LYLxPBdrbsyjK9SBXlAElIUhZcoK4v8lhLkxmxG6cOCewQNHT66u1bN8yfNHzQwH6DBk+a/fOxOM7KL+PkIQhXdsybOnzo4AFjJi/bcdNUjTWKhaa4v1MngBaXM7yMUh1lbisUCQL5tkLFUIuaSPteYq5fO6/eewaSjq2bPDA0KLTn4BH9I3sEdWzX7kf/rsFDJq06fhcqtTR7DeNLO+dOCu3WqZ1f9/BxC/deZ+RaoruYArGWWaaImb4u1lrd5BhvwNS3ZhI/GKR27QxJmPPcM7WefrbmC08/V+ZlkVdzQUDCkZWT+gf4te3Uza99sw//88U3H7/bpG2HvtPWnU4BOT82c9TuvP3booGd233zTdOm33fsPGpudGJqMus9pyHWsz8+McDcacLqDsI5PLa9pXbZUa4npe5KYDu0L+bYnpg/9h946XXVkSoPVksQ+NbBVVMHRwR07tCqdSf/ToGh3fzbfPpt14iZG8/as7NYyvOWEr10WET7+k2+adGiyb86hY5YfSrlXgVi6URoacM7+d3ah5FbzIlIeuazfYd+f6BlTApbISuSCEL5nRr6qhZjeVATYgDxB9fNHj+oZ4+QsMihUctXzxwU9P3bP3QeMHXbRWHV8chqQyGAy+snhbb59MUmbTr++Fntpj9GTt1yDSgmHq08LHuFWFxq+Bbj1sHnvsw9Xu2M4WN4eRlGiWPpjIaEHQzm2vUyZ/G45UAB7Bd+37h8waJlP63f8vuJ07sXRAZ//0SzwOFz9sfDuRdaAoyk/VMHd3m/wTddevePaP/921926TP/SHJx8Wq5XbeXwfi8I53ySbZvfyDZqteU/XssTx8/dfZ4Wb9jIAYJaxFgggTAb1qlNfL0KEiCYE+49ddfN27a7XcTE26f2Tx3SKcfmncMH7P6tHBusxiAPLNyVETrT1r4DZ4wZ0z/zj981rrf2PXnRTGJvHP/CBeENwbjTyMeZ73Vz6CcP18C5XqRdIBT860EgevmvbQGOZaw6ZoDiAsbx/fu/GmzjgOn7bjFzpseMyFhz7TIdh983T5s/M4rK0Z17/DZx+0Hzt6fdE8CAUwQ6IdafMI7nruXcfVbHuqRNVyoIBJ2jq8cG9666feBI5Yek1ZB2yy+NZz9aVT3Nr4/dB22/CJOzovs9uWTzYJH/XypmNgsd8szEZgRc1+DPsaipmW6uvw1JszMW5aCAHI3esGwML+2gRGTN8dm98In7ZvRt2urlkF9pm+/LW5umz6gy7ffdhky5/cEugeBqFUKy2VPGobh45fi6rfIDH8UHBBc2zU9svP3rQJGLoqxZbPKurxmdI8fv+wQMmb1eRPyxPIRAS1qfRk0cs3V4hG/7ba3l8ASiI+et+GCOwWUTWR2wRcEEOYr60b3+LFJix5j1sQ6PxWzH5jRt0un5p36LtxnYyBx74x+XT75vFO/afsS78mNIQMm5g8DZXnjc5uEBcsCN1lAyqH5I0KatQ4eOv9QUtbPJokbmyf06uLXqef4zZcBhoxdOy6k83f+fcb+fE7cgyaLABN4qx4R4F4oJ4lMNckLBghd3TCuV7tWbUPHrL/q7LPp5JIhAW1bdhsya7/JgBTyyKIB/h827tR/5r74ew+IVDX+gqteV5mw7mysuXDy1M1Dc4aEdm0XPHje4SQnehq3c2q/zn6de0Wti7VWGVfWTerZsWXHiNGrTpj3HBC1q6AtL1b9OKBzYLdA97fXBTyHgHF1Y1Tvrq069xq7+S8nV1xeNSrcr2PwkDl/sB2AgOADC4aGtGrZJXLG7sR7cA4BQaBd5UqPVKlcuVLlfD48jwMhSNCxhSOD2zXuOmjJMTsc20OHI8UWPad/+9adIsZtvGZFRBDitkzp0+aDb0JGLztFVgzZPbXshSRASE+8zQWgIQRc3Tqlf3iHTn2n74l3lGy2finz7a1R/QKDegyZG5Oc+vPNY8tGhf/YPnDI7F03i37p6yYQO2PigTQfYXEDomaRk0sHB3Xs5j98yWmRoRA6szy5fHjX79r3mrD2oqr1wQAjYc+Ufv7t2gQOXXrEDnFPAWEAFSMhefhKkoRi2jbv1pYpfdo3ahE587dEK/rK4cJM2RXVq8MP/gNm/hYPlqmv1bm1Y0M7ft8hfOKma1zU+3V3gUjcP0gAL/jJ4miyVDUU25Elw3u1attrxJorMp0rkoBz6yZGdOkeOWblOWkV42QmRuLeuYO6+3UNGTH/0N1UE3fPTOoVB0LieX/OMbihCIEw+PrGqX271O0yZOHhJMBxJMmMlOh5A9t92zFy5p54QEU1MIOB2PXj+3X+/tseY9aeZ3CRziNu70NktT4gPNcJTPkbeEEtewHYD88fHNqqY6+oTdeZVfAvg4G/tozrE9Ct7+ilZ0yQo2QKQLDFzB8R1vKTrn2n77xexBUi3HedPNAfEK+2FzCLn8my3ni+sn5KpH+rHiOWnDPTGS06vXREn06dBk7ffMPxvQ4P0PVtEyKDPm8eOmrp0eSiDcB2P+qkfH+AX+rILIufhjhEHlo4LOD1Fv2n7YpLe+iI3zkt8ut3A4YvO5z5/Jz5xMpxEa3qtew+ae0Fskpz5fzzrHJRGXrQcqEDYdhR8b5yDz1olLq//ENl7y+uQOjyunGDO3TqM/7ncxJEVi/lsz+P793Of8DUTbFZAho4/vdZw7p/3zR0wPyY2xkeuQtOIVXPy0PLMzePcJnw4w8/NG/53bc/NG/WunlxBQLbwbmDg74OHjrjt3jHTI+kPXMGBnwUMGpWtM3JYK5tnj4osOEnfQet/POu2kVS7uphBd2Q6/wKYB8iYLdWjMW4F6688MuE8A+bRY5bdz61wcmVNRN7/ue/PcZtvEROngKdXDExrNXzfv0mbb4sVbGbXA1WpigoLnyTBbuVVGgizy1XC2UOgS169uiwwLARC/YlWP1K7IfmDw/3Dxk2a1eKEx8Y486exSN6+LUNGzhv2y3rx3GuOgJWIfeU96pI+QOismLIRFp90mKpIRBnVk/s3axjnwmrz1qdfa79EtW33TuBURsuO7H2koHr22YP6vx565CxP8ckI7f8e0sbOMfA7sJY9pog0wTIBNuKq+sEAJCwZ/rQ7n7Bg2b+egMAkBizYET4NwHDpm2/5USzJTH47IYJkR3fb9Vj0qozKa5ovxVmxkQezJd3Oy4LYMh0tUGL5yoLxOd/mRgZ1D1ywk+nBEHiyvqpg3v49x2z9rQTU6/akIs/V02MaNklfMi8X28g9yq0bKacPxq9Pybmjz+vJ0hPue3zUFrDvSejfpgNpuWsIDAIApBA/fq55lTnlQgh6dD84REduw2ctu0KJBKj5w0L/iFw6Mzd8ew8+gEs7HvnjQz5vm3EqMUxSTJHb7YJEF/dv37hxAkTx01fuuV4InuojnDBArHDUQFZQpgECMfiTDJY1qkPBhXUxH5ly9QBIcE9Ryw5cIflmZVRg0P8Iyf8fEZk+xxIXNk5d1hot+6RM1achrNAuwyfH7tr2ZhB4QFdAyJGzN5wLAGeebUKWENAdMX/2fJ15sFmReOq8Fr1ljXwBafLM/ewC8J+fPm4voGBfccvjz59bMPUYcGd+46Z+/td595ca2Nx8ZeogeHdgvvP3R5LyP5sRLJE3N4lYyMDu/zYom2XngOnrj9l3gtAmCDfqBy24CNjgsMHrhp9CjAYdXwLqNOnyna4uXvekJCgsMhJa37bPm942Hff9Zqy/nxqJQ4nQCCST62O6tXy054jFxxI5Bz358mHlkX1af5Ru4gePQI7R4yYsz1WFsWy1+0pRCwxZkHitcehNpWO1b0pIKhB/QI8oGOYlzZPGRTRucvAuZtWjo8ICuwzadnRpGx+qUNLE2IWj+3bLaTflA3ncz4XubB2ysDuAe16j5sUNaBnz8ixi/fduQeAgHiPX5IJ6XcfgVSZDUcNOiLUqYeCqTdibexsx1ZOGti5TaewoX0DO3WNGLto722VoO6UCDMD8tr2aUPDfwwYOmPPXcreZCFxz7wRwYFhg2cs37Jh2qi+4f2nrD1lL/4mS1pLElmprsMRZ8Pd6APRB2L+OHBo/z9eQd6LaOb8HqizjjsxK6P6BbZt2bJNh+79RizYfVWA2MkBVLoB8Lm1kyO7tgiMWnE0B+2VZ1ZN7N2le9/pG/+4dGrjnJH9+o2ev+vavTCpq2OTIK+tnOoFX/T835559pknaz31TNnnC67nhOJ8fd+yKcPDAlp1C+s3fuHOc9mdqaUW2gDj7qGfxg2KCB4yZ+vVbIfGt3+dN6JHxICoJX+kwHZ6/bRxQ4ZN23BGFH8gJgBwd2NI1kJnhdLQRdw8unH+5Akjxk6es2rfVdceWNzv80aHfBY4aklMMiSD0udWWW+VeWrVuAC/PiPn7bsJ5pQ/Vk0eMnDc/J3xHnAyFrSGsMDdZj6jGVlcLYXTYYeTYo/s3rp5y479J2/YXbF1gDz/y4yB3ZsPmLzuvHD6cAlxe+eN7BY+eM4vF02A+ebvyyaNHDtt1UkBcL59rgW7ygISPiqzlJz0IC4MIJLAJIWQps106UlJgJFybPmsPj90H7ds9+2sKRQAE06vG98vbNDEJUeS1c86s372hBHjF/92RxZzIJDgtx/arXrfmkVgslL3Q+RSHrplWON2LhrR+cveY9cdtyHTyQgBzHf2zB3RIXzIgh3XiQnMMA+umTl8xIx151LyvWgsYCCMuSW+ioqaMG2sCm0uZCCUvowfu6TRzGC6sn7OsNCI4dO3xcpM3cwIBHl63ZTRwaNnrDljdZ4jXN69aMr4qNX7bhf3nTr4n4bhYxheJeK5KCZ1qAJarp94EwEM2/GfJw9o1y9qyf5bGS0QAYyEvYtHtewycu6+O6nLOfPU6oVjek/95azM7zK+wCd1h8sXmQtrFQYQzviHK4Wb1LW3YpaO79u135TVRzImuhEAcWrNxMhv+szc+JcJdpxkxe37OarvqBXRcfm1WQUMRKiipeykGkxhzSHuFDGxer4T4cr2BWP69B09d9uVTFVkCfG7F0b1GxK15MAt6wiEGITLW5fMmLZkeyzl+5ioYDUkR3NWbBtLMtvPrJs9rGPXyQv3XnPouZUzZp5dM7VHswEzN10R6V+85CMbZ/eauepAXKbNKWsgnpHEIz9PGhTUZ/zPh+JSpwUCgBs7lozrFT5pxaGEjKbsr30rp01asuki0i3oWGuI5+zcnehlM4b3GzVj1ZkEKwyYiQDb0eUzhvWbsHDH9UzudnFhx6rZ89bvu+7oQoS0IjkaSP5tFuS1PUuiBncfOXfzKVu6tfPFLQtGRY6cvTZDhqgEE5KOrF84ct7WU5nWLqyBeGh4dHn7/PFjI8bN3HLOdCx9xa3flk0bOnT68kMJmYZOwF+/r1m6cP3vfyEp0zqPNRCPrJeTz29fPLZ/6OS5O87GASwJSDj484xhw6cu3n7TihVMf4vtr9/Wzl++9Uh8pkU3SQ0k3xaLAUjbme2LJvZvOmzWpqPxzAyknF47Y/SgcQu3nLFnBELMBDZP71gzY8GeE8np4rTInmIXGkj+FYQAhji5dcnEgX0Hzlpz6C875N3zG+cMHzpp7i8nUlQkV8brQfZju1ctWLv3fJrbjlPibt/VGuIxx4v96u7F0/q3HDlx4bod0fs2rogaFTBkztqjdpnNFiP+1K5ls1f+djbBMlb2uIsXbgloIB4bpHktesP8cYO6R4yfNWPalMGtB0xeuOF4vGQ4BUKccHLv5hUztxy+mijInnz9/LFTN0y3/PEaSG6PJ+7EzlULRg0cOXbksKFDe89avPnUXc5u7URA/PlDW5at3vTr/qMnjh09euTUDVOvsjw4RsmAef3PX9cumjVlytRJMxdt/fVCsolst+EkIeNOH9i5df3azTt/izkee1fv1D2sIAxAXj97eN+OTZu27Yu+GJdTayX1Vyk3zp3848CRE2dj49OqrWggnhqmOmyUUpoSdml1EudsN+CsKhELuxCqHRpBzyEepOHw8zrSCRmQMnsfroqtI04rHqFNlkeXvdYeUTlwyRGnLZDNLOLIZ2THH2zt8IsLEFONnp1Fx9wjJqsonDYFmo4AK9KMVbaIBlKkQAjkiG3gzAkwGkhRaIgdEIAJyRCQUgMpYiBKKUzr/xR+5KIG4gQJmCWc9F3XQIpo2csT//3oh2cYVASRixpIVmcQxpQevfStipdhstaQ4rDsvfpAJJBcIUgV1ZVgmdbI3NfXxbZ57HYDYc6uc162X+BSJQRyM7GeINwrGcgQoIhQFSJZAJM6YbL3BQG0rgkJAZlavZgBQt03JcHF4qZuNTyU5F5xHLJW6LlfZy1SXBTh0mNN9/lqCAGhqp4MeV5DBIJ9GKA+pdJS+4Rq1saQDetLhhC5v/2OPFF33gU3u0BLVxL/Ge62qpKqmJXr9kowU5+QXJut5d1ktaoKBsZ7X7NcPRIx4WE9gsNCIkJ73O/zZJVHaz7+WI3cpHq1ao/WeKh6tRouSvXHqpV/tPqjVV29vsrD1as98mS16rle+Gi1GtUrV63o8udWrfZopRrVq7t6/WM1ytd4rFrNUq0k2BVFzEM6gmz/KABEeZ+3wjQkYsLDwoPDwiK6hz9dvl6j+nXq1q9bLxdp5NugYd2ytd6s56LUr13faNTA1+Xr/16+oW+j2vXr5/q59XzrvdmoypOufm4j3/r1yr1cr76r19er4+1bv+Ebjea7aOnysg/pXRqAGFQiIZW4cMy2FNQDAjBdUGkbA6/tdMMcJ5RgCZcTx5e+A9hdsFkCgDT9B7r6uSaYasa4Po3whUokVbULLpBJXQBTjTsEdH4YgD11Updqjg4PBSBcma0JZG+40fUvNhNLCzeM/dIPBcGljloEiZbD3Vhl8YvRbizLTlRVzQ5MuDRb5WEfwmd9ZgJ4+qtUX4q08EuIiB4SrtaZIry61Y2pNM4HbpTnWfGuo2KUK+7SdsPdeCP52QNu9L25VMVa4RC7Mpo8+LIIXz6y64r/gxcyIGeVFhMaSqQK0biwBkLtLW5sIpO83MnNWPI+XLzcDqDdMHeceU/HuDHsiw/n2Ow5/xpiCkp+z8frtZVZeBMBERG51jZM99Ne3eb6HGLG30d219/Mlf8mFi4AUQ6gDkNdt1imqHXEjVJzl6owZAECIQKRuBMLkzl9sVxS2XkhIQSwC7M6A0Cd7W58c7y3O/uW5f9O+5rcbVZH1zWEgaf3u246ObaS6kZaYEBU15SsOZ8SYEJYGIhd25AR+I1f3Ji7Eg2XVm+WLHsP5EpzASZIoO1Q18dB8pkYNx7YqQqmO/vfPCV9OoaWvnmNVfgoNNSxDs4drUDdX03XNTOxFLsxqS97Gy72DZGC0Waky1MIA0/+4cZO/Wo1WaAmy3IrCavpYYZULyZbr1421yosQAL0mjurrETDnT6Ly/5rZ3bJtwggxX+QOzvj56PdmNRPVoE7cXV5OTGUVtiJCRulN0EEYN8+Nc+4MgITK9zoasdytjtO2Rs/qXM0F54vgN0n3DHZ85PdACLmELnhLstT4QCh/HYZAxyY0kLJXCmCKR2Vt1x/EgzX3YtMkHBlDgETuTUOoVJF3XA7F+wcoqVARQPRQLRoIBqIFg1EA9GigWgg7ohg1eOcnZfxZLICTYTaj6VerwqMgVk48z1RWhtrVn1xyeql5uxKcrSlISsTUJ3OCAhkKRqTabzCulNm2b8SUv21pD7VVE1TkBp/kraxlKzaeRGIhfKhynSloLjQgAgJwFQpI05PC6SjjYI6Wk69Xqb5N5xGrFmPjSg1G8W5r0ykNosmKyhLDcOOVJdWeiCZx8uKJTFSMhYOlI5wJYZIF0nGENZ4RKawLjusKDIGhHIjWWfa0p67c9RzGiJBUv18OGsfQQBgmsplwmDH9RIwIQWIhXAWYSfhaFEiANhVtpDpjBsIECQtriRgtbEw2XS89+mJZBmvKdNqlIn0GgJheUzUE2bYFXQVQyEydnNjx722NGWTYIZ0LcTOY0AcDjQJu/MgUZKs1N+uNNnhcEufY0zOM/dVpqYdzCq0SToziQKQ0mo5adkeglUmU0Jk/ujM41VmDqaUYNjSaaCpnrploSzjymxhEEp9RPoXA9K6zOpe7XhdSHChziEEeTX82ec72p26/yVgwoZLwS8+381mRYXKq+HPPhuQBGnu9X2zTp2GgU7uY4xvVO2Lww4YJnjg087ORSRT1H8qfn7cMopsA4Y9DRuAt3z/2aBuoyxEMo/XjvGvPPBi4F2SyMhbgHAp4tnnOydZioI9H1R75KNjAnJQvYb1fH1XU/pXUHXwYEz4V7XGx5XFFbjduurj314kF86JPAeECPKdZ36aVPEDe5reZniydgb968WlUx7+OP315T8xgcGlmzX//rshTt58OeHBIcsbVLqgXngC5pWs6TwLdtz9Q1fXq3LGMU2bi0o8QWA6Y7zXrMX332VVkYzjlehb4uvFnR9sBMU9PQ+Jf72wbMIjnyhTywdLvjRl7N8fPEV4+flmrVt8uyeDKSK1oBhbesSqOlUvqNgP0br6yBmvPXa1MDVEgmm6cVZilVcMhLM3XQJitnEGcq3xG6ddv9qIFviivrItWe+7XnoAIaVioLLfuPmtUfGZZCffz1cf7ANKrhQBZSZufmVUrMEAfjIug7PGXWcZr1nqUwBDSv4qYGaYE4gxyTgDrDRilC41vS+BcNoIgb3sCAh1UpwxT4ZwodxggZTKYQRCEv70mkE4WGo0F+IqC0x4ty4B9gpdnNcMIQDvvkEMW4Xuyr6+W5fAfH8I6O+dpLVkzSzTvE9DyJZ/U4HdIqLKyrY1HfXGM8gUr4sgbvWEVYUsvOryNs9KgMKrO11kZBnv9eDtBN5mLMuYzCoBwnu+BNgrBqmV98jREuBKzc3DXjvU+ZYtk+YBs4yLAL5/DAw7+OYGU+K8Tz8XTqA9qCHAY1+BGK98nV1TKHDNJgTg5W/UHPL41wDw0rdI9PLv8uy/f3bWzzmwNATM/qVJghg4alL7ms4+n4K8wMx9SrIJFsDJBLSvCQAf+A6p93pvk624iszjBV5sLlKXYGZ747LMlBhGwGPfggVe+IZUR0AC8IvXUMz3nta4VrNzGU7arJVCUCk2wf1KkGNlIY59VP40FeqkbuLBAAFG/bedFWchAMyV24Eg3m2gFqCV/ADCW//EHuORoB7VvCY4+dS2DzOAKOMWBCBMSG5f02m+TMvqDIgpXjdUEqQAfnyCiOlRn6ZDahv/ybovU+OF/Z2G1p5TMnbe5y/U1iT96s32UEcA9n/9M7WDM99++TkzpZvxxoCmpR4+ZaZXEXVa2qoyYGKicRvMEIBo4+WzShZIfkh2FgtAhS4g4N9vOD3AFRDA/YECwL/rCICJHgxACsx3auPs4MMCybUeTsm67m37OACadN8ltR8mwM8pEPqxGmDKqV4XJKvdhfzxKQA8bg5AIV4rGSyQPtLSMd736zgW5bT+wQaJSEYG2ymJUaETmPCfumoNJZB83bf87wJrhkpGjPFDBs1Wu5g2NUwA473OMwTANuxf2fiBqAKJ7c2WiEStZgSJ2m/DWRQrMYDnmgNSvPFftTR98TuA8cb7Vpp1pHEg6+IsogyIMci4RaSCluFX0+ncGFGOCBhs3AGpFGHye0qqDbaJA0YYOGN+hjVe0IvvShUoI+aUez8xzVOTtuEUL34HgnzjbWawycDpZx/5w4RUL8aLz7I9s61Aj9IwgeFecVZxcgHCG4/bcj+8NzxosfCvD0wQqnVwntJGYLzzPgRQwQ8swPLddyRJVGmJcwcJwFjjWNYBTzHuEOD3SJo/qP0TTmeoCT5xkPCvIll5kQC/JwhIOXANwOVSWYBY4zXxRBtAgExM9P6RyMqX5HTcgHfeAYAqHay/P/TYSxckJI6dNUGo+3Tm1SRDzvBKgomOVSRDApc2QQJ9jIuyMOcQ0MBSdyV+MxY5W7+yhB00rEQ88f6SS02AIfvfl0TYb6yiYcZWJlm3oj3roz5bchZBPvOl2ltLAO2fcPrtZ0rOgKCnv4TpcPa1qwnguOEPwaONzCYrdbx7SiwiwCRMMyIBARYZXDMMAg8rcxv2Q15LAZCJSxXq3yFIiVceSwGf9/oOZqaOPcAJrxmA+WQTFYo0zNgMQr2yoEL1ZSG+3GexR197z3keBIGB2/d/HvvnP94GKKg9zORyH1868so7sMVWeH3Ln/5eI5wMlz6vsftKtwcvSyxtehZECoizfvaNH999vWvZK8CSxmchwdy+JtiOj3wmX5j0cMMsk7pjvC+/B7r06WJcffDpSROmRo09mdkXJ2BLKvtR7OHX3gFsAf6gD3z6T4qaOHEVTTXanFrVoNzxzJscAtC4xrbrXctfZixvfBEXq9TZcbRLif4FkY6Q/aROwO7HjTIfnXPqjbWitX6rYZT59AxMvFSLwLtqGmU+Og/Qzr8bpcqPcfrBt9739np1GSAGGX8IMNC+plOnF99839t4bTkTIo2DAiBu/wQBfK2Jj5fxbXzmZa9jvGU/OUs4XiIU40oYXobhbUzN2LWbAQmx50mj7CdnIPGP5yjOMLwNH8PrA8KIct7eL/whMt6gsnrvvGd4/2MFAb18Yph/f8Hwun8AFyYQACRhxmZb/9ZxUWy84z9nuD72oshm5pE3b7gQx0YA3b4hnPw9xZ29C8rreB1yOZ4zvAfKZZZ8/o6ZXWfT29dkOtt38azdEaReWKss1Rslu/q36Y8LODWtPd31dsB0UvaQHVX5XDmTsTtfjtudHpi5ON60gyfO6p6EMNl5UUyCzDhl2V2LFPegc9FyfyPnczECyDr6y3K909scp0cuODfh7DeTcB7Z6uJ4M7HNsB62bqZs/BIZCbJrmUwenNQZJEkilx8owQSWWa4ndTDipMmwVUQ0VyAMchrLy85PGF0cb9r+0LJyGV8UyvZlISJB6Teimdv1FYLJcqz5crYAli3Ocr1k54szsKutNp2Bk+nWonkbb3p/JGdRSc42+4Izfa9kV/JVPOo6UeY4twY0bJ3gZLyeraCD/JhM51/Hgk3Kx3gzEsyoYxnYZHmR0g9KQmbYcBYGECbKvZ6MVZiVMl9vdasTzl5Llx6ZBDvVEel0ZnF5vGkbW5lBl6T6S8puFmGAnPx9YZoszvF1yjitO7meclB8F02WU5snHfFBeR2v83vYgp8LUEp3KxfymboWT4gGooFo0UA0EC0aiAaiRQPRQLRoIBqIFg1EiwaigWjRQDQQLRqIQ9jKlGKr+qYVbCAF4DhcFenrBzsSMaXK/aDUwAoNxEMiUwM+yCpPxyapphnkiARJn31KqUffgmwOahqIBzUkXStUOOLQHJmhqsw4p4vySEktCqHKSbja8EUDcVHsqo4CU2rZC0eh1HTxNhnO0s2zqjgAAfZLxG7169FAXBGTtlR8qELFSvc/XOHhI6HPSVXBQpKqzyDNjG2ueHjHFHKQ+2YCWFVf0UA8ZbLsEnSu/8B+X3r/OKDPwGvjvnDM1ao/t8wUp0Zx1W4BEAIShMtP3EgLDdNAPCTEEMA841dHdRIiVYpHWKmZGTK5/DupUHSWEIxv+hAArSEeXGQBAnawXGHsEYCc3UlixuADrRoE3rnS9s2BVwXwe+tXvlzouP5U2e1g2vbVqx+PlQRz431Xndab0EDyLQuMXwFGp0fBnR+r0a5FyY+eahxQoYnE8pIvRHb27sGqh9zwCoDcW/rDke1LdoRE8v2ThQZSkECCKzE6lFwCfGP0BfpVoJTH6wEYXupPFUHfoiGYez4IoH8bCYGX/VNjKDWQggDiXxno5HNXymFeB2Bb6nVyj/eAk0dO7jSmS8AE12mWAizwen9uHOwMRmNfR967BlIgQAIfBXeqDMYYr7uM1cbphV5e3oa34dNV7U7KBQHAyEqG8c+9Ekwtn2DWk3pBziFVgY41UoBRBjGWGoe3GotuJ9+5G5cCsARVbq6qMOzt96TP7WSg8RMAtIYUoMmqBupUUwLjjUSJFV5nLpb8GoT9/9mrtvSv1GbYx34LiJ+91gP0fD1HpUwNpGBMVlWga2UGD/NOARaXOGvzKxF8bsfLr0gBCckdy4B4lxF+6s8vSt8Cc+kwdqd5mgbiLpAuVUl2qQpglJECrDJOICWwnPHgF0es4rNrS5yGRHA5L5+ndkPgoLHN1abWGohntvFg2M6nqz33/4KZiOwnbgBM3L4eEQChJ/XCE5PTt17lTfffUbMGA7heZq977dw1kPwKZ06H5iaRxCBV9zXkOysnUU/qhSUSAFHaKopwYrJQxWoJPCpWqILL2mQVnopkrtDDjqrwqoYVW+XGNZDCApKp7Kyq6ZG2sLILHeRQuHMIQaavF0YSJhwQTMBxnqKBFNYcIjOWTZLWiRUTUsCqIE0x3InoQDkNRIsGooFo0UA0EC0aiAaiRQPRQLRoIFo0EA1EiwaigWjRQP7X5f8D2Nhwa7wg350AAAAASUVORK5CYII=" alt="Image" /> <img src="data:image/png;base64,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" alt="Image" /><br />
+<b><i>continuous_trajectory</i>_Group1_Individual1_Call1</b> side by
+side comparison to <b><i>starting_frequency</i>_Group1_Individual1_Call1
+</b></div>
+<div class="line-block"><img src="data:image/png;base64,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" alt="Image" /> <img src="data:image/png;base64,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" alt="Image" /><br />
+<b><i>continuous_trajectory</i>_Group2_Individual5_Call2</b> side by
+side comparison to
+<b><i>starting_frequency</i>_Group2_Individual5_Call2</b></div>
+<p><br> The figure above compares two pairs of calls created with
+different frequency anchors settings. Dataset A was made with
+<code>section_transition</code> = “continuous_trajectory”. Dataset B was
+made with <code>section_transition</code> = “starting_frequency”.
+Starting from left to right, top to bottom of the spectrograms,
+A_Group1_Indiv1_Call1 versus B_Group1_Indiv1_Call1 and
+A_Group2_Indiv5_Call2 versus B_Group2_Indiv5_Call2.</p>
+<p>Once you have decided which frequency anchor setting is best for your
+project, navigate to Vignette 03: Bioacoustics Analysis to learn how to
 analyze these outputs you created with paRsynth.</p>
 
 
