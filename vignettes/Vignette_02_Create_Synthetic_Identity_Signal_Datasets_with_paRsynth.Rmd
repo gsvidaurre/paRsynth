@@ -1,5 +1,5 @@
 ---
-title: "Vignette 02: Create Synthetic Identity Signal Datasets with paRsynth"
+title: "Vignette 02: Create Synthetic Identity Signal Datasets with `paRsynth`"
 author: "GAJ"
 date: "2024-12-02"
 output: html_document
@@ -11,8 +11,10 @@ knitr::opts_chunk$set(echo = TRUE, eval = TRUE)
 
 ```
 
-In this vignette, we will walk through the process of creating synthetic identity signals by using the `paRsynth` functions to randomly generate character strings, convert them into Parsons code, calculate frequency anchors, and create synthetic audio files. The `soundgen` and `warbleR` packages are used to convert the calls created by `paRsynth` into audio files and spectrograms, respectively. We will create two distinct datasets: 1) more group information than individual, and 2) more individual information than group.
-
+In this vignette, we will walk through the process of creating synthetic identity signals by using the `paRsynth` functions to randomly generate character strings, convert them into Parsons code, calculate frequency anchors, and create synthetic audio files. The `soundgen` and `warbleR` packages are used to convert the calls created by `paRsynth` into audio files and spectrograms, respectively. <br>
+<br> We will create two distinct datasets: <br>
+    1. more group information than individual<br>
+    2. more individual information than group
 
 <h1>Set Up Working Environment</h1>
 
@@ -46,8 +48,7 @@ devtools::install_github("gsvidaurre/paRsynth")
 X <- c(X, "paRsynth")
 
 # Change "Desktop/.../GitHub_repos" to where paRsynth is stored on your local machine
-# testing_path <- "C://Users/summe/OneDrive/Desktop/github_repo/paRsynth/R/" # Summer's testing path
-testing_path <- "~/Desktop/BIRDS/GitHub_repos/paRsynth/R" # Alexandra's testing path
+testing_path <- "~/Desktop/BIRDS/GitHub_repos/paRsynth/R" # example
 
 # Load all of the packages specified above
 invisible(lapply(X, library, character.only = TRUE))
@@ -61,10 +62,7 @@ It is important to have your files organized, especially when creating many diff
 ```{r message = FALSE, warning = FALSE, eval = TRUE, echo = TRUE}
 
 # Initialize a base path (this will need to be different per user)
-# path <- "/Users/raneemsamman/Desktop" # Raneem's path
-# path <- "/Users/gracesmith-vidaurre/Desktop" # Grace's path
-path <- "/Users/gretheljuarez/Desktop/BIRDS" # Alexandra's path
-# path <- "/Users/summe/OneDrive/Desktop/" # Summer's path
+path <- "/Users/gretheljuarez/Desktop/BIRDS" # example
 
 # Initialize the directory for analysis on your local computer
 analysis_dir <- "paRsynth_methods_synthetic_dataset"
@@ -117,7 +115,7 @@ source(file.path(testing_path, "write_audio.R"))
 
 **Check out documentation for the `paRsynth` functions.**
 
-Before using the paRsynth package, it would be beneficial for you to go over the description, usage, arguments, extra details, and examples of each function. These functions are written below in the order in which they should be used
+Before using the `paRsynth` package, it would be beneficial for you to go over the description, usage, arguments, extra details, and examples of each function. These functions are written below in the order in which they should be used
 
 ```{r message = FALSE, warning = FALSE, eval = TRUE, echo = TRUE}
 
@@ -128,7 +126,7 @@ Before using the paRsynth package, it would be beneficial for you to go over the
 
 ```
 
-<h1>paRsynth Workflow</h1>
+<h1>`paRsynth` Workflow</h1>
 
 **Step 1: Set parameters**
 
@@ -140,12 +138,13 @@ After installing `paRsynth` and loading the relevant libraries, you will be able
 set.seed(333)
 
 # Initialize the values of group_information and individual_information, which correspond to the length of the string that will be allocated to encoding group membership or individual identity information
+
 # Group information can outweigh individual information by a factor of at least 10 or higher
+
 # Random variation should be at least half or more compared to individual information
+
 individual_information <- 2
 group_information <- 4
-
-# Create variation within individuals
 random_variation <- 2
 
 # globals refers to the number of characters in the the head and tail shared among all calls in the dataset to bound the variation. Number input here is split in half and those amount of characters are allocated to head and tail of string
@@ -196,9 +195,9 @@ calls_parsons <- parsons_code(
   global_head_col = "Global_head",
   group_head_col = "Group_head",
   individual_middle_col = "Individual_middle",
+  random_variation_col = "Random_variation",
   group_tail_col = "Group_tail",
   global_tail_col = "Global_tail",
-  random_variation_col = "Random_variation",
   mapping = list("A" = "up", "B" = "down", "C" = "constant")
 )
 
@@ -238,7 +237,7 @@ Now, finally, you are equipped with all the necessary data to generate the audio
 
 ```{r message = FALSE, warning = FALSE, eval = TRUE, echo = TRUE}
 
-synthetic_call_metadata1 <- write_audio(
+synthetic_call_metadata_grpdom <- write_audio(
   df = calls_parsons_frequencies,
   save_path = audio_path, 
   sampling_rate = 44100,
@@ -254,7 +253,7 @@ synthetic_call_metadata1 <- write_audio(
   invalidArgAction = "ignore"
   )
 
-glimpse(synthetic_call_metadata1)
+glimpse(synthetic_call_metadata_grpdom)
 
 ```
 
@@ -262,21 +261,21 @@ This will create files with the extension .WAV for each vocalization and will sa
 
 **Step 6: Save the metadata for the synthetic audio files to a CSV file**
 
-The data frames that you generated in R using 'paRsynth' can be saved as  files in your working directory. You can also save your 'paRsynth' generated metadata into a CSV file. I recommend using this file type since it is compatible with R, Microsoft Word, and other software. You can use the function `write.csv()` to save data frames to .CSV spreadsheets on your computer.
+The data frames that you generated in R using `paRsynth` can be saved as  files in your working directory. You can also save your `paRsynth` generated metadata into a CSV file. I recommend using this file type since it is compatible with R, Microsoft Word, and other software. You can use the function `write.csv()` to save data frames to .CSV spreadsheets on your computer.
 
 ```{r message = FALSE, warning = FALSE, eval = FALSE, echo = TRUE}
 
 # Add extra metadata for upcoming image files names and rearrange columns
-synthetic_call_metadata1 %>%
-  write.csv(., file = file.path(analysis_path, "synthetic_call_metadata1.csv"), row.names = FALSE) 
+synthetic_call_metadata_grpdom %>%
+  write.csv(., file = file.path(analysis_path, "synthetic_call_metadata_grpdom.csv"), row.names = FALSE) 
 
 ```
 
 ```{r message = FALSE, warning = FALSE, eval = TRUE, echo = TRUE}
 
-synthetic_call_metadata1csv <- read.csv(file.path(analysis_path, "synthetic_call_metadata1.csv"))
+synthetic_call_metadata_grpdomcsv <- read.csv(file.path(analysis_path, "synthetic_call_metadata_grpdom.csv"))
 
-glimpse(synthetic_call_metadata1csv)
+glimpse(synthetic_call_metadata_grpdomcsv)
 
 ```
 
@@ -291,41 +290,41 @@ Let's do a 2nd example where individual information is greater than group inform
 # Set the seed for reproducibility
 set.seed(444)
 
-group_information2 <- 2
-individual_information2 <- 4
+group_information_inddom <- 2
+individual_information_inddom <- 4
 
-random_variation2 <- 2
+random_variation_inddom <- 2
 
-globals2 <- 8
-string_length2 <- group_information2 + individual_information2 + random_variation2 + globals2
+globals_inddom <- 8
+string_length_inddom <- group_information_inddom + individual_information_inddom + random_variation_inddom + globals_inddom
 
-n_groups2 <- 2
-n_individuals2 <- 10
-n_calls2 <- 2
+n_groups_inddom <- 2
+n_individuals_inddom <- 10
+n_calls_inddom <- 2
 
 ```
 
 ```{r message = FALSE, warning = FALSE, eval = TRUE, echo = TRUE}
 
 ### Generate the string for each call
-calls2 <- generate_strings(
-  n_groups = n_groups2, 
-  n_individuals = n_individuals2, 
-  n_calls = n_calls2, 
-  string_length = string_length2, 
-  group_information = group_information2, 
-  individual_information = individual_information2,
-  random_variation = random_variation2
+calls_inddom <- generate_strings(
+  n_groups = n_groups_inddom, 
+  n_individuals = n_individuals_inddom, 
+  n_calls = n_calls_inddom, 
+  string_length = string_length_inddom, 
+  group_information = group_information_inddom, 
+  individual_information = individual_information_inddom,
+  random_variation = random_variation_inddom
   )
 
-glimpse(calls2)
+glimpse(calls_inddom)
 ```
 
 ```{r message = FALSE, warning = FALSE, eval = TRUE, echo = TRUE}
 
 ### Convert each string to Parsons code
-calls_parsons2 <- parsons_code(
-  df = calls2, 
+calls_parsons_inddom <- parsons_code(
+  df = calls_inddom, 
   string_col = "Call", 
   global_head_col = "Global_head",
   group_head_col = "Group_head",
@@ -336,7 +335,7 @@ calls_parsons2 <- parsons_code(
   mapping = list("A" = "up", "B" = "down", "C" = "constant")
 )
 
-glimpse(calls_parsons2)
+glimpse(calls_parsons_inddom)
 
 ```
 
@@ -344,8 +343,8 @@ glimpse(calls_parsons2)
 ```{r message = FALSE, warning = FALSE, eval = TRUE, echo = TRUE}
 
 ### Convert each Parsons code to frequency values
-calls_parsons_frequencies2 <- frequency_anchors(
-  df = calls_parsons2, 
+calls_parsons_frequencies_inddom <- frequency_anchors(
+  df = calls_parsons_inddom, 
   parsons_col = "Call_Parsons_Code", 
   group_id_col = "Group", 
   individual_id_col = "Individual", 
@@ -356,15 +355,15 @@ calls_parsons_frequencies2 <- frequency_anchors(
   section_transition = "continuous_trajectory"
   )
 
-glimpse(calls_parsons_frequencies2)
+glimpse(calls_parsons_frequencies_inddom)
 
 ```
 
 ```{r message = FALSE, warning = FALSE, eval = TRUE, echo = TRUE}
 
 ### For each call, use the frequency vectors to generate synthetic audio files with the soundgen package
-synthetic_call_metadata2 <- write_audio(
-  df = calls_parsons_frequencies2,
+synthetic_call_metadata_inddom <- write_audio(
+  df = calls_parsons_frequencies_inddom,
   save_path = audio_path, 
   sampling_rate = 44100,
   sylLen = 200,
@@ -379,7 +378,7 @@ synthetic_call_metadata2 <- write_audio(
   invalidArgAction = "ignore"
   )
 
-glimpse(synthetic_call_metadata2)
+glimpse(synthetic_call_metadata_inddom)
 
 ```
 
@@ -387,16 +386,16 @@ glimpse(synthetic_call_metadata2)
 
 ### Save the metadata for the synthetic audio files to a CSV file
 # Add extra metadata for upcoming image files names and rearrange columns
-synthetic_call_metadata2 %>%
-  write.csv(., file = file.path(analysis_path, "synthetic_call_metadata2.csv"), row.names = FALSE)
+synthetic_call_metadata_inddom %>%
+  write.csv(., file = file.path(analysis_path, "synthetic_call_metadata_inddom.csv"), row.names = FALSE)
 
 ```
 
 ```{r message = FALSE, warning = FALSE, eval = TRUE, echo = TRUE}
 
-synthetic_call_metadata2csv <- read.csv(file.path(analysis_path, "synthetic_call_metadata2.csv"))
+synthetic_call_metadata_inddomcsv <- read.csv(file.path(analysis_path, "synthetic_call_metadata_inddom.csv"))
 
-glimpse(synthetic_call_metadata2csv)
+glimpse(synthetic_call_metadata_inddomcsv)
 
 ```
 
@@ -409,12 +408,12 @@ It may be beneficial to have a single csv file that combines information from bo
 ```{r message = FALSE, warning = FALSE, eval = FALSE, echo = TRUE}
 
 # Combine the metdata across datasets and add an extra column to indicate the call dataset generated
-synthetic_call_metadata1 %>%
+synthetic_call_metadata_grpdom %>%
   dplyr::mutate(
     dataset = "Group_Membership"
   ) %>% 
   bind_rows(
-    synthetic_call_metadata2 %>% 
+    synthetic_call_metadata_inddom %>% 
       dplyr::mutate(
         dataset = "Individual_Identity"
       )
@@ -431,6 +430,6 @@ glimpse(synthetic_call_metadatacsv)
 
 ```
  
-After running this code you will have two datasets each with a single .csv file that includes all the details of the synthetic identity signals you generated with paRsynth and a combined one. The first dataset reflects synthetic identity signals with more group information than individual and the 2nd dataset vice versa. Navigate to Vignette 03: Bioacoustics Analysis to learn how to analyze these outputs you created using the `paRsynth` functions.
+After running this code you will have two datasets each with a single .csv file that includes all the details of the synthetic identity signals you generated with `paRsynth` and a combined one. The first dataset reflects synthetic identity signals with more group information than individual and the 2nd dataset vice versa. Navigate to *Vignette 03: Bioacoustics Analysis* to learn how to analyze these outputs you created using the `paRsynth` functions.
 
-Or if you would like to learn more about how to create synthetic identity signals with `paRsynth` using different frequency_anchors arguments and understand how the spectrograms get affected, check out Vignette 02b: Effect of Different Frequency Anchors Arguments on Spectrograms.
+Or if you would like to learn more about how to create synthetic identity signals with `paRsynth` using different frequency_anchors arguments and understand how the spectrograms get affected, check out *Vignette 02b: Effect of Different Frequency Anchors Arguments on Spectrograms*.
