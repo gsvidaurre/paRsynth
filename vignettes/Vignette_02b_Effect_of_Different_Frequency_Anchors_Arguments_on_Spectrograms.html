@@ -360,21 +360,17 @@ Anchors Arguments on Spectrograms</h1>
 
 <p>This vignette is very similar to Vignette 02 <em>BUT</em> with added
 steps exploring the effects of the two different
-<code>frequency_anchors</code> argument settings:
-“continuous_trajectory” and “starting_frequency”.
-“continuous_trajectory” uses the set <code>starting_frequency</code>
-parameter at the start of each vocalization component. In other words,
-if the starting frequency is set to 4000 Hz,then the
-<code>global_head</code> followed by <code>group_information</code>,
-<code>individual_information</code>, <code>random_variation</code>, and
-lastly <code>global_tail</code> would each start at a frequency of 4000
-Hz and the pattern would be read until the start of the next section.
-“starting_frequency” only uses the set <code>starting_frequency</code>
-parameter for the beginning of the call and the pattern would continue
-all the way through the end of the call, not after each component. This
-would mean that depending on the ending frequency of the last pattern
-would influence the frequency of the next differently between both
-argument settings.</p>
+<code>frequency_anchors</code> <code>section_transition</code> argument
+settings: “continuous_trajectory” and “starting_frequency”. In
+“starting_frequency” mode, the frequency value is reset to the
+<code>starting_frequency</code> value after each section. In
+“continuous_trajectory” mode, the frequency value is retained from the
+previous section. This means that using “continuous_trajectory” mode
+would make the ending frequency of the last section to influence the
+starting frequency of the following one; almost like a domino effect. On
+the other hand, using “starting_frequency” mode would force the
+beginning of each section to reset back to the starting_frequency
+value.</p>
 <h1>
 Set Up Working Environment
 </h1>
@@ -401,18 +397,16 @@ invisible(lapply(1:length(X), function(x){
 # X &lt;- c(X, &quot;paRsynth&quot;)
 
 # Change &quot;Desktop/.../GitHub_repos&quot; based on where paRsynth is stored on your local machine
-# testing_path &lt;- &quot;C://Users/summe/OneDrive/Desktop/github_repo/paRsynth/R/&quot; # Summer&#39;s testing path
-testing_path &lt;- &quot;~/Desktop/BIRDS/GitHub_repos/paRsynth/R&quot; # Alexandra&#39;s testing path
+# example
+testing_path &lt;- &quot;~/Desktop/BIRDS/GitHub_repos/paRsynth/R&quot;
 
 # Load all of the packages specified above
 invisible(lapply(X, library, character.only = TRUE))</code></pre>
 <p><strong>Initialize working directories for data on your local
 machine</strong></p>
 <pre class="r"><code># Initialize a base path (this will need to be different per user)
-# path &lt;- &quot;/Users/raneemsamman/Desktop&quot; # Raneem&#39;s path
-# path &lt;- &quot;/Users/gracesmith-vidaurre/Desktop&quot; # Grace&#39;s path
-path &lt;- &quot;/Users/gretheljuarez/Desktop/BIRDS/&quot; # Alexandra&#39;s path
-# path &lt;- &quot;/Users/summe/OneDrive/Desktop/&quot; # Summer&#39;s path
+# example
+path &lt;- &quot;/Users/gretheljuarez/Desktop/BIRDS/&quot;
 
 # Initialize the directory for analysis on your local computer
 analysis_dir &lt;- &quot;paRsynth_frequency_anchors_settings_comparison&quot;
@@ -465,8 +459,6 @@ set.seed(222)
 # Random variation should be at least half or more compared to individual information
 individual_information &lt;- 2
 group_information &lt;- 4
-
-# Create variation within individuals
 random_variation &lt;- 2
 
 # globals refers to the number of characters in the the head and tail shared among all calls in the dataset to bound the variation. Number input here is split in half and those amount of characters are allocated to head and tail of string
@@ -546,9 +538,9 @@ the effects of the two different <code>frequency_anchors</code>
 arguments of <code>section_transition</code> = “continuous_trajectory”
 versus <code>section_transition</code> = “starting_frequency” on the
 spectrograms of the <code>paRsynth</code> generated calls.</p>
-<p><strong>Dataset A</strong>: section_transition =
+<p><strong>Dataset A</strong>: <code>section_transition</code> =
 “continuous_trajectory”</p>
-<pre class="r"><code>calls_parsons_frequencies_a &lt;- frequency_anchors(
+<pre class="r"><code>calls_parsons_frequencies_ct &lt;- frequency_anchors(
   df = calls_parsons, 
   parsons_col = &quot;Call_Parsons_Code&quot;, 
   group_id_col = &quot;Group&quot;, 
@@ -560,7 +552,7 @@ spectrograms of the <code>paRsynth</code> generated calls.</p>
   section_transition = &quot;continuous_trajectory&quot; # This setting will be changed
   )
 
-glimpse(calls_parsons_frequencies_a)</code></pre>
+glimpse(calls_parsons_frequencies_ct)</code></pre>
 <pre><code>## Rows: 250
 ## Columns: 22
 ## $ Group        &lt;int&gt; 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, …
@@ -585,9 +577,9 @@ glimpse(calls_parsons_frequencies_a)</code></pre>
 ## $ Frequency15  &lt;dbl&gt; 1000, 2000, 3000, 2000, 2000, 1000, 1000, 1000, 1000, 100…
 ## $ Frequency16  &lt;dbl&gt; 1000, 1000, 2000, 1000, 1000, 1000, 1000, 1000, 1000, 100…
 ## $ Frequency17  &lt;dbl&gt; 2000, 2000, 3000, 2000, 2000, 2000, 2000, 2000, 2000, 200…</code></pre>
-<p><strong>Dataset B</strong>: section_transition =
+<p><strong>Dataset B</strong>: <code>section_transition</code> =
 “starting_frequency”</p>
-<pre class="r"><code>calls_parsons_frequencies_b &lt;- frequency_anchors(
+<pre class="r"><code>calls_parsons_frequencies_sf &lt;- frequency_anchors(
   df = calls_parsons, 
   parsons_col = &quot;Call_Parsons_Code&quot;, 
   group_id_col = &quot;Group&quot;, 
@@ -599,7 +591,7 @@ glimpse(calls_parsons_frequencies_a)</code></pre>
   section_transition = &quot;starting_frequency&quot; # This setting has been changed
   )
 
-glimpse(calls_parsons_frequencies_b)</code></pre>
+glimpse(calls_parsons_frequencies_sf)</code></pre>
 <pre><code>## Rows: 250
 ## Columns: 22
 ## $ Group        &lt;int&gt; 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, …
@@ -630,10 +622,10 @@ spectrograms for them to see how they differ.</p>
 <p><strong>Step 5: For each call or string, use these frequency anchor
 vectors to generate synthetic audio files with the soundgen
 package</strong></p>
-<p><strong>Dataset A</strong>: section_transition =
+<p><strong>Dataset A</strong>: <code>section_transition</code> =
 “continuous_trajectory”</p>
-<pre class="r"><code>synthetic_call_metadata_a &lt;- write_audio(
-  df = calls_parsons_frequencies_a,
+<pre class="r"><code>synthetic_call_metadata_ct &lt;- write_audio(
+  df = calls_parsons_frequencies_ct,
   save_path = audio_path, 
   sampling_rate = 44100,
   sylLen = 200,
@@ -644,11 +636,11 @@ package</strong></p>
   formants = NA,
   vocalTract = NA,
   vibratoFreq = 1,
-  prefix = &quot;A&quot;,
+  prefix = &quot;CT&quot;,
   invalidArgAction = &quot;ignore&quot;
   )
 
-glimpse(synthetic_call_metadata_a)</code></pre>
+glimpse(synthetic_call_metadata_ct)</code></pre>
 <pre><code>## Rows: 250
 ## Columns: 23
 ## $ Group           &lt;int&gt; 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, …
@@ -673,11 +665,11 @@ glimpse(synthetic_call_metadata_a)</code></pre>
 ## $ Frequency15     &lt;dbl&gt; 1000, 2000, 3000, 2000, 2000, 1000, 1000, 1000, 1000, …
 ## $ Frequency16     &lt;dbl&gt; 1000, 1000, 2000, 1000, 1000, 1000, 1000, 1000, 1000, …
 ## $ Frequency17     &lt;dbl&gt; 2000, 2000, 3000, 2000, 2000, 2000, 2000, 2000, 2000, …
-## $ audio_file_name &lt;chr&gt; &quot;A_Group1_Indiv1_Call1.wav&quot;, &quot;A_Group1_Indiv1_Call2.wa…</code></pre>
-<p><strong>Dataset B</strong>: section_transition =
+## $ audio_file_name &lt;chr&gt; &quot;CT_Group1_Indiv1_Call1.wav&quot;, &quot;CT_Group1_Indiv1_Call2.…</code></pre>
+<p><strong>Dataset B</strong>: <code>section_transition</code> =
 “starting_frequency”</p>
-<pre class="r"><code>synthetic_call_metadata_b &lt;- write_audio(
-  df = calls_parsons_frequencies_b,
+<pre class="r"><code>synthetic_call_metadata_sf &lt;- write_audio(
+  df = calls_parsons_frequencies_sf,
   save_path = audio_path, 
   sampling_rate = 44100,
   sylLen = 200,
@@ -688,11 +680,11 @@ glimpse(synthetic_call_metadata_a)</code></pre>
   formants = NA,
   vocalTract = NA,
   vibratoFreq = 1,
-  prefix = &quot;B&quot;,
+  prefix = &quot;SF&quot;,
   invalidArgAction = &quot;ignore&quot;
   )
 
-glimpse(synthetic_call_metadata_b)</code></pre>
+glimpse(synthetic_call_metadata_sf)</code></pre>
 <pre><code>## Rows: 250
 ## Columns: 23
 ## $ Group           &lt;int&gt; 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, …
@@ -717,38 +709,38 @@ glimpse(synthetic_call_metadata_b)</code></pre>
 ## $ Frequency15     &lt;dbl&gt; 3000, 3000, 3000, 3000, 3000, 3000, 3000, 3000, 3000, …
 ## $ Frequency16     &lt;dbl&gt; 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, …
 ## $ Frequency17     &lt;dbl&gt; 3000, 3000, 3000, 3000, 3000, 3000, 3000, 3000, 3000, …
-## $ audio_file_name &lt;chr&gt; &quot;B_Group1_Indiv1_Call1.wav&quot;, &quot;B_Group1_Indiv1_Call2.wa…</code></pre>
+## $ audio_file_name &lt;chr&gt; &quot;SF_Group1_Indiv1_Call1.wav&quot;, &quot;SF_Group1_Indiv1_Call2.…</code></pre>
 <p><strong>Step 6: Save the metadata for the synthetic audio files to a
 .CSV file</strong></p>
-<p><strong>Dataset A</strong>: section_transition =
+<p><strong>Dataset A</strong>: <code>section_transition</code> =
 “continuous_trajectory”</p>
 <pre class="r"><code># Add extra metadata for upcoming image files names and rearrange columns
-synthetic_call_metadata_a %&gt;%
-  write.csv(., file = file.path(analysis_path, &quot;synthetic_call_metadata_a.csv&quot;), row.names = FALSE) </code></pre>
-<pre class="r"><code>synthetic_call_metadata_a_csv &lt;- read.csv(file.path(analysis_path, &quot;synthetic_call_metadata_a.csv&quot;))
+synthetic_call_metadata_ct %&gt;%
+  write.csv(., file = file.path(analysis_path, &quot;synthetic_call_metadata_ct.csv&quot;), row.names = FALSE) </code></pre>
+<pre class="r"><code>synthetic_call_metadata_ct_csv &lt;- read.csv(file.path(analysis_path, &quot;synthetic_call_metadata_ct.csv&quot;))
 
-glimpse(synthetic_call_metadata_a_csv)</code></pre>
-<p><strong>Dataset B</strong>: section_transition =
+glimpse(synthetic_call_metadata_ct_csv)</code></pre>
+<p><strong>Dataset B</strong>: <code>section_transition</code> =
 “starting_frequency”</p>
 <pre class="r"><code># Add extra metadata for upcoming image files names and rearrange columns
-synthetic_call_metadata_b %&gt;%
-  write.csv(., file = file.path(analysis_path, &quot;synthetic_call_metadata_b.csv&quot;), row.names = FALSE) </code></pre>
-<pre class="r"><code>synthetic_call_metadata_b_csv &lt;- read.csv(file.path(analysis_path, &quot;synthetic_call_metadata_b.csv&quot;))
+synthetic_call_metadata_sf %&gt;%
+  write.csv(., file = file.path(analysis_path, &quot;synthetic_call_metadata_sf.csv&quot;), row.names = FALSE) </code></pre>
+<pre class="r"><code>synthetic_call_metadata_sf_csv &lt;- read.csv(file.path(analysis_path, &quot;synthetic_call_metadata_sf.csv&quot;))
 
-glimpse(synthetic_call_metadata_b_csv)</code></pre>
+glimpse(synthetic_call_metadata_sf_csv)</code></pre>
 <p>You have generated two metadatas with paRsyth and it has been saved
 as a .CSV file for each argument setting!</p>
 <p><strong>Step 7: Save the metadata for the synthetic datasets in a CSV
 file</strong></p>
 <pre class="r"><code># Combine the metdata across datasets and add an extra column to indicate the call dataset generated
-synthetic_call_metadata_a_csv %&gt;%
+synthetic_call_metadata_ct_csv %&gt;%
   dplyr::mutate(
-    dataset = &quot;A&quot;
+    dataset = &quot;CT&quot;
   ) %&gt;% 
   bind_rows(
-    synthetic_call_metadata_b_csv %&gt;% 
+    synthetic_call_metadata_sf_csv %&gt;% 
       dplyr::mutate(
-        dataset = &quot;B&quot;
+        dataset = &quot;SF&quot;
       )
   ) %&gt;%
   write.csv(., file = file.path(analysis_path, &quot;synthetic_call_metadata.csv&quot;), row.names = FALSE) 
@@ -838,14 +830,14 @@ precise information on frequency over time. First, you will use
 <code>warbleR</code> to create spectrograms of the generated calls in
 the selection table. Then, you will rename the spectrogram files saved
 in your <code>images_path</code>.</p>
-<p><strong>Dataset A</strong>: section_transition =
+<p><strong>Dataset A</strong>: <code>section_transition</code> =
 “continuous_trajectory”</p>
 <pre class="r"><code># To make spectrograms of dataset A (continuous_trajectory), you will need to filter it out from the selection table you made above.
-A_sel_tbl &lt;- sel_tbl %&gt;%
-    dplyr::filter(grepl(&quot;A&quot;, sound.files))
+ct_sel_tbl &lt;- sel_tbl %&gt;%
+    dplyr::filter(grepl(&quot;CT&quot;, sound.files))
 
 # Create spectrograms for filtered calls
-warbleR::spectrograms(A_sel_tbl, wl = 512, flim = c(0, 12), wn = &quot;hanning&quot;, pal = reverse.gray.colors.2,ovlp = 90, inner.mar = c(5, 4, 4, 2), outer.mar = c(0, 0, 0, 0), picsize = 1, res = 100, cexlab = 1, propwidth = FALSE, xl = 1, osci = FALSE, gr = FALSE, sc = FALSE, line = FALSE, mar = 0.05, it = &quot;jpeg&quot;, parallel = 1, path = audio_path, pb = TRUE, fast.spec = FALSE, by.song = NULL, sel.labels = NULL, title.labels = NULL, dest.path = images_path, box = TRUE, axis = TRUE)
+warbleR::spectrograms(ct_sel_tbl, wl = 512, flim = c(0, 12), wn = &quot;hanning&quot;, pal = reverse.gray.colors.2,ovlp = 90, inner.mar = c(5, 4, 4, 2), outer.mar = c(0, 0, 0, 0), picsize = 1, res = 100, cexlab = 1, propwidth = FALSE, xl = 1, osci = FALSE, gr = FALSE, sc = FALSE, line = FALSE, mar = 0.05, it = &quot;jpeg&quot;, parallel = 1, path = audio_path, pb = TRUE, fast.spec = FALSE, by.song = NULL, sel.labels = NULL, title.labels = NULL, dest.path = images_path, box = TRUE, axis = TRUE)
 
 # Rename the image files
 imgs &lt;- list.files(images_path)
@@ -853,14 +845,14 @@ imgs &lt;- list.files(images_path)
 new_nms &lt;- gsub(&quot;.wav-1&quot;, &quot;&quot;, imgs)
 
 invisible(file.rename(file.path(images_path, imgs), file.path(images_path, new_nms)))</code></pre>
-<p><strong>Dataset B</strong>: section_transition =
+<p><strong>Dataset B</strong>: <code>section_transition</code> =
 “starting_frequency”</p>
 <pre class="r"><code># To make spectrograms of dataset B (starting_frequency), you will need to filter it out from the selection table you made above.
-B_sel_tbl &lt;- sel_tbl %&gt;%
-    dplyr::filter(grepl(&quot;B&quot;, sound.files))
+sf_sel_tbl &lt;- sel_tbl %&gt;%
+    dplyr::filter(grepl(&quot;SF&quot;, sound.files))
 
 # Create spectrograms for filtered calls
-warbleR::spectrograms(B_sel_tbl, wl = 512, flim = c(0, 12), wn = &quot;hanning&quot;, pal = reverse.gray.colors.2,ovlp = 90, inner.mar = c(5, 4, 4, 2), outer.mar = c(0, 0, 0, 0), picsize = 1, res = 100, cexlab = 1, propwidth = FALSE, xl = 1, osci = FALSE, gr = FALSE, sc = FALSE, line = FALSE, mar = 0.05, it = &quot;jpeg&quot;, parallel = 1, path = audio_path, pb = TRUE, fast.spec = FALSE, by.song = NULL, sel.labels = NULL, title.labels = NULL, dest.path = images_path, box = TRUE, axis = TRUE)
+warbleR::spectrograms(sf_sel_tbl, wl = 512, flim = c(0, 12), wn = &quot;hanning&quot;, pal = reverse.gray.colors.2,ovlp = 90, inner.mar = c(5, 4, 4, 2), outer.mar = c(0, 0, 0, 0), picsize = 1, res = 100, cexlab = 1, propwidth = FALSE, xl = 1, osci = FALSE, gr = FALSE, sc = FALSE, line = FALSE, mar = 0.05, it = &quot;jpeg&quot;, parallel = 1, path = audio_path, pb = TRUE, fast.spec = FALSE, by.song = NULL, sel.labels = NULL, title.labels = NULL, dest.path = images_path, box = TRUE, axis = TRUE)
 
 # Rename the image files
 imgs &lt;- list.files(images_path)
@@ -885,11 +877,11 @@ side comparison to
 <b><i>starting_frequency</i>_Group2_Individual5_Call2</b></div>
 <p><br> The figure above compares two pairs of calls created with
 different frequency anchors settings. Dataset A was made with
-section_transition = “continuous_trajectory”. Dataset B was made with
-section_transition = “starting_frequency”. Starting from left to right,
-top to bottom of the spectrograms, A_Group1_Indiv1_Call1 versus
-B_Group1_Indiv1_Call1 and A_Group2_Indiv5_Call2 versus
-B_Group2_Indiv5_Call2.</p>
+<code>section_transition</code> = “continuous_trajectory”. Dataset B was
+made with <code>section_transition</code> = “starting_frequency”.
+Starting from left to right, top to bottom of the spectrograms,
+A_Group1_Indiv1_Call1 versus B_Group1_Indiv1_Call1 and
+A_Group2_Indiv5_Call2 versus B_Group2_Indiv5_Call2.</p>
 <p>Once you have decided which frequency anchor setting is best for your
 project, navigate to Vignette 03: Bioacoustics Analysis to learn how to
 analyze these outputs you created with paRsynth.</p>
