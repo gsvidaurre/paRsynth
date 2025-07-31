@@ -14,6 +14,7 @@
 #' @param group_information Integer. The number of characters that vary in the middle of the string across groups. The default is 8 characters. The user must provide an even value; negative values will result in unexpected behavior.
 #' @param individual_information Integer. The number of characters that vary in the middle of the string within groups. The default is 2 characters. The user must provide an even value; negative values will result in unexpected behavior.
 #' @param random_variation Integer. The number of characters that will vary randomly and will be appended after the individual information. The default is 2 characters. The user must provide an even value; negative values will result in unexpected behavior.
+#' @param alphabet Character vector. A vector of characters that will be used to generate the strings. The default is `c("A", "B", "C")`, which creates a 1-base Parsons code with three unique characters.
 #'
 #' @details The individual-specific and group-specific string components are combined to form the middle of a longer string. The individual-specific component of the string may not be unique to a single individual within a group, as individual distinctiveness  depends on the total number of individuals in the group, the length of the individually-specific string component, and the number of unique characters or symbols available for creating strings (which may vary depending on how users modify the function). For example, if the length of the individual-specific string component is 2 characters long and 3 unique characters are used, there will be 3^2 (or 9) possible unique individual signatures.
 #'
@@ -33,7 +34,8 @@
 #'                                    string_length = 16,
 #'                                    group_information = 8,
 #'                                    individual_information = 2,
-#'                                    random_variation = 2
+#'                                    random_variation = 2,
+#'                                    alphabet = c("A", "B", "C")
 #'                                  )
 #' glimpse(example_calls)
 #'
