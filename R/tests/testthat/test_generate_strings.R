@@ -1,41 +1,19 @@
 # Author: G.A. Juarez and Raneem Samman
 # Date created: May 22, 2024
 
-rm(list = ls())
-
-# make a list of packages to install
-pkgs <- c("testthat", "soundgen", "dplyr", "stringr", "rlang", "tidyverse", "lubridate", "pbapply", "data.table")
-
-# check if the packages are installed, if not, install them
-for (pkg in pkgs) {
-  if (!require(pkg, character.only = TRUE)) {
-    install.packages(pkg, dependencies = TRUE)
-  }
-}
-# load the packages (for software development purposes)
-# lapply(pkgs, library, character.only = TRUE)
-
-# Change the path for testing to reflect where the package is installed on your local machine
-# testing_path <- "/Users/raneemsamman/Documents/GitHub/paRsynth/R" #raneem's
-testing_path <- "~/Desktop/BIRDS/GitHub_repos/paRsynth/R" #alexandra's
-
-# Change the desktop path to reflect where temporary directories for testing will be created to save files generated during testing
-desktop_path <- "~/Desktop"
-
-# Load the paRsynth functions that will be tested below
-source(file.path(testing_path, "generate_strings.R"))
-
 # Define parameters
-group_information <- 8
-individual_information <- 2
-random_variation <- 4
-global_head <- 4
-string_length <- group_information + individual_information + random_variation + (global_head * 2)
-n_calls <- 1
-n_groups <- 2
-n_individuals <- 2
-alphabet <- c("A", "B", "C")
-string_structure <- "GI-II-RV-GI"
+base_parameters <- list(
+  group_information <- 8,
+  individual_information <- 2,
+  random_variation <- 4,
+  global_head <- 4,
+  string_length <- group_information + individual_information + random_variation + (global_head * 2),
+  n_calls <- 1,
+  n_groups <- 2,
+  n_individuals <- 2,
+  alphabet <- c("A", "B", "C"),
+  string_structure <- "GI-II-RV-GI"
+)
 
 # Call the function using parameters
 generated_strings <- generate_strings(
@@ -49,6 +27,36 @@ generated_strings <- generate_strings(
   alphabet = alphabet,
   string_structure = string_structure
 )
+
+# Create a vector of all valid structures
+valid_structures <- c(
+  "GI-II-RV-GI", "GI-RV-II-GI",
+  "II-GI-RV-II", "II-RV-GI-II",
+  "GI-II-RV", "GI-RV-II",
+  "II-GI-RV", "II-RV-GI",
+  "RV-II-GI", "RV-GI-II",
+  "GI-RV-GI", "II-RV-II",
+  "GI-RV", "RV-GI",
+  "RV-II", "II-RV")
+
+# Loop the function to create calls of each valid structure
+generated_structures <- lapply(valid_structures, function(x) {
+  generate_strings(
+    n_groups = 1,
+    n_individuals = 1,
+    n_calls = 1,
+    string_length = string_length,
+    group_information = group_information,
+    individual_information = individual_information,
+    random_variation = random_variation,
+    alphabet = alphabet,
+    string_structure = x
+  )
+})
+
+# Organize the calls into one dataframe for easier legibility
+all_generated_structures <- data.table::rbindlist(generated_structures)
+# view(all_generated_structures)
 
 # 1. Unit test to check string length
 test_that("The function generates strings that have the correct length", {
@@ -147,13 +155,13 @@ test_that("The function generates character-based vocal strings per catergory", 
     expect_equal(group_middle_tail, generated_strings$Group_tail[i])
     
     # Get the individual middle section
-    individual_middle <- stringr::str_sub(current_call, # nolint
+    individual_complete <- stringr::str_sub(current_call, # nolint
                                           expected_head_tail_length + half_group_length + 1, # nolint
                                           expected_head_tail_length + half_group_length + individual_information) # nolint
-    cat("Individual middle string is:", individual_middle, "\n")
+    cat("Individual middle string is:", individual_complete, "\n")
     cat("Expected individual middle length is", individual_information, "\n")
-    expect_equal(nchar(individual_middle), individual_information)
-    expect_equal(individual_middle, generated_strings$Individual_middle[i])
+    expect_equal(nchar(individual_complete), individual_information)
+    expect_equal(individual_complete, generated_strings$Individual_complete[i])
   }
 })
 
@@ -184,46 +192,17 @@ test_that("The function generates # of calls per individuals per social group co
   
 })
 
-# 6. Unit test to check correct string structure
-test_that("The function generates strings that have the correct given string structure", {
+# 6. Unit test to check correct dataframe is created with string structure
+test_that("The function generates a dataframe with a column for the correct string structure provided", {
   
-  # Create a vector of all valid structures
-  valid_structures <- c(
-    "GI-II-RV-GI", "GI-RV-II-GI",
-    "II-GI-RV-II", "II-RV-GI-II",
-    "GI-II-RV", "GI-RV-II",
-    "II-GI-RV", "II-RV-GI",
-    "RV-II-GI", "RV-GI-II",
-    "GI-RV-GI", "II-RV-II",
-    "GI-RV", "RV-GI",
-    "RV-II", "II-RV")
+  observed_structures <- unique(all_generated_structures$String_structure)
   
-  # Loop the function to create calls of each valid structure
-  generated_structures <- lapply(valid_structures, function(x){
-    generate_strings(
-      n_groups = n_groups,
-      n_individuals = n_individuals,
-      n_calls = n_calls,
-      string_length = string_length,
-      group_information = group_information,
-      individual_information = individual_information,
-      random_variation = random_variation,
-      alphabet = alphabet,
-      string_structure = x
-    )
-  })
+  expect_identical(valid_structures, observed_structures)
   
-  all_generated_structures <- data.table::rbindlist(generated_structures)
-  # glimpse(generated_structures)
+  cat("Expected Valid Structures:", valid_structures, "\n")
+  cat("String structures generated:", observed_structures, "\n")
   
-  expect_identical(valid_structures, unique(all_generated_structures$String_structure))
-  
-  setequal(valid_structures, unique(all_generated_structures$String_structure))
-  
-  cat("Expected Valid Structures:", valid_structures)
-  cat("String structures generated:", unique(all_generated_structures$String_structure))
-  
- })
+})
 
 # 7. Unit test to check that `generate_structures` throws an error for invalid string structures input
 test_that("The function outputs an error when given invalid string structure", {
@@ -250,3 +229,47 @@ test_that("The function outputs an error when given invalid string structure", {
   cat("Error thrown for these invalid structures:", invalid_structures)
   
 })
+
+# 8. Unit test to check that the strings are generated correctly according to the different string structures provided
+test_that("The function outputs an error when given invalid string structure", {
+  
+  # i = 1 # testing
+  for (i in 1:nrow(all_generated_structures)) {
+    
+  # Call out a specific generated string from the created dataframe
+  observed_call <- all_generated_structures$Call[i]
+  
+  # Call out the string structure the call uses
+  structure <- all_generated_structures$String_structure[i]
+  
+  cat("----- Testing string structure: -----", structure, "\n")
+  
+  # Call out each section of the string
+  GL_head <- all_generated_structures$Global_head[i]
+  GL_tail <- all_generated_structures$Global_tail[i]
+  GI_head <- all_generated_structures$Group_head[i]
+  GI_tail <- all_generated_structures$Group_tail[i]
+  II_head <- all_generated_structures$Individual_head[i]
+  II_tail <- all_generated_structures$Individual_tail[i]
+  RV <- all_generated_structures$Random_variation[i]
+  
+  # Based on the used string structure, paste the sections in that order as the expected call
+  form_call <- if (structure %in% valid_structures){
+    build_string_structure(structure, GI_head, GI_tail, II_head, II_tail, RV)
+  }
+  
+  # Paste in the global head and tail
+  expected_call <- paste0(GL_head, form_call, GL_tail)
+  
+  # Compare the observed call generated in the dataframe with the expected call organized together based on section
+  expect_identical(observed_call, expected_call)
+  
+  cat("Expected Call:", expected_call, "\n")
+  cat("Call Generated:", observed_call, "\n")
+  
+  }
+  
+}
+
+)
+  
