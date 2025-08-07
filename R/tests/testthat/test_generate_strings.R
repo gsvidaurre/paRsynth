@@ -54,6 +54,18 @@ generated_structures <- lapply(valid_structures, function(x) {
   )
 })
 
+generated_strings_alphabet <- generate_strings(
+  n_groups = n_groups,
+  n_individuals = n_individuals,
+  n_calls = n_calls,
+  string_length = string_length,
+  group_information = group_information,
+  individual_information = individual_information,
+  random_variation = random_variation,
+  alphabet = c("A", "B", "C", "D", "E"),
+  string_structure = string_structure
+)
+
 # Organize the calls into one dataframe for easier legibility
 all_generated_structures <- data.table::rbindlist(generated_structures)
 # view(all_generated_structures)
@@ -272,4 +284,20 @@ test_that("The function outputs an error when given invalid string structure", {
 }
 
 )
+
+# 9. Unit test to check that the function correctly takes in alphabet beyond the standard 3 base encoding (A, B, C)
+test_that("The function generates character strings when base encoding goes beyond standard A, B, C", {
+  
+  # View(generated_strings_alphabet)
+
+  calls_alphabet <- generated_strings_alphabet$Call
+
+  find_D <- grepl("D", calls_alphabet)
+  find_E <- grepl("E", calls_alphabet)
+  
+  
+  expect_true(any(find_D))
+  expect_true(any(find_E))
+  
+})
   
