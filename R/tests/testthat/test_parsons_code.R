@@ -150,4 +150,48 @@ test_that("The function generates a data frame that has the right number of rows
   
 })
 
-# 5. Unit test to check that the function correctly takes in and computes the parsons code for the new parameters added
+# 5. Unit test to check that the function correctly takes in alphabet and mapping beyond the standard 3 base encoding (A, B, C)
+test_that("The function generates correct parsons code when base encoding goes beyond A = up, B = down, C = constant", {
+  
+  # Generate generic strings with 3+ base encoding (easy to track conversion)
+  Global_head <- "ABC"
+  Group_head <- "DEA"
+  Individual_middle <- "CCED"
+  Random_variation <- "CD"
+  Group_tail <- "EACE"
+  Global_tail <- "DDAB"
+  Individual_head <- gsub('DE', '', Individual_middle)
+  Individual_tail <- gsub('ED', '', Individual_middle)
+  Group_complete <- c(Group_head, Group_tail)
+  
+  generated_strings_alphabet <- data.frame(
+    Call = paste(Global_head, Group_head, Individual_middle, Random_variation, Group_tail, Global_tail, sep = ""),
+    Global_head = Global_head, Group_head = Group_head, Individual_middle = Individual_middle,
+    Global_head = Global_head, Group_head = Group_head, Individual_head = Individual_head, Individual_tail = Individual_tail, Individual_middle = Individual_middle, Group_complete = Group_complete,
+    Random_variation = Random_variation, Group_tail = Group_tail, Global_tail = Global_tail
+  )
+  
+  # Convert using parsons_code
+  Conversion_alphabet <- parsons_code(
+    generated_strings_alphabet, 
+    string_col = "Call", 
+    global_head_col = "Global_head", 
+    group_head_col = "Group_head", 
+    individual_head_col = "Individual_head", 
+    individual_tail_col = "Individual_tail", 
+    individual_complete_col = "Individual_middle", 
+    group_complete_col = "Group_complete", 
+    random_variation_col = "Random_variation", 
+    group_tail_col = "Group_tail", 
+    global_tail_col = "Global_tail", 
+    string_structure_col = "String_structure",
+    mapping = list("A" = "up", "B" = "down", "C" = "constant", "D" = "up_0.5", "E" = "down_0.5")
+  )
+  
+  # Check that the generated parsons code is the same as the expected parsons code with ("A" = "up", "B" = "down", "C" = "constant")
+  generated_call_alphabet <- unname(Conversion_alphabet$Call)[1]
+  generated_parsons_code_alphabet <- unname(Conversion_alphabet$Call_Parsons_Code)[1]
+  expected_parsons_code_alphabet <- "up-down-constant-up_0.5-down_0.5-up-constant-constant-down_0.5-up_0.5-constant-up_0.5-down_0.5-up-constant-down_0.5-up_0.5-up_0.5-up-down"
+  expect_equal(generated_parsons_code_alphabet, expected_parsons_code_alphabet)
+  
+})
