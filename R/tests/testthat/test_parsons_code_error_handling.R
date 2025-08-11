@@ -59,6 +59,11 @@ test_that("Error handling for parsons_code", {
         df = "df", # not a data frame
         error_msg = "The 'df' argument must be a data frame."
     )
+    # test that the mapping argument cannot be NULL
+    run_check_error(
+      mapping = NULL,
+      error_msg = "The 'mapping' argument must not be NULL."
+    )
     # test that the input for mapping is actually a list
     run_check_error(
         df = test_df,
@@ -143,6 +148,13 @@ test_that("Error handling for parsons_code", {
         df = test_df,
         mapping = list(),
         error_msg = "The 'mapping' argument must contain at least three elements."
+    )
+    
+    # test that mapping list is characters
+    run_check_error(
+      df = test_df,
+      mapping = list(1, 2, 3),
+      error_msg = "All elements in the 'mapping' list must be character strings"
     )
     
 })
