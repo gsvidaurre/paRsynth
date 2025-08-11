@@ -126,4 +126,72 @@ test_that("Error handling for generate_strings", {
       
     )
     
+    # Test that alphabet are at least 3 characters
+    expect_error(
+      generate_strings(
+        n_groups = base_parameters$n_groups,
+        n_individuals = base_parameters$n_individuals,
+        n_calls = base_parameters$n_calls,
+        string_length = base_parameters$string_length,
+        group_information = base_parameters$group_information,
+        individual_information = base_parameters$individual_information,
+        random_variation = base_parameters$random_variation,
+        alphabet = c("A"), # less than 3 characters
+        string_structure = base_parameters$string_structure
+      ),
+      "alphabet must be a character vector with at least 3 unique characters, cannot be empty or NA, and cannot exceed 7 characters"
+      
+    )
+    
+    # Test that alphabet cannot exceed 7 characters
+    expect_error(
+      generate_strings(
+        n_groups = base_parameters$n_groups,
+        n_individuals = base_parameters$n_individuals,
+        n_calls = base_parameters$n_calls,
+        string_length = base_parameters$string_length,
+        group_information = base_parameters$group_information,
+        individual_information = base_parameters$individual_information,
+        random_variation = base_parameters$random_variation,
+        alphabet = c("A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L"), # more than 7 characters
+        string_structure = base_parameters$string_structure
+      ),
+      "alphabet must be a character vector with at least 3 unique characters, cannot be empty or NA, and cannot exceed 7 characters"
+      
+    )
+    
+    # Test that alphabet cannot be empty
+    expect_error(
+      generate_strings(
+        n_groups = base_parameters$n_groups,
+        n_individuals = base_parameters$n_individuals,
+        n_calls = base_parameters$n_calls,
+        string_length = base_parameters$string_length,
+        group_information = base_parameters$group_information,
+        individual_information = base_parameters$individual_information,
+        random_variation = base_parameters$random_variation,
+        alphabet = "", # Empty
+        string_structure = base_parameters$string_structure
+      ),
+      "alphabet must be a character vector with at least 3 unique characters, cannot be empty or NA, and cannot exceed 7 characters"
+      
+    )
+    
+    # Test that alphabet cannot be NA
+    expect_error(
+      generate_strings(
+        n_groups = base_parameters$n_groups,
+        n_individuals = base_parameters$n_individuals,
+        n_calls = base_parameters$n_calls,
+        string_length = base_parameters$string_length,
+        group_information = base_parameters$group_information,
+        individual_information = base_parameters$individual_information,
+        random_variation = base_parameters$random_variation,
+        alphabet = NA, # NA
+        string_structure = base_parameters$string_structure
+      ),
+      "alphabet must be a character vector with at least 3 unique characters, cannot be empty or NA, and cannot exceed 7 characters"
+      
+    )
+    
 })
