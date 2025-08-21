@@ -1,14 +1,7 @@
 # Author: Raneem Samman
 # Date created: November 15, 2024
 
-source("R/frequency_anchors.R")
-source("R/parsons_code.R")
-source("R/generate_strings.R")
-# Load necessary libraries
-library(testthat)
-library(tidyverse)
-
-# # Helper function to perform Parsons Code conversion
+# Helper function to perform Parsons Code conversion
 apply_parsons_code <- function(generated_strings) {
   parsons_code(
     generated_strings,
