@@ -2,11 +2,15 @@
 title: "Vignette 03: Bioacoustics Analysis"
 author: "GAJ"
 date: "2024-12-11"
-output: html_document
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Vignette 03: Bioacoustics Analysis}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE, collapse = TRUE)
 ```
 
 In this vignette, we will go through how to analyze the synthetic identity signals you generated using the `paRsynth` package in vignette 02 by creating spectrograms and acoustic space plots to analyze their acoustic similarities.
@@ -58,7 +62,7 @@ It is important to have your files organized, especially when creating many diff
 
 # Initialize a base path (this will need to be different per user)
 # example
-path <- "/Users/gretheljuarez/Desktop/BIRDS/"
+path <- "/Users/raneemsamman/Desktop/BIRDS/"
 
 # Initialize the directory for analysis on your local computer
 analysis_dir <- "paRsynth_methods_synthetic_dataset"

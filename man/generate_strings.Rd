@@ -11,7 +11,8 @@ generate_strings(
   string_length = 16,
   group_information = 8,
   individual_information = 2,
-  random_variation = 2
+  random_variation = 2,
+  alphabet = c("A", "B", "C")
 )
 }
 \arguments{
@@ -28,6 +29,8 @@ generate_strings(
 \item{individual_information}{Integer. The number of characters that vary in the middle of the string within groups. The default is 2 characters. The user must provide an even value; negative values will result in unexpected behavior.}
 
 \item{random_variation}{Integer. The number of characters that will vary randomly and will be appended after the individual information. The default is 2 characters. The user must provide an even value; negative values will result in unexpected behavior.}
+
+\item{alphabet}{Character vector. A vector of characters that will be used to generate the strings. The default is \code{c("A", "B", "C")}, which creates a 1-base Parsons code with three unique characters.}
 }
 \value{
 This function returns a data frame containing the call strings and metadata columns that contain unique numeric identifiers for the group, individual, and call for the given individual.
@@ -52,7 +55,8 @@ example_calls <- generate_strings(n_groups = 2,
                                    string_length = 16,
                                    group_information = 8,
                                    individual_information = 2,
-                                   random_variation = 2
+                                   random_variation = 2,
+                                   alphabet = c("A", "B", "C")
                                  )
 glimpse(example_calls)
 

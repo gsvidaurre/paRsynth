@@ -2,12 +2,16 @@
 title: "Vignette 02b: Effect of Different Frequency Anchors Arguments on Spectrograms"
 author: "GAJ"
 date: "2024-12-02"
-output: html_document
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Vignette 02b: Effect of Different Frequency Anchors Arguments on Spectrograms}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
 ---
 
 ```{r setup, include = FALSE}
 
-knitr::opts_chunk$set(echo = TRUE, eval = TRUE)
+knitr::opts_chunk$set(echo = TRUE, collapse = TRUE)
 
 ```
 
@@ -55,7 +59,7 @@ invisible(lapply(X, library, character.only = TRUE))
 
 # Initialize a base path (this will need to be different per user)
 # example
-path <- "/Users/gretheljuarez/Desktop/BIRDS/"
+path <- "/Users/raneemsamman/Desktop/BIRDS/"
 
 # Initialize the directory for analysis on your local computer
 analysis_dir <- "paRsynth_frequency_anchors_settings_comparison"
@@ -94,12 +98,24 @@ if(!dir.exists(images_path)){
 
 **Source the paRsynth functions directly from the GitHub repository**
 
-```{r message = FALSE, warning = FALSE, eval = TRUE, echo = TRUE}
+```{r message = FALSE, warning = FALSE, eval = TRUE, echo = FALSE}
+
+# Load the paRsynth functions that will be tested below
+source(file.path("/Users/raneemsamman/Documents/GitHub/paRsynth/R/generate_strings.R"))
+source(file.path("/Users/raneemsamman/Documents/GitHub/paRsynth/R/parsons_code.R"))
+source(file.path("/Users/raneemsamman/Documents/GitHub/paRsynth/R/frequency_anchors.R"))
+source(file.path("/Users/raneemsamman/Documents/GitHub/paRsynth/R/write_audio.R"))
+
+```
+
+```{r message = FALSE, warning = FALSE, eval = FALSE, echo = TRUE}
+
 # Load the paRsynth functions that will be tested below
 source(file.path(testing_path, "generate_strings.R"))
 source(file.path(testing_path, "parsons_code.R"))
 source(file.path(testing_path, "frequency_anchors.R"))
 source(file.path(testing_path, "write_audio.R"))
+
 ```
 
 <h1>paRsynth Workflow</h1>
@@ -219,8 +235,29 @@ Now we have two datasets created by two different frequency_anchors settings. We
 **Step 5: For each call or string, use these frequency anchor vectors to generate synthetic audio files with the soundgen package**
 
 **Dataset A**: `section_transition` = "continuous_trajectory"
+```{r message = FALSE, warning = FALSE, eval = TRUE, echo = FALSE}
 
-```{r message = FALSE, warning = FALSE, eval = TRUE, echo = TRUE}
+synthetic_call_metadata_ct <- write_audio(
+  df = calls_parsons_frequencies_ct,
+  save_path = "/Users/raneemsamman/Desktop/BIRDS/paRsynth_methods_synthetic_dataset/audio", 
+  sampling_rate = 44100,
+  sylLen = 200,
+  temperature = 0.025,  # default stochasticity in generating sound
+  pitch_sampling_rate = 44100,
+  smoothing = list(interpol = "loess", loessSpan = 1, discontThres = 0, jumpThres = 0),
+  rolloffExact = c(0.25), # specify an amplitude value for the fundamental only, which will silence all harmonics
+  formants = NA,
+  vocalTract = NA,
+  vibratoFreq = 1,
+  prefix = "CT",
+  invalidArgAction = "ignore"
+  )
+
+glimpse(synthetic_call_metadata_ct)
+
+```
+
+```{r message = FALSE, warning = FALSE, eval = FALSE, echo = TRUE}
 
 synthetic_call_metadata_ct <- write_audio(
   df = calls_parsons_frequencies_ct,
@@ -243,8 +280,29 @@ glimpse(synthetic_call_metadata_ct)
 ```
 
 **Dataset B**: `section_transition` = "starting_frequency"
+```{r message = FALSE, warning = FALSE, eval = TRUE, echo = FALSE}
 
-```{r message = FALSE, warning = FALSE, eval = TRUE, echo = TRUE}
+synthetic_call_metadata_sf <- write_audio(
+  df = calls_parsons_frequencies_sf,
+  save_path = "/Users/raneemsamman/Desktop/BIRDS/paRsynth_methods_synthetic_dataset/audio", 
+  sampling_rate = 44100,
+  sylLen = 200,
+  temperature = 0.025,  # default stochasticity in generating sound
+  pitch_sampling_rate = 44100,
+  smoothing = list(interpol = "loess", loessSpan = 1, discontThres = 0, jumpThres = 0),
+  rolloffExact = c(0.25), # specify an amplitude value for the fundamental only, which will silence all harmonics
+  formants = NA,
+  vocalTract = NA,
+  vibratoFreq = 1,
+  prefix = "SF",
+  invalidArgAction = "ignore"
+  )
+
+glimpse(synthetic_call_metadata_sf)
+
+```
+
+```{r message = FALSE, warning = FALSE, eval = FALSE, echo = TRUE}
 
 synthetic_call_metadata_sf <- write_audio(
   df = calls_parsons_frequencies_sf,

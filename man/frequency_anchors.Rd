@@ -13,7 +13,7 @@ frequency_anchors(
   call_string_col,
   starting_frequency = 4000,
   frequency_shift = 1000,
-  section_transition = "starting_frequency"
+  section_transition = "continuous_trajectory"
 )
 }
 \arguments{
@@ -33,7 +33,7 @@ frequency_anchors(
 
 \item{frequency_shift}{Numeric value. A numeric value in Hz that specifies the frequency value that will be used to shift direction (or not). This is from the previous frequency anchor based on the Parsons code. For instance, if \code{frequency_shift} is 1000 Hz and the first Parsons code value is "up", then the first frequency anchor will be 5000 Hz. The default value is 1000 Hz. We have found that for total string lengths over 60 characters, it is better to use a smaller value (100 Hz). This avoids generating negative or zero values.}
 
-\item{section_transition}{Character string. The transition between sections in the Parsons code. The default value is "starting_frequency". The other option is "continuous_trajectory". In "starting_frequency" mode, the frequency value is reset to the \code{starting_frequency} value after each section. In "continuous_trajectory" mode, the frequency value is retained from the previous section. This can be useful for creating continuous frequency trajectories across vocalizations.}
+\item{section_transition}{Character string. The transition between sections in the Parsons code. The default value is "continuous_trajectory". The other option is "starting_frequency". In "starting_frequency" mode, the frequency value is reset to the \code{starting_frequency} value after each section. In "continuous_trajectory" mode, the frequency value is retained from the previous section. This can be useful for creating continuous frequency trajectories across vocalizations.}
 }
 \value{
 This function returns a data frame containing the string of the vocalization, the original Parsons code string, and one column per frequency anchor value. This data structure facilitates calculating the minimum and maximum frequency anchors across vocalizations. This can facilitate writing synthetic audio files with \code{soundgen} and making spectrogram image files.
@@ -54,7 +54,9 @@ example_calls <- generate_strings(n_groups = 2,
                                    string_length = 16,
                                    group_information = 8,
                                    individual_information = 2,
-                                   random_variation = 2)
+                                   random_variation = 2,
+                                   alphabet = c("A", "B", "C")
+                                 )
 
 example_calls_parsons <- parsons_code(example_calls,
                                       "Call",
@@ -77,7 +79,8 @@ anchors <- frequency_anchors(example_calls_parsons,
                              "Call",
                              starting_frequency = 4000,
                              frequency_shift = 1000,
-                             section_transition = "starting_frequency")
+                             section_transition = "continuous_trajectory"
+                             )
 
 glimpse(anchors)
 
