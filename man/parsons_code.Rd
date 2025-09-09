@@ -55,7 +55,9 @@ example_calls <- generate_strings(n_groups = 2,
                                    string_length = 16,
                                    group_information = 8,
                                    individual_information = 2,
-                                   random_variation = 2)
+                                   random_variation = 2,
+                                   alphabet = c("A", "B", "C")
+                                 )
 
 example_calls_parsons <- parsons_code(example_calls,
                                       "Call",

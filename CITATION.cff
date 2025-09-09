@@ -14,7 +14,7 @@ authors:
   given-names: "Grace"
   orcid: "https://orcid.org/0000-0002-0155-8159"
 title: "paRsynth: Sonify character strings to create synthetic frequency modulated vocalizations"
-version: 0.0.0.9000
+version: 1.0.0
 doi: 10.5281/zenodo.13246829
 date-released: 2024-08-06
 url: "https://github.com/gsvidaurre/paRsynth"

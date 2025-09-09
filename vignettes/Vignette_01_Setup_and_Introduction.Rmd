@@ -2,12 +2,16 @@
 title: "Vignette 01: Setup and Introduction"
 author: "GAJ"
 date: "2024-11-25"
-output: html_document
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Vignette 01: Setup and Introduction}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
 ---
 
 ```{r setup, include = FALSE}
 
-knitr::opts_chunk$set(echo = TRUE, eval = TRUE)
+knitr::opts_chunk$set(echo = TRUE, collapse = TRUE)
 ```
 
 This vignette will guide you through the setup of the `paRsynth` package, introduce its purpose and functions before demonstrating how to utilize it for your research.

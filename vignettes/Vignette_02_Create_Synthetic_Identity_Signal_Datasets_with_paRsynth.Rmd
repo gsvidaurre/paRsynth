@@ -2,12 +2,16 @@
 title: "Vignette 02: Create Synthetic Identity Signal Datasets with `paRsynth`"
 author: "GAJ"
 date: "2024-12-02"
-output: html_document
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Vignette 02: Create Synthetic Identity Signal Datasets with `paRsynth`}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
 ---
 
 ```{r setup, include = FALSE}
 
-knitr::opts_chunk$set(echo = TRUE, eval = TRUE)
+knitr::opts_chunk$set(echo = TRUE, collapse = TRUE)
 
 ```
 
@@ -62,7 +66,7 @@ It is important to have your files organized, especially when creating many diff
 ```{r message = FALSE, warning = FALSE, eval = TRUE, echo = TRUE}
 
 # Initialize a base path (this will need to be different per user)
-path <- "/Users/gretheljuarez/Desktop/BIRDS" # example
+path <- "/Users/raneemsamman/Desktop/BIRDS" # example
 
 # Initialize the directory for analysis on your local computer
 analysis_dir <- "paRsynth_methods_synthetic_dataset"
@@ -102,8 +106,17 @@ if(!dir.exists(images_path)){
 **Source the `paRsynth` functions directly from the GitHub repository**
 
 In order to use the `paRsynth` functions, you will need to source them into your environment. 
+```{r message = FALSE, warning = FALSE, eval = TRUE, echo = FALSE}
 
-```{r message = FALSE, warning = FALSE, eval = TRUE, echo = TRUE}
+# Load the paRsynth functions that will be tested below
+source(file.path("/Users/raneemsamman/Documents/GitHub/paRsynth/R/generate_strings.R"))
+source(file.path("/Users/raneemsamman/Documents/GitHub/paRsynth/R/parsons_code.R"))
+source(file.path("/Users/raneemsamman/Documents/GitHub/paRsynth/R/frequency_anchors.R"))
+source(file.path("/Users/raneemsamman/Documents/GitHub/paRsynth/R/write_audio.R"))
+
+```
+
+```{r message = FALSE, warning = FALSE, eval = FALSE, echo = TRUE}
 
 # Load the paRsynth functions that will be tested below
 source(file.path(testing_path, "generate_strings.R"))
@@ -235,7 +248,29 @@ This will return an updated data frame that includes all of the previous columns
 
 Now, finally, you are equipped with all the necessary data to generate the audio files that will allow you to hear the synthetic bird calls we generated! To do that, we will use the function `write_audio()`. This function creates a sound file (in .WAV format) for each call and saves it to your desired directory. Each file will represent one call with its own unique frequency modulation pattern that was developed in step 3. This function has five parameters: the data frame with frequency anchors and string metadata (df), the directory where the audio files will be saved (save_path), the sampling rate for the audio files with a default of 150000 Hz (sampling_rate), the length of the syllable in milliseconds with a default of 200 ms (sylLen), and the prefix for the audio file names (prefix). Note that the prefix you use for the synthetic audio files should match the social level that should contain the most information (here it is the group level because the group information string is longer).
 
-```{r message = FALSE, warning = FALSE, eval = TRUE, echo = TRUE}
+```{r message = FALSE, warning = FALSE, eval = TRUE, echo = FALSE}
+
+synthetic_call_metadata_grpdom <- write_audio(
+  df = calls_parsons_frequencies,
+  save_path = "/Users/raneemsamman/Desktop/BIRDS/paRsynth_methods_synthetic_dataset/audio", 
+  sampling_rate = 44100,
+  sylLen = 200,
+  temperature = 0.025,  # default stochasticity in generating sound
+  pitch_sampling_rate = 44100,
+  smoothing = list(interpol = "loess", loessSpan = 1, discontThres = 0, jumpThres = 0),
+  rolloffExact = c(0.25), # specify an amplitude value for the fundamental only, which will silence all harmonics
+  formants = NA,
+  vocalTract = NA,
+  vibratoFreq = 1,
+  prefix = "GroupMembership",
+  invalidArgAction = "ignore"
+  )
+
+glimpse(synthetic_call_metadata_grpdom)
+
+```
+
+```{r message = FALSE, warning = FALSE, eval = FALSE, echo = TRUE}
 
 synthetic_call_metadata_grpdom <- write_audio(
   df = calls_parsons_frequencies,
@@ -271,7 +306,7 @@ synthetic_call_metadata_grpdom %>%
 
 ```
 
-```{r message = FALSE, warning = FALSE, eval = TRUE, echo = TRUE}
+```{r message = FALSE, warning = FALSE, eval = FALSE, echo = TRUE}
 
 synthetic_call_metadata_grpdomcsv <- read.csv(file.path(analysis_path, "synthetic_call_metadata_grpdom.csv"))
 
@@ -391,7 +426,7 @@ synthetic_call_metadata_inddom %>%
 
 ```
 
-```{r message = FALSE, warning = FALSE, eval = TRUE, echo = TRUE}
+```{r message = FALSE, warning = FALSE, eval = FALSE, echo = TRUE}
 
 synthetic_call_metadata_inddomcsv <- read.csv(file.path(analysis_path, "synthetic_call_metadata_inddom.csv"))
 
@@ -422,7 +457,7 @@ synthetic_call_metadata_grpdom %>%
 
 ```
 
-```{r message = FALSE, warning = FALSE, eval = TRUE, echo = TRUE}
+```{r message = FALSE, warning = FALSE, eval = FALSE, echo = TRUE}
 
 synthetic_call_metadatacsv <- read.csv(file.path(analysis_path, "synthetic_call_metadata.csv"))
 
