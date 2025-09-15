@@ -45,3 +45,9 @@ To *communicate that you've addressed an issue*:
 **Package usage and maintenance**
 
 This is a new package that is still under development for our own research purposes. As such, we are currently not working to make the functions generally applicable for many different purposes or users. Anyone interested in using these functions should be careful to implement their own tests and validation. Please cite the package if you find it useful for your own work.
+
+We follow a semantic versioning system to track package versions:
+
+MAJOR (1.0.0 → 2.0.0): Backward-incompatible changes, major new features, or stable milestone releases (e.g., Version 1 = first full release, Version 2 = next major release).
+MINOR (1.1.0 → 1.2.0): Backward-compatible feature additions (e.g., new functions, analysis pipelines).
+PATCH (1.1.1 → 1.1.2): Bug fixes, typos, or small tweaks that do not affect compatibility.
