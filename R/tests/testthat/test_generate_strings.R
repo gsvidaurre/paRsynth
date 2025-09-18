@@ -144,34 +144,36 @@ test_that("The function generates character-based vocal strings per catergory", 
     expect_equal(nchar(global_tail), expected_head_tail_length)
     expect_equal(global_tail, generated_strings$Global_tail[i])
     
-    # Calculate the half-length of the group membership
-    half_group_length <- group_information / 2
+    # Calculate the length of each group head and tail
+    expected_group_head_tail_length <- group_information / 2
     
-    # get the group middle (split into two parts)
-    group_middle_head <- stringr::str_sub(current_call,
-                                          expected_head_tail_length + 1,
-                                          expected_head_tail_length + half_group_length) # nolint
+    # Calculate the length of group complete
+    expected_group_complete <- group_information
     
-    group_middle_tail <- stringr::str_sub(current_call,
-                                          expected_head_tail_length + half_group_length + individual_information + random_variation + 1, # nolint
-                                          expected_head_tail_length + half_group_length + individual_information + random_variation + half_group_length) # nolint
+    # Get the group complete (split into two parts)
+    group_head <- stringr::str_sub(current_call,
+                                   expected_head_tail_length + 1,
+                                   expected_head_tail_length +
+                                    expected_group_head_tail_length) # nolint
     
-    cat("Group middle head string is:", group_middle_head, "\n")
-    cat("Expected group middle head length is", half_group_length, "\n")
-    expect_equal(nchar(group_middle_head), half_group_length)
-    expect_equal(group_middle_head, generated_strings$Group_head[i])
+    group_tail <- stringr::str_sub(current_call,
+                                          expected_head_tail_length + expected_group_head_tail_length + individual_information + random_variation + 1, # nolint
+                                          expected_head_tail_length + expected_group_head_tail_length + individual_information + random_variation + expected_group_head_tail_length) # nolint
     
-    cat("Group middle tail string is:", group_middle_tail, "\n")
-    cat("Expected group middle tail length is", half_group_length, "\n")
-    expect_equal(nchar(group_middle_tail), half_group_length)
-    expect_equal(group_middle_tail, generated_strings$Group_tail[i])
+    group_complete <- paste0(group_head, group_tail)
     
-    # Get the individual middle section
+    cat("Group complete string is:", group_complete, "\n")
+    cat("Expected group complete length is", expected_group_complete, "\n")
+    expect_equal(nchar(group_complete), expected_group_complete)
+    expect_equal(group_head, generated_strings$Group_head[i])
+    
+    # Get the individual complete section
     individual_complete <- stringr::str_sub(current_call, # nolint
-                                          expected_head_tail_length + half_group_length + 1, # nolint
-                                          expected_head_tail_length + half_group_length + individual_information) # nolint
-    cat("Individual middle string is:", individual_complete, "\n")
-    cat("Expected individual middle length is", individual_information, "\n")
+                                          expected_head_tail_length + expected_group_head_tail_length + 1, # nolint
+                                          expected_head_tail_length + expected_group_head_tail_length + individual_information) # nolint
+    
+    cat("Individual complete string is:", individual_complete, "\n")
+    cat("Expected individual complete length is", individual_information, "\n")
     expect_equal(nchar(individual_complete), individual_information)
     expect_equal(individual_complete, generated_strings$Individual_complete[i])
   }
@@ -220,8 +222,7 @@ test_that("The function generates a dataframe with a column for the correct stri
 test_that("The function outputs an error when given invalid string structure", {
   
   # Create a vector of all valid structures
-  invalid_structures <- c(
-    "GI-GI-GI", "ABC", "123", "***")
+  invalid_structures <- c("GI-GI-GI", "ABC", "123", "***")
   
   # Loop the function to create calls of each valid structure
   expect_error(lapply(invalid_structures, function(y){
@@ -245,15 +246,11 @@ test_that("The function outputs an error when given invalid string structure", {
 # 8. Unit test to check that the strings are generated correctly according to the different string structures provided
 test_that("The function outputs an error when given invalid string structure", {
   
-  # i = 1 # testing
   for (i in 1:nrow(all_generated_structures)) {
-    
   # Call out a specific generated string from the created dataframe
   observed_call <- all_generated_structures$Call[i]
-  
   # Call out the string structure the call uses
   structure <- all_generated_structures$String_structure[i]
-  
   cat("----- Testing string structure: -----", structure, "\n")
   
   # Call out each section of the string
@@ -280,10 +277,8 @@ test_that("The function outputs an error when given invalid string structure", {
   cat("Call Generated:", observed_call, "\n")
   
   }
-  
-}
 
-)
+})
 
 # 9. Unit test to check that the function correctly takes in alphabet beyond the standard 3 base encoding (A, B, C)
 test_that("The function generates character strings when base encoding goes beyond standard A, B, C", {
