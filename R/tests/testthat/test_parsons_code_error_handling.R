@@ -81,10 +81,13 @@ test_that("Error handling for parsons_code", {
         list("string_col", "Call1"),
         list("global_head_col", "Gloval"),
         list("group_head_col", "Group2"),
-        list("individual_middle_col", "individual2"),
+        list("individual_head_col", "individual2"),
+        list("individual_tail_col", "individual2"),
+        list("individual_complete_col", "individual2"),
+        list("group_complete_col", "Group2"),
         list("random_variation_col", "rando"),
-        list("group_tail_col", "Group_tail"),
-        list("global_tail_col", "Global_tail")
+        list("group_tail_col", "Group2"),
+        list("global_tail_col", "Gloval")
     )
 
     lapply(invalid_string_cols, function(invalid_string_col) {
@@ -114,9 +117,17 @@ test_that("Error handling for parsons_code", {
         list("string_col" = 1),
         list("string_col" = call),
         list("global_head_col" = 1),
+        list("global_head_col" = call),
+        list("group_head_col" = 1),
         list("group_head_col" = call),
-        list("individual_middle_col" = 1),
-        list("individual_middle_col" = call),
+        list("individual_head_col" = 1),
+        list("individual_head_col" = call),
+        list("individual_tail_col" = 1),
+        list("individual_tail_col" = call),
+        list("individual_complete_col" = 1),
+        list("individual_complete_col" = call),
+        list("group_complete_col" = 1),
+        list("group_complete_col" = call),
         list("random_variation_col" = 1),
         list("random_variation_col" = call),
         list("group_tail_col" = 1),
