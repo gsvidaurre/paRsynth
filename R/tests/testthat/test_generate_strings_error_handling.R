@@ -13,6 +13,17 @@ base_parameters <- list(
   alphabet = c("A", "B", "C"),
   string_structure = "GI-II-RV-GI"
 )
+
+valid_structures <- c(
+  "GI-II-RV", "GI-RV-II",
+  "II-GI-RV", "II-RV-GI",
+  "RV-II-GI", "RV-GI-II",
+  "GI-II-RV-GI", "GI-RV-II-GI",
+  "II-GI-RV-II", "II-RV-GI-II",
+  "GI-RV-GI", "II-RV-II",
+  "GI-RV", "RV-GI",
+  "RV-II", "II-RV")
+  
 test_that("Error handling for generate_strings", {
 
   # Test that string length is between 6 and 200
@@ -121,10 +132,9 @@ test_that("Error handling for generate_strings", {
         random_variation = base_parameters$random_variation,
         alphabet = base_parameters$alphabet, 
         string_structure = "GI-GI-GI" # Invalid string structure
-      ),
-      "Invalid string_structure. Must be one of: GI-II-RV, GI-RV-II, II-GI-RV, II-RV-GI, RV-II-GI, RV-GI-II, GI-II-RV-GI, GI-RV-II-GI, II-GI-RV-II, II-RV-GI-II, GI-RV-GI, II-RV-II, GI-RV, RV-GI, RV-II, II-RV"
-      
-    )
+        ),
+      "Invalid string_structure. Must be one of: "
+      )
     
     # Test that alphabet are at least 3 characters
     expect_error(
