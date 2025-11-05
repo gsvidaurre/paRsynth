@@ -143,7 +143,7 @@ test_that("This function computes frequency anchors correctly in continuous traj
 # 3. Unit test to check that there are no negative or zero frequencies created when generating many calls
 test_that("The function corrects negative or zero frequencies", {
   # generate strings
-  generated_strings <- generate_strings(
+  generated_strings <- suppressWarnings(generate_strings(
     n_groups = 2,
     n_individuals = 5,
     n_calls = 10,

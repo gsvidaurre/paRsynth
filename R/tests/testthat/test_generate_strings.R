@@ -239,7 +239,7 @@ test_that("The function outputs an error when given invalid string structure", {
     )
   }))
   
-  cat("Error thrown for these invalid structures:", invalid_structures)
+  cat("Error thrown for these invalid structures:", invalid_structures, "\n")
   
 })
 

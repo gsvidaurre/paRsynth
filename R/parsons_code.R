@@ -65,12 +65,12 @@ parsons_code <- function(df, string_col, global_head_col, group_head_col,
                 individual_head_col, individual_tail_col, individual_complete_col, group_complete_col,
                 random_variation_col, group_tail_col, global_tail_col, string_structure_col,
                 mapping = list("A" = "up", "B" = "down", "C" = "constant")) {
-
-  if (!is.data.frame(df)) {
-    stop("The 'df' argument must be a data frame.")
-  }
+  
   if (is.null(mapping)) {
     stop("The 'mapping' argument must not be NULL.")
+  }
+  if (!is.data.frame(df)) {
+    stop("The 'df' argument must be a data frame.")
   }
   if (!is.list(mapping)) {
     stop("The 'mapping' argument must be a list.")

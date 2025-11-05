@@ -51,6 +51,7 @@ test_that("Error handling for frequency_anchors", {
                 individual_id_col = "Individual",
                 call_id_col = "Call_ID",
                 call_string_col = "Call",
+                string_structure_col = "String_structure",
                 starting_frequency = params$starting_frequency,
                 frequency_shift = params$frequency_shift,
                 section_transition = section_transition

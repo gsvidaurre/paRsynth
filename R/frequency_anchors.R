@@ -79,6 +79,10 @@ frequency_anchors <- function(df, parsons_col, group_id_col, individual_id_col,
   if (nrow(df) == 0) {
     stop("Input data frame is empty")
   }
+  if (section_transition != "starting_frequency" &&
+      section_transition != "continuous_trajectory") {
+    stop("section_transition must be 'starting_frequency' or 'continuous_trajectory'")
+  }
   if (!all(c(parsons_col,
              group_id_col,
              individual_id_col,
@@ -86,11 +90,6 @@ frequency_anchors <- function(df, parsons_col, group_id_col, individual_id_col,
              call_string_col,
              string_structure_col) %in% colnames(df))) {
     stop("One or more columns were not found in the data frame")
-  }
-  if (section_transition != "starting_frequency" &&
-        section_transition != "continuous_trajectory") {
-    stop("section_transition must be 'starting_frequency' or ",
-         "'continuous_trajectory'")
   }
 
   # Ensure column names are case-insensitive
