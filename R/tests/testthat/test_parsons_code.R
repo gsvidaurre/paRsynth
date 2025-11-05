@@ -1,32 +1,6 @@
 # Author: G.A. Juarez and Raneem Samman
 # Date created: December 4, 2024
 
-rm(list = ls())
-
-# make a list of packages to install
-pkgs <- c("testthat", "soundgen", "dplyr", "stringr", "rlang", "tidyverse", "lubridate", "pbapply", "data.table")
-
-# check if the packages are installed, if not, install them
-for (pkg in pkgs) {
-  if (!require(pkg, character.only = TRUE)) {
-    install.packages(pkg, dependencies = TRUE)
-  }
-}
-# load the packages (for software development purposes)
-# lapply(pkgs, library, character.only = TRUE)
-
-# Change the path for testing to reflect where the package is installed on your local machine
-# testing_path <- "/Users/raneemsamman/Documents/GitHub/paRsynth/R" #raneem's
-testing_path <- "~/Desktop/BIRDS/GitHub_repos/paRsynth/R" #alexandra's
-
-# Change the desktop path to reflect where temporary directories for testing will be created to save files generated during testing
-desktop_path <- "~/Desktop"
-
-# Load the paRsynth functions that will be tested below
-source(file.path(testing_path, "generate_strings.R"))
-source(file.path(testing_path, "parsons_code.R"))
-
-# Define parameters
 base_parameters <- list(
   n_groups <- 2,
   n_individuals <- 5,
@@ -40,12 +14,12 @@ base_parameters <- list(
 )
 
 generated_strings <- generate_strings(
-  n_groups = n_groups, 
-  n_individuals = n_individuals, 
-  n_calls = n_calls, 
-  string_length = string_length, 
-  group_information = group_information, 
-  individual_information = individual_information, 
+  n_groups = n_groups,
+  n_individuals = n_individuals,
+  n_calls = n_calls,
+  string_length = string_length,
+  group_information = group_information,
+  individual_information = individual_information,
   random_variation = random_variation,
   alphabet = alphabet,
   string_structure = string_structure
@@ -100,17 +74,18 @@ test_that("The function generates correct parsons code", {
   # Generate generic strings (easy to track conversion)
   Global_head <- "AABA"
   Group_head <- "BBCC"
-  Individual_middle <- "CCBA"
+  Individual_complete <- "CCBA"
   Random_variation <- "BA"
   Group_tail <- "BBAC"
   Global_tail <- "BBAA"
-  Individual_head <- gsub('CC', '', Individual_middle)
-  Individual_tail <- gsub('BA', '', Individual_middle)
+  Individual_head <- gsub('CC', '', Individual_complete)
+  Individual_tail <- gsub('BA', '', Individual_complete)
   Group_complete <- c(Group_head, Group_tail)
 
   generated_strings <- data.frame(
-    Call = paste(Global_head, Group_head, Individual_middle, Random_variation, Group_tail, Global_tail, sep = ""),
-    Global_head = Global_head, Group_head = Group_head, Individual_head = Individual_head, Individual_tail = Individual_tail, Individual_middle = Individual_middle, Group_complete = Group_complete,
+    Call = paste(Global_head, Group_head, Individual_complete, Random_variation, Group_tail, Global_tail, sep = ""),
+    Global_head = Global_head, Group_head = Group_head, Individual_complete = Individual_complete,
+    Global_head = Global_head, Group_head = Group_head, Individual_head = Individual_head, Individual_tail = Individual_tail, Individual_complete = Individual_complete, Group_complete = Group_complete,
     Random_variation = Random_variation, Group_tail = Group_tail, Global_tail = Global_tail
   )
 
@@ -122,7 +97,7 @@ test_that("The function generates correct parsons code", {
     group_head_col = "Group_head", 
     individual_head_col = "Individual_head", 
     individual_tail_col = "Individual_tail", 
-    individual_complete_col = "Individual_middle", 
+    individual_complete_col = "Individual_complete", 
     group_complete_col = "Group_complete", 
     random_variation_col = "Random_variation", 
     group_tail_col = "Group_tail", 
@@ -148,4 +123,65 @@ test_that("The function generates a data frame that has the right number of rows
   expect_equal(nrow(generated_strings),nrow(Conversion))
   expect_equal(ncol(generated_strings) + length(parsons_df_cols), ncol(Conversion))
   
+})
+
+# 5. Unit test to check that the function correctly takes in alphabet and mapping beyond the standard 3 base encoding (A, B, C)
+test_that("The function generates correct parsons code when base encoding goes beyond A = up, B = down, C = constant", {
+  
+  # Generate strings with 3+ base encoding
+  generated_strings_alphabet <- suppressWarnings(generate_strings(
+    n_groups = n_groups,
+    n_individuals = n_individuals,
+    n_calls = n_calls,
+    string_length = string_length,
+    group_information = group_information,
+    individual_information = individual_information,
+    random_variation = random_variation,
+    alphabet = alphabet <- c("A", "B", "C", "D", "E"),
+    string_structure = string_structure
+  ))
+  
+  # Convert using parsons_code
+  Conversion_alphabet <- parsons_code(
+    generated_strings_alphabet, 
+    string_col = "Call", 
+    global_head_col = "Global_head", 
+    group_head_col = "Group_head", 
+    individual_head_col = "Individual_head", 
+    individual_tail_col = "Individual_tail", 
+    individual_complete_col = "Individual_complete", 
+    group_complete_col = "Group_complete", 
+    random_variation_col = "Random_variation", 
+    group_tail_col = "Group_tail", 
+    global_tail_col = "Global_tail", 
+    string_structure_col = "String_structure",
+    mapping = list("A" = "up", "B" = "down", "C" = "constant", "D" = "up_0.5", "E" = "down_0.5")
+  )
+  
+  for (i in 1:nrow(generated_strings_alphabet)) {
+    
+    # Call out a specific generated string
+    generated_call <- Conversion_alphabet$Call[i]
+    
+    # Split string into individual letters
+    generated_call_vec <- strsplit(generated_call, "")[[1]]
+    
+    # Call out a the strings' parsons code conversion
+    generated_parsons_code <-
+      unname(Conversion_alphabet$Call_Parsons_Code)[i]
+    
+    cat("----- Testing string conversion with 3+ bases: -----", generated_call, "\n")
+    
+    # Switch the bases to expected mapping
+    expected_mapping <- recode(generated_call_vec, "A" = "up", "B" = "down", "C" = "constant", "D" = "up_0.5", "E" = "down_0.5", .default = NA_character_)
+    
+    # collapse into one string
+    expected_parsons_code <- paste(expected_mapping, collapse = "-")
+    
+  expect_equal(generated_parsons_code, expected_parsons_code)
+  
+  cat("Expected Parsons Code:", generated_parsons_code, "\n")
+  cat("Generated Parsons Code:", expected_parsons_code, "\n")
+  
+  }
 })

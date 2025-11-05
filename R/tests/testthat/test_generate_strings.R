@@ -1,30 +1,6 @@
 # Author: G.A. Juarez and Raneem Samman
 # Date created: May 22, 2024
 
-rm(list = ls())
-
-# make a list of packages to install
-pkgs <- c("testthat", "soundgen", "dplyr", "stringr", "rlang", "tidyverse", "lubridate", "pbapply", "data.table")
-
-# check if the packages are installed, if not, install them
-for (pkg in pkgs) {
-  if (!require(pkg, character.only = TRUE)) {
-    install.packages(pkg, dependencies = TRUE)
-  }
-}
-# load the packages (for software development purposes)
-# lapply(pkgs, library, character.only = TRUE)
-
-# Change the path for testing to reflect where the package is installed on your local machine
-# testing_path <- "/Users/raneemsamman/Documents/GitHub/paRsynth/R" #raneem's
-testing_path <- "~/Desktop/BIRDS/GitHub_repos/paRsynth/R" #alexandra's
-
-# Change the desktop path to reflect where temporary directories for testing will be created to save files generated during testing
-desktop_path <- "~/Desktop"
-
-# Load the paRsynth functions that will be tested below
-source(file.path(testing_path, "generate_strings.R"))
-
 # Define parameters
 base_parameters <- list(
   group_information <- 8,
@@ -64,11 +40,11 @@ valid_structures <- c(
   "RV-II", "II-RV")
 
 # Loop the function to create calls of each valid structure
-generated_structures <- lapply(valid_structures, function(x){
+generated_structures <- lapply(valid_structures, function(x) {
   generate_strings(
-    n_groups = n_groups,
-    n_individuals = n_individuals,
-    n_calls = n_calls,
+    n_groups = 1,
+    n_individuals = 1,
+    n_calls = 1,
     string_length = string_length,
     group_information = group_information,
     individual_information = individual_information,
@@ -77,6 +53,22 @@ generated_structures <- lapply(valid_structures, function(x){
     string_structure = x
   )
 })
+
+generated_strings_alphabet <- generate_strings(
+  n_groups = n_groups,
+  n_individuals = n_individuals,
+  n_calls = n_calls,
+  string_length = string_length,
+  group_information = group_information,
+  individual_information = individual_information,
+  random_variation = random_variation,
+  alphabet = c("A", "B", "C", "D", "E"),
+  string_structure = string_structure
+)
+
+# Organize the calls into one dataframe for easier legibility
+all_generated_structures <- data.table::rbindlist(generated_structures)
+# view(all_generated_structures)
 
 # 1. Unit test to check string length
 test_that("The function generates strings that have the correct length", {
@@ -152,36 +144,38 @@ test_that("The function generates character-based vocal strings per catergory", 
     expect_equal(nchar(global_tail), expected_head_tail_length)
     expect_equal(global_tail, generated_strings$Global_tail[i])
     
-    # Calculate the half-length of the group membership
-    half_group_length <- group_information / 2
+    # Calculate the length of each group head and tail
+    expected_group_head_tail_length <- group_information / 2
     
-    # get the group middle (split into two parts)
-    group_middle_head <- stringr::str_sub(current_call,
-                                          expected_head_tail_length + 1,
-                                          expected_head_tail_length + half_group_length) # nolint
+    # Calculate the length of group complete
+    expected_group_complete <- group_information
     
-    group_middle_tail <- stringr::str_sub(current_call,
-                                          expected_head_tail_length + half_group_length + individual_information + random_variation + 1, # nolint
-                                          expected_head_tail_length + half_group_length + individual_information + random_variation + half_group_length) # nolint
+    # Get the group complete (split into two parts)
+    group_head <- stringr::str_sub(current_call,
+                                   expected_head_tail_length + 1,
+                                   expected_head_tail_length +
+                                    expected_group_head_tail_length) # nolint
     
-    cat("Group middle head string is:", group_middle_head, "\n")
-    cat("Expected group middle head length is", half_group_length, "\n")
-    expect_equal(nchar(group_middle_head), half_group_length)
-    expect_equal(group_middle_head, generated_strings$Group_head[i])
+    group_tail <- stringr::str_sub(current_call,
+                                          expected_head_tail_length + expected_group_head_tail_length + individual_information + random_variation + 1, # nolint
+                                          expected_head_tail_length + expected_group_head_tail_length + individual_information + random_variation + expected_group_head_tail_length) # nolint
     
-    cat("Group middle tail string is:", group_middle_tail, "\n")
-    cat("Expected group middle tail length is", half_group_length, "\n")
-    expect_equal(nchar(group_middle_tail), half_group_length)
-    expect_equal(group_middle_tail, generated_strings$Group_tail[i])
+    group_complete <- paste0(group_head, group_tail)
     
-    # Get the individual middle section
-    individual_middle <- stringr::str_sub(current_call, # nolint
-                                          expected_head_tail_length + half_group_length + 1, # nolint
-                                          expected_head_tail_length + half_group_length + individual_information) # nolint
-    cat("Individual middle string is:", individual_middle, "\n")
-    cat("Expected individual middle length is", individual_information, "\n")
-    expect_equal(nchar(individual_middle), individual_information)
-    expect_equal(individual_middle, generated_strings$Individual_complete[i])
+    cat("Group complete string is:", group_complete, "\n")
+    cat("Expected group complete length is", expected_group_complete, "\n")
+    expect_equal(nchar(group_complete), expected_group_complete)
+    expect_equal(group_head, generated_strings$Group_head[i])
+    
+    # Get the individual complete section
+    individual_complete <- stringr::str_sub(current_call, # nolint
+                                          expected_head_tail_length + expected_group_head_tail_length + 1, # nolint
+                                          expected_head_tail_length + expected_group_head_tail_length + individual_information) # nolint
+    
+    cat("Individual complete string is:", individual_complete, "\n")
+    cat("Expected individual complete length is", individual_information, "\n")
+    expect_equal(nchar(individual_complete), individual_information)
+    expect_equal(individual_complete, generated_strings$Individual_complete[i])
   }
 })
 
@@ -212,12 +206,8 @@ test_that("The function generates # of calls per individuals per social group co
   
 })
 
-# 6. Unit test to check correct string structure
-test_that("The function generates strings that have the correct given string structure", {
-  
-  # combine datasets with different different string structure into one dataframe
-  all_generated_structures <- data.table::rbindlist(generated_structures)
-  # glimpse(generated_structures)
+# 6. Unit test to check correct dataframe is created with string structure
+test_that("The function generates a dataframe with a column for the correct string structure provided", {
   
   observed_structures <- unique(all_generated_structures$String_structure)
   
@@ -226,14 +216,13 @@ test_that("The function generates strings that have the correct given string str
   cat("Expected Valid Structures:", valid_structures, "\n")
   cat("String structures generated:", observed_structures, "\n")
   
- })
+})
 
 # 7. Unit test to check that `generate_structures` throws an error for invalid string structures input
 test_that("The function outputs an error when given invalid string structure", {
   
   # Create a vector of all valid structures
-  invalid_structures <- c(
-    "GI-GI-GI", "ABC", "123", "***")
+  invalid_structures <- c("GI-GI-GI", "ABC", "123", "***")
   
   # Loop the function to create calls of each valid structure
   expect_error(lapply(invalid_structures, function(y){
@@ -253,3 +242,57 @@ test_that("The function outputs an error when given invalid string structure", {
   cat("Error thrown for these invalid structures:", invalid_structures, "\n")
   
 })
+
+# 8. Unit test to check that the strings are generated correctly according to the different string structures provided
+test_that("The function outputs an error when given invalid string structure", {
+  
+  for (i in 1:nrow(all_generated_structures)) {
+  # Call out a specific generated string from the created dataframe
+  observed_call <- all_generated_structures$Call[i]
+  # Call out the string structure the call uses
+  structure <- all_generated_structures$String_structure[i]
+  cat("----- Testing string structure: -----", structure, "\n")
+  
+  # Call out each section of the string
+  GL_head <- all_generated_structures$Global_head[i]
+  GL_tail <- all_generated_structures$Global_tail[i]
+  GI_head <- all_generated_structures$Group_head[i]
+  GI_tail <- all_generated_structures$Group_tail[i]
+  II_head <- all_generated_structures$Individual_head[i]
+  II_tail <- all_generated_structures$Individual_tail[i]
+  RV <- all_generated_structures$Random_variation[i]
+  
+  # Based on the used string structure, paste the sections in that order as the expected call
+  form_call <- if (structure %in% valid_structures){
+    build_string_structure(structure, GI_head, GI_tail, II_head, II_tail, RV)
+  }
+  
+  # Paste in the global head and tail
+  expected_call <- paste0(GL_head, form_call, GL_tail)
+  
+  # Compare the observed call generated in the dataframe with the expected call organized together based on section
+  expect_identical(observed_call, expected_call)
+  
+  cat("Expected Call:", expected_call, "\n")
+  cat("Call Generated:", observed_call, "\n")
+  
+  }
+
+})
+
+# 9. Unit test to check that the function correctly takes in alphabet beyond the standard 3 base encoding (A, B, C)
+test_that("The function generates character strings when base encoding goes beyond standard A, B, C", {
+  
+  # View(generated_strings_alphabet)
+
+  calls_alphabet <- generated_strings_alphabet$Call
+
+  find_D <- grepl("D", calls_alphabet)
+  find_E <- grepl("E", calls_alphabet)
+  
+  
+  expect_true(any(find_D))
+  expect_true(any(find_E))
+  
+})
+  

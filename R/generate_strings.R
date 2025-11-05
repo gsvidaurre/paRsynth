@@ -89,7 +89,7 @@ generate_strings <- function(n_groups = 2, n_individuals = 5, n_calls = 10,
   if (!(string_structure %in% valid_structures)) {
   stop("Invalid string_structure. Must be one of: ", paste(valid_structures, collapse = ", "))
   }
-  if (alphabet %in% c("", NA) || length(alphabet) < 3 || length(unique(alphabet)) < 3 || length(alphabet) > 7) {
+  if (length(alphabet) < 3 || length(unique(alphabet)) < 3 || length(alphabet) > 7) {
     stop("alphabet must be a character vector with at least 3 unique characters, cannot be empty or NA, and cannot exceed 7 characters")
   }
 
