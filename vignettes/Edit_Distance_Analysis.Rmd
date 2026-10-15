@@ -1,0 +1,88 @@
+---
+title: "Edit_Distance_Analysis"
+author: "GAJ"
+date: '`r Sys.Date()`'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+1. Load packages
+```{r}
+
+# Clean the global environment
+rm(list = ls())
+
+# Specify the required packages
+X <- c("devtools", "dplyr", "stringdist", "tidyverse", "ggplot2", "apcluster", "soundgen", "parallel", "stringr", "data.table", "tuneR", "pbapply", "warbleR", "magrittr", "infotheo")
+
+# Install the packages in X if not already installed
+is_installed <- function(p) is.element(p, installed.packages()[,1])
+
+invisible(lapply(1:length(X), function(x){
+  if(!is_installed(X[x])){
+    install.packages(X[x], repos = "http://lib.stat.cmu.edu/R/CRAN")
+  }
+}))
+
+# Install the paRsynth package from GitHub if you haven't installed it already
+# devtools::install_github("gsvidaurre/paRsynth")
+
+# Add paRsynth to the list of packages to load
+# X <- c(X, "paRsynth")
+
+# Change "Desktop/.../GitHub_repos" based on where paRsynth is stored on your local machine
+testing_path_1 <- "~/Desktop/BIRDS/GitHub_repos/paRsynth/R" # Alexandra's testing path
+testing_path_2 <- "~/Desktop/BIRDS/GitHub_repos/paRsynth_Info_Cap/Code/" # Alexandra's testing path
+
+# Load the paRsynth function that will be tested below
+source(file.path(testing_path_1, "generate_strings.R"))
+
+# Load the custom information theory functions that will be tested below
+source(file.path(testing_path_2, "calculate_entropy.R"))
+source(file.path(testing_path_2, "detect_duplicates.R"))
+
+# Load all of the packages specified above
+invisible(lapply(X, library, character.only = TRUE))
+
+```
+
+2. Set paths and directories
+```{r}
+
+# Initialize a base path (this will need to be different per user)
+path <- "/Users/gretheljuarez/Desktop/BIRDS/GitHub_repos/paRsynth_Info_Cap/" # Alexandra's path
+
+# Initialize the directory for analysis on your local computer
+analysis_dir <- "simulation_experiment_1_data"
+
+# Combine the base path and the newly created data directory into a single path
+analysis_path <- file.path(path, analysis_dir)
+
+# Create the data directory if it doesn't already exist on your computer
+if(!dir.exists(analysis_path)){ 
+  dir.create(analysis_path)
+}
+
+edit_dir <- "edit_distance_results"
+
+edit_path <- file.path(path, edit_dir)
+
+if(!dir.exists(edit_path)){ 
+  dir.create(edit_path)
+}
+
+```
+
+- Calculate the min, 1st quartile, median, mean, 3rd quartile, and the max of the dependent variable of entropy aka information capacity
+```{r}
+
+summary(combined_data)
+
+summary(combined_data$entropy)
+
+summary(combined_data$expected_info_cap)
+
+```

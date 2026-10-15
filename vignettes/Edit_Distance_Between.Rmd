@@ -1,0 +1,352 @@
+---
+title: "Edit_Distance_Between"
+author: "GAJ"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Purpose: I want to use edit distance to calculate the distinctiveness of the datasets I manipulate the parameters for and generate. This specifically calculates the edit distance within the dataset to see how different are the strings in one CSV from the strings in another CSV? Between group variation.
+
+
+1. Load packages
+```{r}
+
+# Clean the global environment
+rm(list = ls())
+
+# Specify the required packages
+X <- c("devtools", "dplyr", "stringdist", "tidyverse", "ggplot2", "apcluster", "soundgen", "parallel", "stringr", "data.table", "tuneR", "pbapply", "warbleR", "magrittr", "infotheo")
+
+# Install the packages in X if not already installed
+is_installed <- function(p) is.element(p, installed.packages()[,1])
+
+invisible(lapply(1:length(X), function(x){
+  if(!is_installed(X[x])){
+    install.packages(X[x], repos = "http://lib.stat.cmu.edu/R/CRAN")
+  }
+}))
+
+# Install the paRsynth package from GitHub if you haven't installed it already
+# devtools::install_github("gsvidaurre/paRsynth")
+
+# Add paRsynth to the list of packages to load
+# X <- c(X, "paRsynth")
+
+# Change "Desktop/.../GitHub_repos" based on where paRsynth is stored on your local machine
+testing_path_1 <- "~/Desktop/BIRDS/GitHub_repos/paRsynth/R" # Alexandra's testing path
+testing_path_2 <- "~/Desktop/BIRDS/GitHub_repos/paRsynth_Info_Cap/Code/" # Alexandra's testing path
+
+# Load the paRsynth function that will be tested below
+source(file.path(testing_path_1, "generate_strings.R"))
+
+# Load the custom information theory functions that will be tested below
+source(file.path(testing_path_2, "calculate_entropy.R"))
+source(file.path(testing_path_2, "detect_duplicates.R"))
+
+# Load all of the packages specified above
+invisible(lapply(X, library, character.only = TRUE))
+
+```
+
+2. Set paths and directories
+```{r}
+
+# Initialize a base path (this will need to be different per user)
+path <- "/Users/gretheljuarez/Desktop/BIRDS/GitHub_repos/paRsynth_Info_Cap/" # Alexandra's path
+
+# Initialize the directory for analysis on your local computer
+analysis_dir <- "simulation_experiment_1_data"
+
+# Combine the base path and the newly created data directory into a single path
+analysis_path <- file.path(path, analysis_dir)
+
+# Create the data directory if it doesn't already exist on your computer
+if(!dir.exists(analysis_path)){ 
+  dir.create(analysis_path)
+}
+
+edit_dir <- "edit_distance_results"
+
+edit_path <- file.path(path, edit_dir)
+
+if(!dir.exists(edit_path)){ 
+  dir.create(edit_path)
+}
+
+
+```
+
+Find the paRsynth generated csv and make an object for them in list_data
+```{r}
+
+# set path where the data is saved
+data_path <- "/Users/gretheljuarez/Desktop/BIRDS/GitHub_repos/paRsynth_Info_Cap/simulation_experiment_1_data/"
+
+# list all the files in the data path
+list_data <- list.files(data_path, pattern = "\\.csv$", full.names = TRUE)
+
+```
+
+read two csv and call character strings
+```{r}
+
+high_length <- read.csv(list_data[1]) # length - 12, bases - 3, high indiv
+low_length <- read.csv(list_data[41]) # length - 8, bases - 3, high indiv
+
+calls_hi <- high_length$Call
+calls_low <- low_length$Call 
+
+```
+
+Create function to calculate between groups
+```{r}
+
+calculate_between_distance <- function(calls1,
+                                       calls2,
+                                       n_samples = 10000){
+
+  distances <- numeric(n_samples)
+
+  for(i in 1:n_samples){
+
+    s1 <- sample(calls1, 1)
+
+    s2 <- sample(calls2, 1)
+
+    dist <- stringdist(
+      s1,
+      s2,
+      method = "lv"
+    )
+    
+    # normalized distance to account for different lengths
+    distances[i] <- dist / max(nchar(s1), nchar(s2))
+
+  }
+
+  mean_dist <- mean(distances)
+  cat("Mean:", mean_dist, "\n")
+  
+  return(mean_dist)
+
+}
+
+```
+
+Test function
+```{r}
+
+between_mean <- calculate_between_distance(
+  calls_hi,
+  calls_low,
+  n_samples = 10000
+)
+# Mean: 0.5257
+
+```
+
+Create information about every file to be able to sort by treatment
+```{r}
+
+file_info <- data.frame(file = list_data)
+
+file_info$string_length <- ifelse(
+  str_detect(file_info$file, "string_length_12"),
+  "High",
+  "Low"
+)
+
+file_info$num_characters <- ifelse(
+  str_detect(file_info$file, "bases_7"),
+  "High",
+  "Low"
+)
+
+file_info$dataset_size <- ifelse(
+  str_detect(file_info$file, "high_individuals"),
+  "High",
+  "Low"
+)
+
+file_info$iteration <-
+  as.numeric(str_extract(file_info$file,
+                         "(?<=iteration_)\\d+"))
+
+head(file_info)
+
+```
+
+Helper function to make comparison tables
+```{r}
+
+make_comparison_table <- function(file_info, factor){
+
+  # Columns should stay the same
+  matching_columns <- c(
+    "string_length",
+    "num_characters",
+    "dataset_size",
+    "iteration"
+  )
+
+  # Remove the factor we're changing
+  matching_columns <- setdiff(matching_columns, factor)
+
+  # Join the table with itself
+  comparison_table <-
+    inner_join(
+      file_info,
+      file_info,
+      by = matching_columns,
+      suffix = c("1", "2")
+    )
+
+  # Keep only rows where the chosen factor is different
+  comparison_table <-
+    comparison_table %>%
+    filter(.data[[paste0(factor, "1")]] !=
+           .data[[paste0(factor, "2")]])
+
+  # Remove duplicate comparisons
+  comparison_table <-
+    comparison_table %>%
+    filter(file1 < file2)
+
+  return(comparison_table)
+
+}
+
+```
+
+Run helper function that makes comparison table
+```{r}
+
+comparison_length <-
+  make_comparison_table(
+    file_info,
+    "string_length"
+  )
+
+comparison_characters <-
+  make_comparison_table(
+    file_info,
+    "num_characters"
+  )
+
+comparison_dataset <-
+  make_comparison_table(
+    file_info,
+    "dataset_size"
+  )
+
+head(comparison_length)
+
+```
+
+Helper function to run edit distance between for all files based on treatment
+```{r}
+
+compare_files <- function(comparison_table){
+
+  results <- data.frame()
+
+  for(i in 1:nrow(comparison_table)){
+
+    cat("Comparing", i, "of", nrow(comparison_table), "\n")
+
+    # choose a file1 and file2 from the comparison table
+    file1 <- comparison_table$file1[i]
+    file2 <- comparison_table$file2[i]
+
+    # read the chosen file1 and file2
+    dat1 <- read.csv(file1)
+    dat2 <- read.csv(file2)
+
+    # extract the character string for analysis
+    strings1 <- dat1$Call
+    strings2 <- dat2$Call
+
+    # calculate edit distance of the two calls from the two different files
+    d <- calculate_between_distance(
+      strings1,
+      strings2,
+      n_samples = 10000
+    )
+
+    # make a dataframe with the results of the edit distance 
+    results <- rbind(
+      results,
+      data.frame(
+        file1 = file1,
+        file2 = file2,
+        normalized_distance = d
+      )
+    )
+  }
+
+  results
+}
+
+```
+
+run it
+```{r}
+
+results_length <-
+    compare_files(comparison_length)
+
+results_characters <-
+    compare_files(comparison_characters)
+
+results_dataset <-
+    compare_files(comparison_dataset)
+
+```
+
+check it
+```{r}
+
+nrow(comparison_length)
+nrow(comparison_characters)
+nrow(comparison_dataset)
+
+```
+
+```{r}
+
+results_length$factor <- "string_length"
+results_characters$factor <- "num_characters"
+results_dataset$factor <- "dataset_size"
+
+all_results <- rbind(
+  results_length,
+  results_characters,
+  results_dataset
+)
+
+write.csv(all_results,
+          file.path(edit_path, "all_edit_between_distance_results.csv"),
+          row.names = FALSE)
+
+```
+
+Outline: 
+file_info
+        │
+        ▼
+make_comparison_table()
+        │
+        ▼
+comparison_length
+comparison_characters
+comparison_dataset
+        │
+        ▼
+compare_files()
+        │
+        ▼
+results tables
